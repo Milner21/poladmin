@@ -10,6 +10,7 @@ const AppRoutes = () => {
       <Route path={RoutesConfig.home} element={<VoterRegistration />} />
       <Route path="/tr" element={<TransportRegistration />} />
       <Route path="/ev" element={<EventAttendance />} />
+      <Route path="/test" element={<div><h1>NOT FOUND</h1></div>} />
       {/* Rutas administrativas privadas */}
     </Routes>
   );
