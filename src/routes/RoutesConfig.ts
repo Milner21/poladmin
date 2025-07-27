@@ -1,5 +1,5 @@
 const basePaths = {
-    admin: "/", 
+    admin: "", 
   };
   
   const RoutesConfig = {
@@ -8,7 +8,7 @@ const basePaths = {
     
   
     // Rutas administrativas usando el prefijo dinámico
-    registro_votantes: `${basePaths.admin}/resgitro-personas`,
+    registro_votantes: `${basePaths.admin}/registro-votantes`,
   };
   
   export default RoutesConfig;
