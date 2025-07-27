@@ -1,5 +1,5 @@
 const basePaths = {
-    admin: "", 
+    admin: "/admin", 
   };
   
   const RoutesConfig = {

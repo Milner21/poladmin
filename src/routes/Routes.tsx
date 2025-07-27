@@ -6,7 +6,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       {/* Rutas públicas */}
-      <Route path={RoutesConfig.registro_votantes} element={<VoterRegistration />} />
+      <Route path={RoutesConfig.home} element={<VoterRegistration />} />
             
 
       {/* Rutas administrativas privadas */}
