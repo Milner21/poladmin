@@ -6,8 +6,15 @@ import {
   Typography,
   Space,
   Card,
+  Tooltip,
 } from "antd";
-import { UserOutlined, PhoneOutlined, IdcardOutlined } from '@ant-design/icons';
+import { 
+  UserOutlined, 
+  PhoneOutlined, 
+  IdcardOutlined,
+  ReloadOutlined,
+  QuestionCircleOutlined
+} from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import type { ValidateErrorEntity } from 'rc-field-form/lib/interface';
 import type { VoterData, FormattedVoterData, Lider } from '../../../../types/votantes';
@@ -45,6 +52,20 @@ function VoterRegistration() {
     return acc;
   }, {} as Record<string, Lider[]>);
 
+  // Generar CI temporal aleatorio de 4 dígitos
+  const generarCITemporal = () => {
+    const ciTemporal = Math.floor(1000 + Math.random() * 9000).toString();
+    form.setFieldsValue({ ci: ciTemporal });
+    toast.info(`CI temporal generado: ${ciTemporal}`);
+  };
+
+  // Establecer teléfono por defecto
+  const establecerTelefonoDefault = () => {
+    const telefonoDefault = '0970111222';
+    form.setFieldsValue({ telefono: telefonoDefault });
+    toast.info('Teléfono por defecto establecido');
+  };
+
   const onFinish = async (values: VoterData) => {
     clearError();
 
@@ -52,7 +73,10 @@ function VoterRegistration() {
       ...values,
       nombre: values.nombre.toUpperCase(),
       apellido: values.apellido.toUpperCase(),
-      lider_id: values.lider_id // ← ID del líder
+      sexo: 'indefinido' as 'masculino' | 'femenino' | 'indefinido', // Valor por defecto
+      edad: 100, // Valor por defecto
+      barrio: 'CDE', // Valor por defecto
+      lider_id: values.lider_id
     };
     
     console.log('Enviando datos:', formattedValues);
@@ -83,7 +107,7 @@ function VoterRegistration() {
           </Title>
           
           <Text type="secondary" style={{ textAlign: 'center', display: 'block' }}>
-            Todos los campos son obligatorios y deben ser completados de manera correcta
+            Complete la información del votante
           </Text>
 
           {error && (
@@ -108,7 +132,7 @@ function VoterRegistration() {
             style={{ marginTop: 20 }}
           >
 
-            {/* Líder */}
+            {/* Líder - AHORA AL PRINCIPIO */}
             <Form.Item
               label="Líder que lo invita"
               name="lider_id"
@@ -146,22 +170,43 @@ function VoterRegistration() {
               </Select>
             </Form.Item>
 
-
-            {/* CI - Cédula de Identidad */}
+            {/* CI - Cédula de Identidad CON BOTÓN TEMPORAL */}
             <Form.Item
-              label="CI (Cédula de Identidad)"
+              label={
+                <Space>
+                  CI (Cédula de Identidad)
+                  <Tooltip title="Si no conoce la CI, puede generar un número temporal de 4 dígitos para completar el registro">
+                    <QuestionCircleOutlined style={{ color: '#1890ff' }} />
+                  </Tooltip>
+                </Space>
+              }
               name="ci"
               rules={[
                 { required: true, message: 'Por favor ingrese su cédula de identidad' },
                 { pattern: /^\d+$/, message: 'La cédula debe contener solo números' }
               ]}
             >
-              <Input 
-                prefix={<IdcardOutlined />} 
-                placeholder="Ej: 12345678"
-                size="large"
-                disabled={loading}
-              />
+              <Input.Group compact>
+                <Input 
+                  style={{ width: 'calc(100% - 120px)' }}
+                  prefix={<IdcardOutlined />} 
+                  placeholder="Ej: 12345678 o genere temporal"
+                  size="large"
+                  disabled={loading}
+                />
+                <Tooltip title="Generar CI temporal de 4 dígitos">
+                  <Button
+                    type="default"
+                    icon={<ReloadOutlined />}
+                    onClick={generarCITemporal}
+                    style={{ width: '120px' }}
+                    size="large"
+                    disabled={loading}
+                  >
+                    
+                  </Button>
+                </Tooltip>
+              </Input.Group>
             </Form.Item>
 
             {/* Nombre */}
@@ -198,23 +243,44 @@ function VoterRegistration() {
               />
             </Form.Item>
 
-            {/* Teléfono */}
+            {/* Teléfono CON BOTÓN POR DEFECTO */}
             <Form.Item
-              label="Teléfono"
+              label={
+                <Space>
+                  Teléfono
+                  <Tooltip title="Si no conoce el teléfono, puede establecer un número por defecto">
+                    <QuestionCircleOutlined style={{ color: '#1890ff' }} />
+                  </Tooltip>
+                </Space>
+              }
               name="telefono"
               rules={[
                 { required: true, message: 'Por favor ingrese su teléfono' },
                 { pattern: /^\d{10,11}$/, message: 'El teléfono debe tener 10 u 11 dígitos' }
               ]}
             >
-              <Input 
-                prefix={<PhoneOutlined />} 
-                placeholder="Ej: 04121234567"
-                size="large"
-                disabled={loading}
-              />
+              <Input.Group compact>
+                <Input 
+                  style={{ width: 'calc(100% - 120px)' }}
+                  prefix={<PhoneOutlined />} 
+                  placeholder="Ej: 04121234567"
+                  size="large"
+                  disabled={loading}
+                />
+                <Tooltip title="Establecer teléfono por defecto (0970111222)">
+                  <Button
+                    type="default"
+                    icon={<PhoneOutlined />}
+                    onClick={establecerTelefonoDefault}
+                    style={{ width: '120px' }}
+                    size="large"
+                    disabled={loading}
+                  >
+                    Por Defecto
+                  </Button>
+                </Tooltip>
+              </Input.Group>
             </Form.Item>
-
 
             {/* Información del líder seleccionado */}
             <Form.Item shouldUpdate={(prevValues, currentValues) => 
@@ -260,6 +326,16 @@ function VoterRegistration() {
               </Button>
             </Form.Item>
           </Form>
+
+          {/* Información adicional */}
+          <Card size="small" style={{ backgroundColor: '#f0f9ff', border: '1px solid #91d5ff' }}>
+            <Text type="secondary" style={{ fontSize: '12px' }}>
+              <strong>Nota:</strong> Los datos temporales (CI de 4 dígitos y teléfonos por defecto) 
+              pueden ser actualizados posteriormente con la información real del votante.
+              <br />
+              <strong>Valores automáticos:</strong> Sexo: Indefinido, Edad: 100, Barrio: CDE
+            </Text>
+          </Card>
         </Space>
       </Card>
     </div>
@@ -267,65 +343,3 @@ function VoterRegistration() {
 }
 
 export default VoterRegistration;
-
-/*
-
-            <Form.Item
-              label="Sexo"
-              name="sexo"
-              rules={[{ required: true, message: 'Por favor seleccione su sexo' }]}
-            >
-              <Select 
-                placeholder="Seleccione su sexo" 
-                size="large"
-                disabled={loading}
-              >
-                <Option value="masculino">Masculino</Option>
-                <Option value="femenino">Femenino</Option>
-              </Select>
-            </Form.Item>
-
-            
-            <Form.Item
-              label="Edad"
-              name="edad"
-              rules={[
-                { required: true, message: 'Por favor ingrese su edad' },
-                { 
-                  validator: (_, value) => {
-                    if (!value) return Promise.resolve();
-                    const age = parseInt(value);
-                    if (age < 18 || age > 120) {
-                      return Promise.reject(new Error('La edad debe estar entre 18 y 120 años'));
-                    }
-                    return Promise.resolve();
-                  }
-                }
-              ]}
-            >
-              <Input 
-                type="number" 
-                placeholder="Ingrese su edad"
-                size="large"
-                min={18}
-                max={120}
-                disabled={loading}
-              />
-            </Form.Item>
-
-         
-            <Form.Item
-              label="Barrio de Residencia"
-              name="barrio"
-              rules={[
-                { required: true, message: 'Por favor ingrese su barrio de residencia' },
-                { min: 3, message: 'El barrio debe tener al menos 3 caracteres' }
-              ]}
-            >
-              <Input 
-                placeholder="Ingrese el barrio donde reside"
-                size="large"
-                disabled={loading}
-              />
-            </Form.Item>
-*/

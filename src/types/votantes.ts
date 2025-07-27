@@ -13,7 +13,7 @@ export interface VoterData {
   nombre: string;
   apellido: string;
   telefono: string;
-  sexo: 'masculino' | 'femenino';
+  sexo: 'masculino' | 'femenino' | 'indefinido';
   edad: number;
   barrio: string;
   lider_id: string; // ← Cambio de nombre
