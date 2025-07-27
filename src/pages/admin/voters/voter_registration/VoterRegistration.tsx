@@ -52,8 +52,6 @@ function VoterRegistration() {
       ...values,
       nombre: values.nombre.toUpperCase(),
       apellido: values.apellido.toUpperCase(),
-      sexo: values.sexo.toUpperCase(),
-      barrio: values.barrio.toUpperCase(),
       lider_id: values.lider_id // ← ID del líder
     };
     
@@ -109,6 +107,46 @@ function VoterRegistration() {
             autoComplete="off"
             style={{ marginTop: 20 }}
           >
+
+            {/* Líder */}
+            <Form.Item
+              label="Líder que lo invita"
+              name="lider_id"
+              rules={[{ required: true, message: 'Por favor seleccione el líder que lo invita' }]}
+            >
+              <Select 
+                placeholder="Seleccione el líder que lo invita" 
+                size="large"
+                loading={loadingLideres}
+                disabled={loading || loadingLideres}
+                showSearch
+                filterOption={(input, option) => {
+                  //Verificar tipo y convertir a string de forma segura
+                  const label = option?.label || option?.children;
+                  if (typeof label === 'string') {
+                    return label.toLowerCase().includes(input.toLowerCase());
+                  }
+                  return false;
+                }}
+                optionFilterProp="children"
+              >
+                {Object.entries(lideresPorCandidato).map(([candidato, lideresGrupo]) => (
+                  <OptGroup key={candidato} label={`🗳️ ${candidato}`}>
+                    {lideresGrupo.map((lider) => (
+                      <Option 
+                        key={lider.id} 
+                        value={lider.id}
+                        label={`${lider.nombre} ${lider.apellido} (CI: ${lider.ci})`}
+                      >
+                        {`${lider.nombre} ${lider.apellido} (CI: ${lider.ci})`}
+                      </Option>
+                    ))}
+                  </OptGroup>
+                ))}
+              </Select>
+            </Form.Item>
+
+
             {/* CI - Cédula de Identidad */}
             <Form.Item
               label="CI (Cédula de Identidad)"
@@ -177,103 +215,6 @@ function VoterRegistration() {
               />
             </Form.Item>
 
-            {/* Sexo */}
-            <Form.Item
-              label="Sexo"
-              name="sexo"
-              rules={[{ required: true, message: 'Por favor seleccione su sexo' }]}
-            >
-              <Select 
-                placeholder="Seleccione su sexo" 
-                size="large"
-                disabled={loading}
-              >
-                <Option value="masculino">Masculino</Option>
-                <Option value="femenino">Femenino</Option>
-              </Select>
-            </Form.Item>
-
-            {/* Edad */}
-            <Form.Item
-              label="Edad"
-              name="edad"
-              rules={[
-                { required: true, message: 'Por favor ingrese su edad' },
-                { 
-                  validator: (_, value) => {
-                    if (!value) return Promise.resolve();
-                    const age = parseInt(value);
-                    if (age < 18 || age > 120) {
-                      return Promise.reject(new Error('La edad debe estar entre 18 y 120 años'));
-                    }
-                    return Promise.resolve();
-                  }
-                }
-              ]}
-            >
-              <Input 
-                type="number" 
-                placeholder="Ingrese su edad"
-                size="large"
-                min={18}
-                max={120}
-                disabled={loading}
-              />
-            </Form.Item>
-
-            {/* Barrio */}
-            <Form.Item
-              label="Barrio de Residencia"
-              name="barrio"
-              rules={[
-                { required: true, message: 'Por favor ingrese su barrio de residencia' },
-                { min: 3, message: 'El barrio debe tener al menos 3 caracteres' }
-              ]}
-            >
-              <Input 
-                placeholder="Ingrese el barrio donde reside"
-                size="large"
-                disabled={loading}
-              />
-            </Form.Item>
-
-            {/* Líder */}
-            <Form.Item
-              label="Líder que lo invita"
-              name="lider_id"
-              rules={[{ required: true, message: 'Por favor seleccione el líder que lo invita' }]}
-            >
-              <Select 
-                placeholder="Seleccione el líder que lo invita" 
-                size="large"
-                loading={loadingLideres}
-                disabled={loading || loadingLideres}
-                showSearch
-                filterOption={(input, option) => {
-                  //Verificar tipo y convertir a string de forma segura
-                  const label = option?.label || option?.children;
-                  if (typeof label === 'string') {
-                    return label.toLowerCase().includes(input.toLowerCase());
-                  }
-                  return false;
-                }}
-                optionFilterProp="children"
-              >
-                {Object.entries(lideresPorCandidato).map(([candidato, lideresGrupo]) => (
-                  <OptGroup key={candidato} label={`🗳️ ${candidato}`}>
-                    {lideresGrupo.map((lider) => (
-                      <Option 
-                        key={lider.id} 
-                        value={lider.id}
-                        label={`${lider.nombre} ${lider.apellido} (CI: ${lider.ci})`}
-                      >
-                        {`${lider.nombre} ${lider.apellido} (CI: ${lider.ci})`}
-                      </Option>
-                    ))}
-                  </OptGroup>
-                ))}
-              </Select>
-            </Form.Item>
 
             {/* Información del líder seleccionado */}
             <Form.Item shouldUpdate={(prevValues, currentValues) => 
@@ -326,3 +267,65 @@ function VoterRegistration() {
 }
 
 export default VoterRegistration;
+
+/*
+
+            <Form.Item
+              label="Sexo"
+              name="sexo"
+              rules={[{ required: true, message: 'Por favor seleccione su sexo' }]}
+            >
+              <Select 
+                placeholder="Seleccione su sexo" 
+                size="large"
+                disabled={loading}
+              >
+                <Option value="masculino">Masculino</Option>
+                <Option value="femenino">Femenino</Option>
+              </Select>
+            </Form.Item>
+
+            
+            <Form.Item
+              label="Edad"
+              name="edad"
+              rules={[
+                { required: true, message: 'Por favor ingrese su edad' },
+                { 
+                  validator: (_, value) => {
+                    if (!value) return Promise.resolve();
+                    const age = parseInt(value);
+                    if (age < 18 || age > 120) {
+                      return Promise.reject(new Error('La edad debe estar entre 18 y 120 años'));
+                    }
+                    return Promise.resolve();
+                  }
+                }
+              ]}
+            >
+              <Input 
+                type="number" 
+                placeholder="Ingrese su edad"
+                size="large"
+                min={18}
+                max={120}
+                disabled={loading}
+              />
+            </Form.Item>
+
+         
+            <Form.Item
+              label="Barrio de Residencia"
+              name="barrio"
+              rules={[
+                { required: true, message: 'Por favor ingrese su barrio de residencia' },
+                { min: 3, message: 'El barrio debe tener al menos 3 caracteres' }
+              ]}
+            >
+              <Input 
+                placeholder="Ingrese el barrio donde reside"
+                size="large"
+                disabled={loading}
+              />
+            </Form.Item>
+*/
