@@ -1,3 +1,13 @@
+export interface Lider {
+  id: string;
+  ci: string;
+  nombre: string;
+  apellido: string;
+  telefono?: string;
+  candidato: string;
+  activo: boolean;
+}
+
 export interface VoterData {
   ci: string;
   nombre: string;
@@ -6,6 +16,7 @@ export interface VoterData {
   sexo: 'masculino' | 'femenino';
   edad: number;
   barrio: string;
+  lider_id: string; // ← Cambio de nombre
 }
 
 export interface FormattedVoterData {
@@ -16,6 +27,7 @@ export interface FormattedVoterData {
   sexo: string;
   edad: number;
   barrio: string;
+  lider_id: string; // ← Cambio de nombre
 }
 
 // Nuevo: Tipo para el votante guardado en la BD

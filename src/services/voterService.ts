@@ -19,6 +19,7 @@ export class VoterService {
         p_sexo: voterData.sexo,
         p_edad: voterData.edad,
         p_barrio: voterData.barrio,
+        p_lider_id: voterData.lider_id,
         p_registered_by: registered_by
       })
 
