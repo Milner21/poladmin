@@ -1,5 +1,5 @@
 const basePaths = {
-    admin: "/cloud/sp/gestion", 
+    admin: "/", 
   };
   
   const RoutesConfig = {
@@ -8,8 +8,7 @@ const basePaths = {
     
   
     // Rutas administrativas usando el prefijo dinámico
-    //gistro_votantes: `${basePaths.admin}/resgitro-personas`,
-    registro_votantes: "/"
+    registro_votantes: `${basePaths.admin}/resgitro-personas`,
   };
   
   export default RoutesConfig;
