@@ -1,3 +1,1 @@
-import VoterRegistration from "./voter_registration";
-
-export { VoterRegistration };   
+export { VoterRegistration, BulkVoterRegistration } from './voter_registration';

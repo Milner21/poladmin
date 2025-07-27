@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router";
 import RoutesConfig from "./RoutesConfig";
-import { TransportRegistration, VoterRegistration } from "../pages/admin";
+import { BulkVoterRegistration, TransportRegistration, VoterRegistration } from "../pages/admin";
 import EventAttendance from "../pages/admin/event/EventAttendance";
 
 const AppRoutes = () => {
@@ -10,6 +10,7 @@ const AppRoutes = () => {
       <Route path={RoutesConfig.home} element={<VoterRegistration />} />
       <Route path="/tr" element={<TransportRegistration />} />
       <Route path="/ev" element={<EventAttendance />} />
+      <Route path="/rm" element={<BulkVoterRegistration/>} />
       {/* Rutas administrativas privadas */}
     </Routes>
   );

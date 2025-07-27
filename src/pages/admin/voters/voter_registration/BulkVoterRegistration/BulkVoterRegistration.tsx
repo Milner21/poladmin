@@ -17,9 +17,9 @@ import {
 } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import type { ValidateErrorEntity } from 'rc-field-form/lib/interface';
-import type { VoterData, FormattedVoterData, Lider } from '../../../../types/votantes';
-import { useVoters } from '../../../../hooks/useVoters';
-import { LiderService } from '../../../../services/liderService';
+import type { VoterData, FormattedVoterData, Lider } from '../../../../../types/votantes';
+import { useVoters } from '../../../../../hooks/useVoters';
+import { LiderService } from '../../../../../services/liderService';
 import { toast } from "react-toastify";
 
 const { Title, Text } = Typography;
@@ -170,44 +170,43 @@ function VoterRegistration() {
             </Form.Item>
 
             {/* CI - Cédula de Identidad CON BOTÓN TEMPORAL */}
-            <div>
-              <Form.Item
-                label={
-                  <Space>
-                    CI (Cédula de Identidad)
-                    <Tooltip title="Si no conoce la CI, puede generar un número temporal de 4 dígitos para completar el registro">
-                      <QuestionCircleOutlined style={{ color: '#1890ff' }} />
-                    </Tooltip>
-                  </Space>
-                }
-                name="ci"
-                rules={[
-                  { required: true, message: 'Por favor ingrese su cédula de identidad' },
-                  { pattern: /^\d+$/, message: 'La cédula debe contener solo números' }
-                ]}
-                style={{ marginBottom: 0 }}
-              >
+            <Form.Item
+              label={
+                <Space>
+                  CI (Cédula de Identidad)
+                  <Tooltip title="Si no conoce la CI, puede generar un número temporal de 4 dígitos para completar el registro">
+                    <QuestionCircleOutlined style={{ color: '#1890ff' }} />
+                  </Tooltip>
+                </Space>
+              }
+              name="ci"
+              rules={[
+                { required: true, message: 'Por favor ingrese su cédula de identidad' },
+                { pattern: /^\d+$/, message: 'La cédula debe contener solo números' }
+              ]}
+            >
+              <Input.Group compact>
                 <Input 
+                  style={{ width: 'calc(100% - 120px)' }}
                   prefix={<IdcardOutlined />} 
                   placeholder="Ej: 12345678 o genere temporal"
                   size="large"
                   disabled={loading}
-                  addonAfter={
-                    <Tooltip title="Generar CI temporal de 4 dígitos">
-                      <Button
-                        type="text"
-                        icon={<ReloadOutlined />}
-                        onClick={generarCITemporal}
-                        disabled={loading}
-                        style={{ border: 'none', padding: '0 8px' }}
-                      >
-                        Temporal
-                      </Button>
-                    </Tooltip>
-                  }
                 />
-              </Form.Item>
-            </div>
+                <Tooltip title="Generar CI temporal de 4 dígitos">
+                  <Button
+                    type="default"
+                    icon={<ReloadOutlined />}
+                    onClick={generarCITemporal}
+                    style={{ width: '120px' }}
+                    size="large"
+                    disabled={loading}
+                  >
+                    Temporal
+                  </Button>
+                </Tooltip>
+              </Input.Group>
+            </Form.Item>
 
             {/* Nombre */}
             <Form.Item
@@ -244,44 +243,43 @@ function VoterRegistration() {
             </Form.Item>
 
             {/* Teléfono CON BOTÓN POR DEFECTO */}
-            <div>
-              <Form.Item
-                label={
-                  <Space>
-                    Teléfono
-                    <Tooltip title="Si no conoce el teléfono, puede establecer un número por defecto">
-                      <QuestionCircleOutlined style={{ color: '#1890ff' }} />
-                    </Tooltip>
-                  </Space>
-                }
-                name="telefono"
-                rules={[
-                  { required: true, message: 'Por favor ingrese su teléfono' },
-                  { pattern: /^\d{10,11}$/, message: 'El teléfono debe tener 10 u 11 dígitos' }
-                ]}
-                style={{ marginBottom: 0 }}
-              >
+            <Form.Item
+              label={
+                <Space>
+                  Teléfono
+                  <Tooltip title="Si no conoce el teléfono, puede establecer un número por defecto">
+                    <QuestionCircleOutlined style={{ color: '#1890ff' }} />
+                  </Tooltip>
+                </Space>
+              }
+              name="telefono"
+              rules={[
+                { required: true, message: 'Por favor ingrese su teléfono' },
+                { pattern: /^\d{10,11}$/, message: 'El teléfono debe tener 10 u 11 dígitos' }
+              ]}
+            >
+              <Input.Group compact>
                 <Input 
+                  style={{ width: 'calc(100% - 120px)' }}
                   prefix={<PhoneOutlined />} 
                   placeholder="Ej: 04121234567"
                   size="large"
                   disabled={loading}
-                  addonAfter={
-                    <Tooltip title="Establecer teléfono por defecto (0970111222)">
-                      <Button
-                        type="text"
-                        icon={<PhoneOutlined />}
-                        onClick={establecerTelefonoDefault}
-                        disabled={loading}
-                        style={{ border: 'none', padding: '0 8px' }}
-                      >
-                        Por Defecto
-                      </Button>
-                    </Tooltip>
-                  }
                 />
-              </Form.Item>
-            </div>
+                <Tooltip title="Establecer teléfono por defecto (0970111222)">
+                  <Button
+                    type="default"
+                    icon={<PhoneOutlined />}
+                    onClick={establecerTelefonoDefault}
+                    style={{ width: '120px' }}
+                    size="large"
+                    disabled={loading}
+                  >
+                    Por Defecto
+                  </Button>
+                </Tooltip>
+              </Input.Group>
+            </Form.Item>
 
             {/* Información del líder seleccionado */}
             <Form.Item shouldUpdate={(prevValues, currentValues) => 
