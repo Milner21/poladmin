@@ -1,6 +1,8 @@
 import { Routes, Route } from "react-router";
 import RoutesConfig from "./RoutesConfig";
-import { BulkVoterRegistration, TransportRegistration, VoterRegistration } from "../pages/admin";
+import {  TransportRegistration } from "../pages/admin";
+import BulkVoterRegistration from "../pages/admin/voters/voter_bulk_registration";
+import VoterRegistration from "../pages/admin/voters/voter_registration";
 import EventAttendance from "../pages/admin/event/EventAttendance";
 
 const AppRoutes = () => {
