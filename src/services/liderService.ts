@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase } from '../api/supabaseClient'
 import type { Lider } from '../types/votantes'
 
 export class LiderService {

@@ -1,5 +1,5 @@
 // services/candidatoService.ts
-import { supabase } from './supabase'
+import { supabase } from '../api/supabaseClient'
 import type { Candidato } from '../types/transpotes'
 
 export class CandidatoService {

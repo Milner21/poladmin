@@ -1,5 +1,5 @@
 // services/voterService.ts
-import { supabase } from './supabase'
+import { supabase } from '../api/supabaseClient'
 import type { 
   FormattedVoterData, 
   VoterResponse, 

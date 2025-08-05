@@ -1,5 +1,5 @@
 // services/eventoService.ts
-import { supabase } from "./supabase";
+import { supabase } from "../api/supabaseClient";
 import type {
   Evento,
   VotanteParaEvento,

@@ -1,5 +1,5 @@
 import { EMAIL_DOMAIN } from "../config/authConfig";
-import { supabase } from "./supabase";
+import { supabase } from "../api/supabaseClient";
 
 export const authService = {
     /**Login de usuario */
