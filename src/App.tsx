@@ -3,6 +3,7 @@ import { ToastContainer } from "react-toastify";
 import AppRoutes from "./routes/Routes";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./context/queryClient";
+import { AuthProvider } from "./providers/AuthProvider";
 
 function App() {
   return (
@@ -17,9 +18,11 @@ function App() {
           draggable
           theme="colored"
         />
-        <Router>
-          <AppRoutes />
-        </Router>
+        <AuthProvider>
+          <Router>
+            <AppRoutes />
+          </Router>
+        </AuthProvider>
       </QueryClientProvider>
     </>
   );

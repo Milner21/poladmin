@@ -1,0 +1,44 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+
+.container {
+  min-width: 300px;
+  max-width: 700px;
+  width: 90vw;
+  background-color: #fff; 
+  box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+/* Media queries para ajustar tamaño en pantallas pequeñas */
+@media (max-width: 480px) {
+  .container {
+    min-width: 90vw;
+    max-width: 90vw;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .container {
+    min-width: 400px;
+    max-width: 600px;
+  }
+}
+
+/* Estilos para el texto del tip */
+:global(.ant-spin-text) {
+  font-size: 24px !important; /* Ajusta el tamaño de fuente que desees */
+  font-weight: bold; /* Opcional: haz el texto más grueso */
+}

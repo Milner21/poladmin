@@ -5,6 +5,7 @@ const basePaths = {
   const RoutesConfig = {
     // Rutas principales
     home: "/",
+    login: "/login",
     
   
     // Rutas administrativas usando el prefijo dinámico
