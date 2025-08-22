@@ -16,6 +16,7 @@ export default defineConfig({
       '@pages': path.resolve(__dirname, 'src/pages'),
       '@services': path.resolve(__dirname, 'src/services'),
       '@providers': path.resolve(__dirname, 'src/providers'),
+      '@themes': path.resolve(__dirname, 'src/themes'),
     },
   }
 })

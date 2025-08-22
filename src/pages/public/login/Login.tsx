@@ -1,142 +1,117 @@
 import { type FC } from "react";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Checkbox, Form, Input, message, notification } from "antd";
-import { Content, Footer } from "antd/es/layout/layout";
-import style from "./Login.module.css";
+import { Form } from "antd";
+import { useLocation, useNavigate } from "react-router";
+
+import { InputTextC, ThemeToggleSwitch } from "@components";
 import { useAuthActions } from "@hooks/useAuthAction";
 import type { LoginFormValues } from "@interfaces/LoginTypes";
-import { useLocation, useNavigate } from "react-router";
+import { useLoginMessages } from "./hooks/useLoginMessages";
+import {
+  LoginContainer,
+  LoginTitle,
+  HelpLink,
+  FooterContainer,
+  LoginForm,
+  LoginFormContainer,
+  Submit,
+  Img,
+} from "./Login.styles";
+import { LOGIN_CONSTANTS } from "./Login.constants";
+import logo from "@assets/AppLogo60px.svg";
 
 const Login: FC = () => {
   const { login, loading, error } = useAuthActions();
-  const [messageApi, contextHolder] = message.useMessage();
-  const key = "loginMessage";
+  const {
+    showLoadingMessage,
+    showSuccessMessage,
+    showErrorMessage,
+    showHelpMessage,
+    contextHolder,
+  } = useLoginMessages();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Si no hay ruta previa, por defecto va a dashboard
   const from =
-    (location.state as { from?: Location })?.from?.pathname || "/test";
+    (location.state as { from?: Location })?.from?.pathname ||
+    LOGIN_CONSTANTS.DEFAULT_REDIRECT;
 
-  const onFinish = async (values: LoginFormValues) => {
-    // Mostrar mensaje de loading
-    messageApi.open({
-      key,
-      type: "loading",
-      content: "Autenticando...",
-      duration: 0, // duración 0 para que no desaparezca automáticamente
-    });
+  const handleFinish = async (values: LoginFormValues) => {
+    showLoadingMessage();
 
     const success = await login(values.username, values.password);
 
     if (success) {
-      // Actualizar mensaje a éxito
-      messageApi.open({
-        key,
-        type: "success",
-        content: "Inicio de sesión exitoso",
-        duration: 2,
-      });
-      // Se redirige al usuario a la ruta previa o dashboard
+      showSuccessMessage();
       navigate(from, { replace: true });
     } else {
-      // Cierra el mensaje loading antes de mostrar la notificación
-      messageApi.destroy();
-
-      if (error === "Invalid login credentials") {
-        notification.error({
-          message: "Error de autenticación",
-          description:
-            "Credenciales inválidas. Por favor, verifica tu usuario y contraseña.",
-          duration: 3,
-        });
-      } else {
-        notification.error({
-          message: "Error",
-          description: error || "Error en el inicio de sesión",
-          duration: 3,
-        });
-      }
+      showErrorMessage(error ?? undefined);
     }
+  };
+
+  const handleHelpClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    showHelpMessage();
   };
 
   return (
     <>
       {contextHolder}
-      <Content style={{ padding: 0, margin: 0 }}>
-        <div className={style.loginContent}>
-          <div className={style.loginFormContainer}>
-            <h4>Poladmin</h4>
+      <LoginContainer>
+        <LoginFormContainer>
+          <Img
+              src={logo}
+              alt="Poladmin Logo"
+            />
+          <LoginTitle>Poladmin</LoginTitle>
+          <LoginForm>
             <Form
-              className={style.loginForm}
               name="login"
               layout="vertical"
               initialValues={{ remember: true }}
-              onFinish={onFinish}
+              onFinish={handleFinish}
             >
-              <Form.Item
+              <InputTextC
                 label="Usuario"
                 name="username"
-                rules={[
-                  {
-                    required: true,
-                    message: "¡Por favor ingrese su nombre de usuario!",
-                  },
-                ]}
-              >
-                <Input
-                  prefix={<UserOutlined />}
-                  placeholder="nombre.apellido"
-                />
-              </Form.Item>
-              <Form.Item
+                rules={LOGIN_CONSTANTS.USERNAME_RULES}
+                placeholder="nombre.apellido"
+                prefix={<UserOutlined />}
+                type="text"
+              />
+
+              <InputTextC
                 label="Contraseña"
                 name="password"
-                rules={[
-                  {
-                    required: true,
-                    message: "¡Por favor ingrese su contraseña!",
-                  },
-                ]}
+                rules={LOGIN_CONSTANTS.PASSWORD_RULES}
+                placeholder="4111555"
+                prefix={<LockOutlined />}
+                type="password"
+              />
+
+              <Submit
+                block
+                type="primary"
+                htmlType="submit"
+                loading={loading}
+                disabled={loading}
               >
-                <Input.Password
-                  prefix={<LockOutlined />}
-                  placeholder="Password"
-                  visibilityToggle={true}
-                />
-              </Form.Item>
+                Iniciar sesión
+              </Submit>
+
               <Form.Item>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Form.Item name="remember" valuePropName="checked" noStyle>
-                    <Checkbox>Recordar</Checkbox>
-                  </Form.Item>
-                  <a href="">Has olvidado tu contraseña</a>
-                </div>
-              </Form.Item>
-              <Form.Item>
-                <Button
-                  block
-                  type="primary"
-                  htmlType="submit"
-                  loading={loading}
-                  disabled={loading}
-                >
-                  Iniciar sesión
-                </Button>
+                <HelpLink href="" onClick={handleHelpClick}>
+                  ¿Has olvidado tu contraseña?
+                </HelpLink>
               </Form.Item>
             </Form>
-            <Footer style={{ textAlign: "center" }}>
-              Poladmin ©{new Date().getFullYear()} Created by SITEC
-            </Footer>
-          </div>
-        </div>
-      </Content>
+          </LoginForm>
+          <FooterContainer>
+            Poladmin ©{new Date().getFullYear()} Created by SITEC
+          </FooterContainer>
+        </LoginFormContainer>
+      </LoginContainer>
+      <ThemeToggleSwitch />
     </>
   );
 };

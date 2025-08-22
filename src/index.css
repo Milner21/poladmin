@@ -18,6 +18,10 @@ body {
   min-height: 100vh;
 }
 
-
+:root {
+  --color-label: #262626;
+  --color-primary: #09780e;
+  --color-primary-dark: #065d0b;
+}
 
 

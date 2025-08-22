@@ -17,7 +17,8 @@
       "@pages": ["pages/index.ts"],
       "@context/*": ["context/*"],
       "@data/*": ["data/*"],
-      "@services/*": ["services/*"]
+      "@services/*": ["services/*"],
+      "@themes/*": ["themes/*"]
     }
   }
 }
