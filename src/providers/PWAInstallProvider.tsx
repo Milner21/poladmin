@@ -46,10 +46,10 @@ const PWAInstallProvider: React.FC<PWAInstallProviderProps> = ({
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
 
-    // 🔥 SOLO PARA TESTING - Remover en producción
+    /* 🔥 SOLO PARA TESTING - Remover en producción
     setTimeout(() => {
       setShowInstallPrompt(true);
-    }, 2000); // Muestra el banner después de 2 segundos
+    }, 2000); // Muestra el banner después de 2 segundos*/
 
     // Para iOS, mostrar prompt si no está en modo standalone
     if (iOS && !standalone) {
