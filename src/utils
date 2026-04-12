@@ -1,0 +1,48 @@
+
+Módulos restantes
+1) Partidos y movimientos
+- Prisma model Partido + CRUD (PartidosService, PartidosController, DTOs).
+
+2) Candidatos
+- Prisma model Candidato (relación con Partido), CRUD y endpoints para listar por partido.
+
+3) Simpatizantes
+- Modelo Simpatizante, endpoints para registro masivo/import y búsqueda por CI/ubicación.
+
+4) Eventos
+- Modelo Evento, CRUD, endpoints para inscribir simpatizantes y obtener asistentes.
+
+5) Transporte
+- Modelo Transporte/SolicitudTransporte, endpoints para crear solicitudes y asignar vehículos.
+
+6) Solicitudes (general)
+- Modelo Solicitud con estados y auditoría de cambios.
+
+7) Financiamiento
+- Modelos Donación/Factura, endpoints para registrar ingresos y reportes básicos.
+
+8) Notificaciones push
+- Endpoints para registrar suscripciones push y enviar notificación de prueba (PWA).
+
+9) Historial y trazabilidad
+- Tabla AuditLog + interceptor para registrar acciones CRUD (usuario, ruta, payload).
+- Archivos: audit.interceptor.ts, prisma model AuditLog, endpoint para consultar logs.
+
+Integración de notificaciones push
+- Registrar suscripciones web-push (VAPID), enviar notificaciones a PWA.
+
+Auditoría y trazabilidad
+- Registro de acciones para control y seguridad (logs, ReuseLog ya implementado).
+
+Documentación y pruebas
+- Documentar API con Swagger (setup en main.ts/app.module).
+- Pruebas unitarias e integración (jest/e2e) para auth, refresh, reuse y módulos principales.
+
+Optimización y despliegue
+- Configuración para producción: variables de entorno, logging, monitoreo.
+- Dockerfile / docker-compose y healthchecks.
+
+
+TypeScript: Restart TS Server
+
+npx tsx prisma/seed_simpatizantes_por_usuario_paraguay.ts --userIds usr_lider_1,usr_gestor_2,usr_cand_3 --total 300

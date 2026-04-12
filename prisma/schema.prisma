@@ -1,0 +1,673 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ==========================================
+// 1. ESTRUCTURA SAAS (MULTI-CAMPAÑA)
+// ==========================================
+model Campana {
+  id             String   @id @default(uuid())
+  nombre         String
+  nivel_campana  String   @default("DISTRITO") // PAIS, DEPARTAMENTO, DISTRITO
+  departamento   String?
+  distrito       String?
+  estado         Boolean  @default(true)
+  fecha_registro DateTime @default(now())
+  tipo_campana   String   @default("PARTIDO") // PARTIDO | MOVIMIENTO
+  partido_id     String?
+
+  configuracion             ConfiguracionCampana?
+  usuarios                  Usuario[]
+  simpatizantes             Simpatizante[]
+  eventos                   Evento[]
+  solicitudes               Solicitud[]
+  transportistas            Transportista[]
+  configuracion_transporte  ConfiguracionTransporte?
+  verificaciones_transporte VerificacionTransporte[]
+  impresoras                Impresora[]
+  partido                   Partido?                 @relation(fields: [partido_id], references: [id])
+  duplicados_simpatizantes  DuplicadoSimpatizante[]
+
+  @@map("campanas")
+}
+
+model ConfiguracionCampana {
+  id            String @id @default(uuid())
+  campana_id    String @unique
+  modo_eleccion String @default("INTERNAS") // INTERNAS o GENERALES
+
+  permitir_duplicados_simpatizantes     Boolean @default(false)
+  permitir_registro_manual_fuera_padron Boolean @default(false)
+
+  campana Campana @relation(fields: [campana_id], references: [id], onDelete: Cascade)
+
+  @@map("configuraciones_campanas")
+}
+
+// ==========================================
+// 1.1 PARTIDOS POLITICOS
+// ==========================================
+model Partido {
+  id             String   @id @default(uuid())
+  nombre         String   @unique
+  sigla          String   @unique
+  descripcion    String?
+  estado         Boolean  @default(true)
+  fecha_registro DateTime @default(now())
+
+  campanas       Campana[]
+  padron_interno PadronInterno[]
+
+  @@map("partidos")
+}
+
+// ==========================================
+// 2. NIVELES Y PERFILES (CONTROL DE ACCESO)
+// ==========================================
+model Nivel {
+  id                 String   @id @default(uuid())
+  nombre             String   @unique
+  orden              Int      @unique
+  descripcion        String?
+  permite_operadores Boolean  @default(false)
+  exclusivo_root     Boolean  @default(false) // <-- EL CONTROL DE FACTURACIÓN
+  estado             Boolean  @default(true)
+  creado_por_id      String?
+  fecha_registro     DateTime @default(now())
+
+  perfiles Perfil[]
+  usuarios Usuario[] @relation("UsuarioNivel")
+
+  @@map("niveles")
+}
+
+model Perfil {
+  id              String  @id @default(uuid())
+  nombre          String  @unique
+  nivel_id        String?
+  es_operativo    Boolean @default(false)
+  username_manual Boolean @default(false)
+  estado          Boolean @default(true)
+
+  nivel    Nivel?          @relation(fields: [nivel_id], references: [id])
+  permisos PerfilPermiso[]
+  usuarios Usuario[]
+
+  @@map("perfiles")
+}
+
+model Permiso {
+  id                      String                 @id @default(uuid())
+  nombre                  String                 @unique
+  descripcion             String?
+  modulo                  String
+  accion                  String
+  perfiles                PerfilPermiso[]
+  permisos_personalizados PermisoPersonalizado[]
+
+  @@map("permisos")
+}
+
+model PerfilPermiso {
+  perfil_id  String
+  permiso_id String
+  permiso    Permiso @relation(fields: [permiso_id], references: [id], onDelete: Cascade)
+  perfil     Perfil  @relation(fields: [perfil_id], references: [id], onDelete: Cascade)
+
+  @@id([perfil_id, permiso_id])
+  @@map("perfil_permisos")
+}
+
+model PermisoPersonalizado {
+  id              String  @id @default(uuid())
+  usuario_id      String
+  permiso_id      String
+  asignado_por_id String
+  permiso         Permiso @relation(fields: [permiso_id], references: [id], onDelete: Cascade)
+  usuario         Usuario @relation("PermisosPersonalizados", fields: [usuario_id], references: [id], onDelete: Cascade)
+
+  @@unique([usuario_id, permiso_id])
+  @@map("permisos_personalizados")
+}
+
+// ==========================================
+// 3. USUARIOS Y OPERATIVA
+// ==========================================
+model Usuario {
+  id         String  @id @default(uuid())
+  campana_id String? // <-- NULO SOLO PARA ROOT
+  nombre     String
+  apellido   String
+  username   String  @unique
+  documento  String  @unique
+  telefono   String?
+  password   String
+
+  perfil_id             String
+  nivel_id              String?
+  candidato_superior_id String? // A quién rinde cuentas
+
+  estado         Boolean  @default(true)
+  eliminado      Boolean  @default(false)
+  fecha_registro DateTime @default(now())
+  refresh_token  String?
+
+  creado_por_id String?
+
+  campana                     Campana?                  @relation(fields: [campana_id], references: [id])
+  perfil                      Perfil                    @relation(fields: [perfil_id], references: [id])
+  nivel                       Nivel?                    @relation("UsuarioNivel", fields: [nivel_id], references: [id])
+  candidato_superior          Usuario?                  @relation("JerarquiaUsuarios", fields: [candidato_superior_id], references: [id])
+  subordinados                Usuario[]                 @relation("JerarquiaUsuarios")
+  permisos_personalizados     PermisoPersonalizado[]    @relation("PermisosPersonalizados")
+  solicitudes_registradas     Solicitud[]               @relation("SolicitudesRegistradas")
+  solicitudes_asignadas       Solicitud[]               @relation("SolicitudesAsignadas")
+  solicitudes_como_candidato  Solicitud[]               @relation("SolicitudesCandidato")
+  solicitudes_como_lider      Solicitud[]               @relation("SolicitudesLider")
+  movimientos_solicitud       MovimientoSolicitud[]     @relation("MovimientosUsuario")
+  transportistas_perfil       Transportista[]           @relation("TransportistaUsuario")
+  transportistas_creados      Transportista[]           @relation("TransportistasRegistrados")
+  pasajeros_registrados       PasajeroTransporte[]      @relation("PasajerosRegistrados")
+  impresoras_creadas          Impresora[]               @relation("ImpresorasCreadasPor")
+  impresoras_asignadas        UsuarioImpresora[]
+  trabajos_impresion          TrabajoImpresion[]
+  verificaciones_operador     VerificacionTransporte[]  @relation("OperadorVerificacion")
+  duplicados_intentados       DuplicadoSimpatizante[]   @relation("DuplicadoIntento")
+  duplicados_como_registrador DuplicadoSimpatizante[]   @relation("DuplicadoOriginalUsuario")
+  duplicados_eliminados       DuplicadoSimpatizante[]   @relation("DuplicadoEliminadoPor")
+  duplicados_resueltos        DuplicadoSimpatizante[]   @relation("DuplicadoResueltoPor")
+  simpatizantes_registrados   Simpatizante[]            @relation("SimpatizanteRegistradoPor")
+  simpatizantes_candidato     Simpatizante[]            @relation("SimpatizanteCandidato")
+  simpatizantes_lider         Simpatizante[]            @relation("SimpatizanteLider")
+  eventos_candidato           Evento[]                  @relation("EventosCandidato")
+  eventos_creados             Evento[]                  @relation("EventosCreador")
+  seguimientos_realizados     SeguimientoSimpatizante[] @relation("SeguimientosUsuario")
+  auditoria_logs              AuditoriaLog[]            @relation("AuditoriaUsuario")
+
+  @@map("usuarios")
+}
+
+model Simpatizante {
+  id         String @id @default(uuid())
+  campana_id String
+
+  // DATOS PERSONALES
+  nombre           String
+  apellido         String
+  documento        String
+  telefono         String?
+  fecha_nacimiento String?
+
+  // DATOS ELECTORALES - COMPARTIDOS
+  departamento String?
+  distrito     String?
+  barrio       String?
+
+  // DATOS ELECTORALES - INTERNAS
+  seccional_interna      String?
+  local_votacion_interna String?
+  mesa_votacion_interna  String?
+  orden_votacion_interna String?
+
+  // DATOS ELECTORALES - GENERALES
+  local_votacion_general String?
+  mesa_votacion_general  String?
+  orden_votacion_general String?
+
+  // DATOS POLÍTICOS
+  es_afiliado    Boolean @default(false)
+  intencion_voto String  @default("INDECISO")
+  observaciones  String?
+
+  // ORIGEN DEL REGISTRO
+  origen_registro String @default("PADRON_INTERNO")
+  // PADRON_INTERNO → encontrado en padrón interno
+  // PADRON_GENERAL → encontrado en padrón general
+  // MANUAL         → no encontrado, registrado manualmente
+
+  // LOGÍSTICA
+  necesita_transporte Boolean @default(false)
+  latitud             Float?
+  longitud            Float?
+
+  // AUDITORÍA Y JERARQUÍA
+  candidato_id      String?
+  lider_id          String?
+  registrado_por_id String
+  fecha_registro    DateTime @default(now())
+  eliminado         Boolean  @default(false)
+
+  campana                   Campana                   @relation(fields: [campana_id], references: [id])
+  registrado_por            Usuario                   @relation("SimpatizanteRegistradoPor", fields: [registrado_por_id], references: [id])
+  candidato                 Usuario?                  @relation("SimpatizanteCandidato", fields: [candidato_id], references: [id])
+  lider                     Usuario?                  @relation("SimpatizanteLider", fields: [lider_id], references: [id])
+  asistencias               Asistencia[]
+  seguimientos              SeguimientoSimpatizante[]
+  solicitudes               Solicitud[]
+  pasajeros_transporte      PasajeroTransporte[]
+  verificaciones_transporte VerificacionTransporte[]
+  duplicados_como_original  DuplicadoSimpatizante[]   @relation("DuplicadoOriginal")
+
+  @@unique([documento, campana_id])
+  @@map("simpatizantes")
+}
+
+model DuplicadoSimpatizante {
+  id                         String   @id @default(uuid())
+  campana_id                 String
+  simpatizante_id            String
+  registrado_por_id_original String
+  intento_registrar_id       String
+  fecha_intento              DateTime @default(now())
+
+  eliminado           Boolean   @default(false)
+  eliminado_por_id    String?
+  fecha_eliminacion   DateTime?
+  es_dueno_confirmado Boolean   @default(false)
+  resuelto_por_id     String?
+  fecha_resolucion    DateTime?
+
+  campana              Campana      @relation(fields: [campana_id], references: [id])
+  simpatizante         Simpatizante @relation("DuplicadoOriginal", fields: [simpatizante_id], references: [id])
+  quien_intento        Usuario      @relation("DuplicadoIntento", fields: [intento_registrar_id], references: [id])
+  registrador_original Usuario      @relation("DuplicadoOriginalUsuario", fields: [registrado_por_id_original], references: [id])
+  eliminado_por        Usuario?     @relation("DuplicadoEliminadoPor", fields: [eliminado_por_id], references: [id])
+  resuelto_por         Usuario?     @relation("DuplicadoResueltoPor", fields: [resuelto_por_id], references: [id])
+
+  @@index([campana_id])
+  @@index([simpatizante_id])
+  @@index([intento_registrar_id])
+  @@map("duplicados_simpatizantes")
+}
+
+model Evento {
+  id                 String   @id @default(uuid())
+  campana_id         String // <-- SEPARACIÓN POR CAMPAÑA
+  titulo             String
+  fecha_hora_inicio  DateTime
+  direccion          String?
+  barrio             String?
+  ciudad             String?
+  tipo_evento        String
+  capacidad_estimada Int?
+  estado             String   @default("planificado")
+
+  candidato_id  String // Dueño del evento
+  creado_por_id String // El que lo registró
+
+  fecha_registro DateTime @default(now())
+  eliminado      Boolean  @default(false)
+
+  campana     Campana      @relation(fields: [campana_id], references: [id])
+  candidato   Usuario      @relation("EventosCandidato", fields: [candidato_id], references: [id])
+  creado_por  Usuario      @relation("EventosCreador", fields: [creado_por_id], references: [id])
+  asistencias Asistencia[]
+
+  @@map("eventos")
+}
+
+model Asistencia {
+  id                     String   @id @default(uuid())
+  evento_id              String
+  simpatizante_id        String
+  confirmado_previamente Boolean  @default(false)
+  asistio                Boolean  @default(false)
+  fecha_hora_registro    DateTime @default(now())
+
+  simpatizante Simpatizante @relation(fields: [simpatizante_id], references: [id], onDelete: Cascade)
+  evento       Evento       @relation(fields: [evento_id], references: [id], onDelete: Cascade)
+
+  @@unique([evento_id, simpatizante_id])
+  @@map("asistencias")
+}
+
+// ==========================================
+// 4. PADRÓN ELECTORAL
+// ==========================================
+model PadronInterno {
+  id               String   @id @default(uuid())
+  ci               String
+  nombre           String
+  apellido         String
+  fecha_nacimiento String?
+  departamento     String?
+  distrito         String?
+  seccional        String?
+  local_votacion   String?
+  mesa             String?
+  orden            String?
+  fecha_carga      DateTime @default(now())
+  partido_id       String?
+
+  partido Partido? @relation(fields: [partido_id], references: [id])
+
+  @@unique([ci, partido_id])
+  @@index([partido_id])
+  @@map("padron_interno")
+}
+
+model PadronGeneral {
+  id               String   @id @default(uuid())
+  ci               String   @unique
+  nombre           String
+  apellido         String
+  fecha_nacimiento String?
+  departamento     String?
+  distrito         String?
+  local_votacion   String?
+  mesa             String?
+  orden            String?
+  fecha_carga      DateTime @default(now())
+
+  @@map("padron_general")
+}
+
+// ==========================================
+// 5. CATÁLOGO DE DIRECCIONES
+// ==========================================
+model Direccion {
+  id            String   @id @default(uuid())
+  departamento  String
+  ciudad        String
+  barrio        String
+  activo        Boolean  @default(true)
+  creado_por_id String?
+  fecha_carga   DateTime @default(now())
+
+  @@unique([departamento, ciudad, barrio])
+  @@map("direcciones")
+}
+
+// ==========================================
+// 6. AUDITORÍA Y LOGS
+// ==========================================
+model AuditoriaLog {
+  id            String   @id @default(uuid())
+  usuario_id    String? // Puede ser null si es una acción del sistema
+  accion        String // CREAR, EDITAR, ELIMINAR, CAMBIAR_CAMPANA, LOGIN, LOGOUT
+  modulo        String // USUARIOS, SIMPATIZANTES, EVENTOS, CAMPANAS, etc.
+  entidad_id    String? // ID del registro afectado
+  entidad_tipo  String? // Tipo de entidad (Usuario, Simpatizante, etc.)
+  datos_antes   Json? // Estado anterior (para ediciones)
+  datos_despues Json? // Estado nuevo
+  ip_address    String?
+  user_agent    String?
+  fecha_accion  DateTime @default(now())
+
+  usuario Usuario? @relation("AuditoriaUsuario", fields: [usuario_id], references: [id])
+
+  @@index([usuario_id])
+  @@index([modulo])
+  @@index([accion])
+  @@index([fecha_accion])
+  @@map("auditoria_logs")
+}
+
+// ==========================================
+// 7. SEGUIMIENTO DE SIMPATIZANTES
+// ==========================================
+model SeguimientoSimpatizante {
+  id              String   @id @default(uuid())
+  simpatizante_id String
+  usuario_id      String // Quién hizo el seguimiento
+  tipo_contacto   String // LLAMADA | VISITA | WHATSAPP | EVENTO
+  resultado       String // EXITOSO | NO_CONTESTA | RECHAZA | PENDIENTE
+  intencion_voto  String? // Se actualiza si se logró calificar
+  observaciones   String?
+  fecha_contacto  DateTime @default(now())
+
+  simpatizante Simpatizante @relation(fields: [simpatizante_id], references: [id], onDelete: Cascade)
+  usuario      Usuario      @relation("SeguimientosUsuario", fields: [usuario_id], references: [id])
+
+  @@index([simpatizante_id])
+  @@index([usuario_id])
+  @@index([fecha_contacto])
+  @@map("seguimientos_simpatizantes")
+}
+
+// ==========================================
+// 8. SOLICITUDES DE SIMPATIZANTES
+// ==========================================
+model Solicitud {
+  id              String @id @default(uuid())
+  campana_id      String
+  simpatizante_id String
+  titulo          String
+  descripcion     String
+  prioridad       String @default("MEDIA") // ALTA | MEDIA | BAJA
+  estado          String @default("PENDIENTE") // PENDIENTE | EN_PROCESO | AGENDADA | CUMPLIDA | RECHAZADA
+
+  // Jerarquía y asignación
+  registrado_por_id String
+  registrado_por    Usuario @relation("SolicitudesRegistradas", fields: [registrado_por_id], references: [id])
+
+  asignado_a_id String?
+  asignado_a    Usuario? @relation("SolicitudesAsignadas", fields: [asignado_a_id], references: [id])
+
+  candidato_id String?
+  candidato    Usuario? @relation("SolicitudesCandidato", fields: [candidato_id], references: [id])
+
+  lider_id String?
+  lider    Usuario? @relation("SolicitudesLider", fields: [lider_id], references: [id])
+
+  // Agendamiento
+  fecha_limite DateTime?
+  fecha_cierre DateTime?
+
+  // Auditoría
+  fecha_registro DateTime @default(now())
+  eliminado      Boolean  @default(false)
+
+  // Relaciones
+  campana      Campana               @relation(fields: [campana_id], references: [id])
+  simpatizante Simpatizante          @relation(fields: [simpatizante_id], references: [id])
+  movimientos  MovimientoSolicitud[]
+
+  @@index([campana_id])
+  @@index([simpatizante_id])
+  @@index([registrado_por_id])
+  @@index([asignado_a_id])
+  @@index([estado])
+  @@index([prioridad])
+  @@map("solicitudes")
+}
+
+model MovimientoSolicitud {
+  id                   String   @id @default(uuid())
+  solicitud_id         String
+  usuario_id           String
+  usuario              Usuario  @relation("MovimientosUsuario", fields: [usuario_id], references: [id])
+  accion               String // CREAR | ASIGNAR | AGENDAR | ACTUALIZAR | CUMPLIR | RECHAZAR | REABRIR
+  comentario           String?
+  estado_anterior      String?
+  estado_nuevo         String?
+  asignado_anterior_id String?
+  asignado_nuevo_id    String?
+  fecha_movimiento     DateTime @default(now())
+
+  // Relaciones
+  solicitud Solicitud @relation(fields: [solicitud_id], references: [id], onDelete: Cascade)
+
+  @@index([solicitud_id])
+  @@index([usuario_id])
+  @@map("movimientos_solicitudes")
+}
+
+// ==========================================
+// 9. MÓDULO DE TRANSPORTES
+// ==========================================
+model Transportista {
+  id         String   @id @default(uuid())
+  campana_id String
+  usuario_id String?
+  usuario    Usuario? @relation("TransportistaUsuario", fields: [usuario_id], references: [id])
+
+  registrado_por_id   String
+  registrado_por      Usuario  @relation("TransportistasRegistrados", fields: [registrado_por_id], references: [id])
+  nombre              String
+  apellido            String
+  documento           String
+  telefono            String?
+  tipo_vehiculo       String // AUTO | SUV | FURGON | OMNIBUS | OTRO
+  marca_vehiculo      String?
+  chapa_vehiculo      String
+  capacidad_pasajeros Int
+  estado              Boolean  @default(true)
+  fecha_registro      DateTime @default(now())
+  eliminado           Boolean  @default(false)
+
+  // Relaciones
+  campana            Campana                      @relation(fields: [campana_id], references: [id])
+  pasajeros          PasajeroTransporte[]
+  verificaciones     VerificacionTransporte[]
+  lotes_confirmacion LoteConfirmacionTransporte[]
+
+  @@index([campana_id])
+  @@index([documento])
+  @@map("transportistas")
+}
+
+model PasajeroTransporte {
+  id               String  @id @default(uuid())
+  transportista_id String
+  simpatizante_id  String
+  es_duplicado     Boolean @default(false)
+  confirmado       Boolean @default(false)
+  fue_por_cuenta   Boolean @default(false)
+  eliminado        Boolean @default(false)
+
+  hora_recogida DateTime? // ← AGREGAR ESTE CAMPO
+
+  registrado_por_id  String
+  registrado_por     Usuario   @relation("PasajerosRegistrados", fields: [registrado_por_id], references: [id])
+  fecha_registro     DateTime  @default(now())
+  fecha_confirmacion DateTime?
+
+  transportista Transportista @relation(fields: [transportista_id], references: [id], onDelete: Cascade)
+  simpatizante  Simpatizante  @relation(fields: [simpatizante_id], references: [id])
+
+  @@index([transportista_id])
+  @@index([simpatizante_id])
+  @@index([hora_recogida]) // ← ÍNDICE PARA ESTADÍSTICAS DE RETRASO
+  @@map("pasajeros_transporte")
+}
+
+model ConfiguracionTransporte {
+  id                         String   @id @default(uuid())
+  campana_id                 String   @unique
+  permitir_impresion_tickets Boolean  @default(false)
+  permitir_duplicados        Boolean  @default(true)
+  fecha_registro             DateTime @default(now())
+
+  campana Campana @relation(fields: [campana_id], references: [id])
+
+  @@map("configuraciones_transporte")
+}
+
+model VerificacionTransporte {
+  id                  String        @id @default(uuid())
+  campana_id          String
+  documento_buscado   String // CI que no se encontró
+  nombre_referencia   String? // Nombre que dice el transportista (opcional)
+  apellido_referencia String? // Apellido que dice el transportista (opcional)
+  transportista_id    String // Quién solicitó la verificación
+  transportista       Transportista @relation(fields: [transportista_id], references: [id])
+  operador_id         String? // Operador que verificó (null si está pendiente)
+  operador            Usuario?      @relation("OperadorVerificacion", fields: [operador_id], references: [id])
+  estado              String        @default("PENDIENTE") // PENDIENTE | APROBADO | RECHAZADO
+  motivo_rechazo      String? // Si fue rechazado, por qué
+  simpatizante_id     String? // Si fue aprobado, el simpatizante creado
+  simpatizante        Simpatizante? @relation(fields: [simpatizante_id], references: [id])
+  fecha_solicitud     DateTime      @default(now())
+  fecha_resolucion    DateTime?
+
+  campana Campana @relation(fields: [campana_id], references: [id])
+
+  @@index([campana_id])
+  @@index([documento_buscado])
+  @@index([estado])
+  @@index([transportista_id])
+  @@map("verificaciones_transporte")
+}
+
+model LoteConfirmacionTransporte {
+  id               String   @id @default(uuid())
+  transportista_id String
+  hash_lote        String   @unique
+  pasajeros_ids    String[]
+  fecha_creacion   DateTime @default(now())
+  fecha_expiracion DateTime
+  utilizado        Boolean  @default(false)
+
+  transportista Transportista @relation(fields: [transportista_id], references: [id], onDelete: Cascade)
+
+  @@index([transportista_id])
+  @@index([hash_lote])
+}
+
+// ==========================================
+// 10. MÓDULO DE IMPRESIONES
+// ==========================================
+
+model Impresora {
+  id              String    @id @default(uuid())
+  campana_id      String
+  codigo          String    @unique // MESA-001, OFICINA-A, etc
+  nombre          String // "Impresora Mesa 1"
+  descripcion     String? // "Epson TM-T20II - Oficina Principal"
+  ubicacion       String? // "Planta baja - Escritorio 3"
+  estado          String    @default("DESCONECTADA") // CONECTADA / DESCONECTADA
+  ip_ultima       String? // IP de la PC donde se conectó
+  hostname_ultimo String? // Nombre de la PC
+  ultima_conexion DateTime?
+  creado_en       DateTime  @default(now())
+  creado_por_id   String
+
+  campana    Campana            @relation(fields: [campana_id], references: [id], onDelete: Cascade)
+  creado_por Usuario            @relation("ImpresorasCreadasPor", fields: [creado_por_id], references: [id])
+  usuarios   UsuarioImpresora[]
+  trabajos   TrabajoImpresion[]
+
+  @@index([campana_id])
+  @@index([codigo])
+  @@index([estado])
+}
+
+model UsuarioImpresora {
+  id           String   @id @default(uuid())
+  usuario_id   String
+  impresora_id String
+  es_principal Boolean  @default(true)
+  creado_en    DateTime @default(now())
+
+  usuario   Usuario   @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+  impresora Impresora @relation(fields: [impresora_id], references: [id], onDelete: Cascade)
+
+  @@unique([usuario_id, impresora_id])
+  @@index([usuario_id])
+  @@index([impresora_id])
+}
+
+model TrabajoImpresion {
+  id           String    @id @default(uuid())
+  impresora_id String
+  usuario_id   String
+  tipo         String // "TICKET_TRANSPORTE", "REPORTE"
+  datos        Json
+  estado       String    @default("PENDIENTE") // PENDIENTE / ENVIADO / COMPLETADO / FALLIDO
+  error        String?
+  creado_en    DateTime  @default(now())
+  procesado_en DateTime?
+
+  impresora Impresora @relation(fields: [impresora_id], references: [id], onDelete: Cascade)
+  usuario   Usuario   @relation(fields: [usuario_id], references: [id])
+
+  @@index([impresora_id, estado])
+  @@index([estado])
+}
