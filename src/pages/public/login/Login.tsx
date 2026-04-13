@@ -1,118 +1,33 @@
-import { type FC } from "react";
-import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import { Form } from "antd";
-import { useLocation, useNavigate } from "react-router";
-
-import { InputTextC, ThemeToggleSwitch } from "@components";
-import { useAuthActions } from "@hooks/useAuthAction";
-import type { LoginFormValues } from "@interfaces/LoginTypes";
-import { useLoginMessages } from "./hooks/useLoginMessages";
-import {
-  LoginContainer,
-  LoginTitle,
-  HelpLink,
-  FooterContainer,
-  LoginForm,
-  LoginFormContainer,
-  Submit,
-  Img,
-} from "./Login.styles";
-import { LOGIN_CONSTANTS } from "./Login.constants";
 import logo from "@assets/AppLogo60px.svg";
+import { CFooter } from "@components";
+import type { FC } from "react";
+import LoginForm from "./components/LoginForm";
 
 const Login: FC = () => {
-  const { login, loading, error } = useAuthActions();
-  const {
-    showLoadingMessage,
-    showSuccessMessage,
-    showErrorMessage,
-    showHelpMessage,
-    contextHolder,
-  } = useLoginMessages();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const from =
-    (location.state as { from?: Location })?.from?.pathname ||
-    LOGIN_CONSTANTS.DEFAULT_REDIRECT;
-
-  const handleFinish = async (values: LoginFormValues) => {
-    showLoadingMessage();
-
-    const success = await login(values.username, values.password);
-
-    if (success) {
-      showSuccessMessage();
-      navigate(from, { replace: true });
-    } else {
-      showErrorMessage(error ?? undefined);
-    }
-  };
-
-  const handleHelpClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    showHelpMessage();
-  };
-
   return (
-    <>
-      {contextHolder}
-      <LoginContainer>
-        <LoginFormContainer>
-          <Img
-              src={logo}
-              alt="Poladmin Logo"
-            />
-          <LoginTitle>Poladmin</LoginTitle>
-          <LoginForm>
-            <Form
-              name="login"
-              layout="vertical"
-              initialValues={{ remember: true }}
-              onFinish={handleFinish}
-            >
-              <InputTextC
-                label="Usuario"
-                name="username"
-                rules={LOGIN_CONSTANTS.USERNAME_RULES}
-                placeholder="nombre.apellido"
-                prefix={<UserOutlined />}
-                type="text"
-              />
+    <div className="w-screen h-screen bg-bg-base flex items-center justify-center p-5">
+      <div className="w-full max-w-112.5 mx-auto">
+        {/* Logo */}
+        <img
+          src={logo}
+          alt="Poladmin Logo"
+          className="block mx-auto mb-4 h-12.5 w-auto"
+        />
 
-              <InputTextC
-                label="Contraseña"
-                name="password"
-                rules={LOGIN_CONSTANTS.PASSWORD_RULES}
-                placeholder="4111555"
-                prefix={<LockOutlined />}
-                type="password"
-              />
+        {/* Title */}
+        <h1 className="text-center text-2xl font-semibold text-text-primary mb-2">
+          Poladmin
+        </h1>
 
-              <Submit
-                block
-                type="primary"
-                htmlType="submit"
-                loading={loading}
-                disabled={loading}
-              >
-                Iniciar sesión
-              </Submit>
+        {/* Form Card */}
+        <div className="bg-bg-content p-10 rounded-2xl shadow-md w-full">
+          <LoginForm />
+        </div>
 
-              <Form.Item>
-                <HelpLink href="" onClick={handleHelpClick}>
-                  ¿Has olvidado tu contraseña?
-                </HelpLink>
-              </Form.Item>
-            </Form>
-          </LoginForm>
-          <FooterContainer>
-            Poladmin ©{new Date().getFullYear()} Created by SITEC
-          </FooterContainer>
-        </LoginFormContainer>
-      </LoginContainer>
-      <ThemeToggleSwitch />
-    </>
+        {/* Footer */}
+        <CFooter />
+      </div>
+    </div>
   );
 };
 

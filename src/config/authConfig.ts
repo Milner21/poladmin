@@ -1,1 +1,0 @@
-export const EMAIL_DOMAIN = 'sitec.com.py';

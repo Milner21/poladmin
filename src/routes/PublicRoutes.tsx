@@ -1,25 +1,15 @@
-import { useEffect } from "react";
-import { Navigate, Outlet, useLocation } from "react-router";
-import { useAuth } from "@hooks/useAuth";
-import { App } from "antd";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { storage } from "../utils/storage";
 import RoutesConfig from "./RoutesConfig";
 
-export const PublicRoutes = () => {
-  const { user, loading } = useAuth();
+export const PublicRoute = () => {
   const location = useLocation();
-  const { message } = App.useApp();
+  const token = storage.getToken();
 
-  useEffect(() => {
-    if (user) {
-      message.info("Ya estás logueado");
-    }
-  }, [user, message]);
-
-  if (loading) return null;
-
-  if (user) {
+  if (token) {
     const from =
-      (location.state as { from?: Location })?.from?.pathname || RoutesConfig.dashboard;
+      (location.state as { from?: Location })?.from?.pathname ||
+      RoutesConfig.dashboard;
     return <Navigate to={from} replace />;
   }
 

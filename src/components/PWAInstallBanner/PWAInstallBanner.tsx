@@ -1,144 +1,75 @@
-import React from 'react';
-import styled, { keyframes } from 'styled-components';
+import type { FC } from 'react';
 import { usePWAInstall } from '@hooks/usePWAInstall';
+import { X, Download } from 'lucide-react';
 
-const slideUp = keyframes`
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
-`;
-
-const BannerContainer = styled.div`
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 16px;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  animation: ${slideUp} 0.3s ease-out;
-`;
-
-const BannerContent = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 1200px;
-  margin: 0 auto;
-  gap: 16px;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    text-align: center;
-    gap: 12px;
-  }
-`;
-
-const BannerText = styled.div`
-  h3 {
-    margin: 0 0 4px 0;
-    font-size: 16px;
-    font-weight: 600;
-
-    @media (max-width: 768px) {
-      font-size: 15px;
-    }
-  }
-
-  p {
-    margin: 0;
-    font-size: 14px;
-    opacity: 0.9;
-
-    @media (max-width: 768px) {
-      font-size: 13px;
-    }
-  }
-`;
-
-const ShareIcon = styled.span`
-  font-weight: bold;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 2px 6px;
-  border-radius: 4px;
-  margin: 0 2px;
-`;
-
-const BannerActions = styled.div`
-  display: flex;
-  gap: 8px;
-  align-items: center;
-`;
-
-const InstallButton = styled.button`
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: translateY(-1px);
-  }
-`;
-
-const DismissButton = styled.button`
-  background: none;
-  border: none;
-  color: white;
-  font-size: 18px;
-  cursor: pointer;
-  padding: 4px;
-  opacity: 0.7;
-  transition: opacity 0.2s ease;
-
-  &:hover {
-    opacity: 1;
-  }
-`;
-
-const PWAInstallBanner: React.FC = () => {
+const PWAInstallBanner: FC = () => {
   const { showInstallPrompt, isIOS, installApp, dismissPrompt } = usePWAInstall();
 
   if (!showInstallPrompt) return null;
 
   return (
-    <BannerContainer>
-      <BannerContent>
-        <BannerText>
-          <h3>¡Instala nuestra app!</h3>
+    <div className="
+      fixed bottom-0 left-0 right-0 z-1000
+      bg-linear-to-r from-[#667eea] to-[#764ba2]
+      text-white px-4 py-4 shadow-lg
+      animate-in slide-in-from-bottom duration-300
+    ">
+      <div className="
+        flex items-center justify-between gap-4
+        max-w-300 mx-auto
+        flex-col sm:flex-row text-center sm:text-left
+      ">
+        {/* Text */}
+        <div>
+          <h3 className="text-base font-semibold m-0 mb-1">
+            ¡Instala nuestra app!
+          </h3>
           {isIOS ? (
-            <p>
-              Para instalar: toca <ShareIcon>⎋</ShareIcon> y luego 
-              "Agregar a pantalla de inicio"
+            <p className="text-sm opacity-90 m-0">
+              Para instalar: toca{" "}
+              <span className="font-bold bg-white/20 px-1.5 py-0.5 rounded mx-1">
+                ⎋
+              </span>
+              y luego "Agregar a pantalla de inicio"
             </p>
           ) : (
-            <p>Instala la app para una mejor experiencia</p>
+            <p className="text-sm opacity-90 m-0">
+              Instala la app para una mejor experiencia
+            </p>
           )}
-        </BannerText>
-        
-        <BannerActions>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-2">
           {!isIOS && (
-            <InstallButton onClick={installApp}>
+            <button
+              onClick={installApp}
+              className="
+                flex items-center gap-2
+                bg-white/20 hover:bg-white/30
+                border border-white/30
+                text-white text-sm font-medium
+                px-4 py-2 rounded-lg
+                transition-all hover:-translate-y-0.5
+              "
+            >
+              <Download size={16} />
               Instalar
-            </InstallButton>
+            </button>
           )}
-          <DismissButton onClick={dismissPrompt}>
-            ✕
-          </DismissButton>
-        </BannerActions>
-      </BannerContent>
-    </BannerContainer>
+
+          <button
+            onClick={dismissPrompt}
+            className="
+              text-white/70 hover:text-white
+              p-1 transition-opacity
+            "
+          >
+            <X size={20} />
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 

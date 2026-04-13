@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import { PWAInstallContext } from '@context/PWAInstallContext';
-import type { PWAInstallContextType } from '@interfaces/pwa';
+import type { PWAInstallContextType } from '@dto/pwa';
 
 export const usePWAInstall = (): PWAInstallContextType => {
   const context = useContext(PWAInstallContext);

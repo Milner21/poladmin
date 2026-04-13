@@ -1,0 +1,122 @@
+// src/pages/private/dashboard/Dashboard.tsx
+
+import {
+  CalendarOutlined,
+  CheckCircleOutlined,
+  PlusOutlined,
+  UsergroupAddOutlined,
+} from "@ant-design/icons";
+import { Alert, Button, Col, Row, Space, Spin, Typography } from "antd";
+import { useNavigate } from "react-router-dom";
+import { AsistenciasBarChart } from "./components/AsistenciasBarChart";
+import { DistribucionPieChart } from "./components/DistribucionPieChart";
+import { EventosRecientesTable } from "./components/EventosRecientesTable";
+import { SimpatizantesLineChart } from "./components/SimpatizantesLineChart";
+import { StatCard } from "./components/StatCard";
+import { useDashboard } from "./hooks/useDashboard";
+
+const { Title } = Typography;
+
+const Dashboard = () => {
+  const {
+    estadisticas,
+    simpatizantesEvolucionDiaria,
+    asistenciasPorEvento,
+    distribucionRed,
+    eventosRecientes,
+    isLoading,
+    isError,
+    refetch,
+  } = useDashboard();
+
+  const navigate = useNavigate();
+
+  if (isLoading)
+    return (
+      <Spin
+        tip="Cargando dashboard..."
+        style={{ width: "100%", marginTop: 100 }}
+      />
+    );
+  if (isError)
+    return (
+      <Alert
+        message="Error al cargar datos"
+        type="error"
+        showIcon
+        action={<Button onClick={refetch}>Reintentar</Button>}
+      />
+    );
+
+  return (
+    <Space direction="vertical" size="large" style={{ width: "100%" }}>
+      <Title level={2}>Overview</Title>
+
+      <Button
+        type="primary"
+        icon={<PlusOutlined />}
+        onClick={() => navigate("/admin/eventos/nuevo")}
+      >
+        Nuevo Evento
+      </Button>
+
+      <Row gutter={[16, 16]}>
+        <Col xs={24} sm={12} md={6}>
+          <StatCard
+            title="Simpatizantes"
+            value={estadisticas?.total_simpatizantes ?? 0}
+            cambio={estadisticas?.total_simpatizantes_cambio ?? 0}
+            icon={<UsergroupAddOutlined />}
+          />
+        </Col>
+        <Col xs={24} sm={12} md={6}>
+          <StatCard
+            title="Eventos"
+            value={estadisticas?.total_eventos ?? 0}
+            cambio={estadisticas?.total_eventos_cambio ?? 0}
+            icon={<CalendarOutlined />}
+          />
+        </Col>
+        <Col xs={24} sm={12} md={6}>
+          <StatCard
+            title="Asistencias"
+            value={estadisticas?.total_asistencias ?? 0}
+            cambio={estadisticas?.total_asistencias_cambio ?? 0}
+            icon={<CheckCircleOutlined />}
+          />
+        </Col>
+        <Col xs={24} sm={12} md={6}>
+          <StatCard
+            title="Mi Red"
+            value={estadisticas?.total_mi_red ?? 0}
+            cambio={estadisticas?.total_mi_red_cambio ?? 0}
+            icon={<UsergroupAddOutlined />}
+          />
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]}>
+        <Col xs={24} md={12}>
+          <Title level={4}>Evolución de simpatizantes</Title>
+          <SimpatizantesLineChart data={simpatizantesEvolucionDiaria ?? []} />
+        </Col>
+        <Col xs={24} md={12}>
+          <Title level={4}>Asistencias por evento</Title>
+          <AsistenciasBarChart data={asistenciasPorEvento ?? []} />
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]}>
+        <Col xs={24} md={12}>
+          <Title level={4}>Distribución de mi red</Title>
+          <DistribucionPieChart data={distribucionRed ?? []} />
+        </Col>
+        <Col xs={24} md={12}>
+          <Title level={4}>Eventos recientes</Title>
+          <EventosRecientesTable data={eventosRecientes ?? []} />
+        </Col>
+      </Row>
+    </Space>
+  );
+};
+export default Dashboard;

@@ -1,5 +1,4 @@
-import type { Rule } from "antd/es/form";
-import type { ReactNode } from "react";
+import type { ChangeEvent, ReactNode } from "react";
 
 export interface InputTextCProps {
   label: string;
@@ -7,14 +6,13 @@ export interface InputTextCProps {
   placeholder?: string;
   prefix?: ReactNode;
   type?: "text" | "password" | "email" | "number" | "tel" | "url";
-  rules?: Rule[];
   required?: boolean;
-  requiredMessage?: string;
   disabled?: boolean;
   maxLength?: number;
   showCount?: boolean;
   allowClear?: boolean;
   size?: "small" | "middle" | "large";
+  value?: string;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  error?: string;
 }
-
-export type InputType = InputTextCProps["type"];

@@ -1,4 +1,11 @@
-export { default as Loading } from './loading';
-export { default as InputTextC } from './inputTextC';
-export { default as ThemeToggleSwitch } from './themeToggleButton';
-export { default as PWAInstallBanner } from './PWAInstallBanner';
+export { default as Loading } from "./loading";
+export { default as InputTextC } from "./inputTextC";
+export { default as ThemeToggleSwitch } from "./themeToggleButton";
+export { default as PWAInstallBanner } from "./PWAInstallBanner";
+export { default as CThemeButton } from "./CThemeButton";
+export { default as SMenuSidebar } from "./CMenuSidebar";
+export { default as CFooter } from "./footer";
+export { default as ErrorBoundary } from "./errorBoundary";
+export { CTable } from "./CTable";
+export { PageHeader } from "./CPageHeader";
+export { ProtectedAction } from "./ProtectedAction";

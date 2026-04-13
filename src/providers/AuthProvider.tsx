@@ -1,39 +1,104 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../api/supabaseClient';
-import { AuthContext } from '@context/AuthContext';
-import type { AuthContextType } from '@interfaces/AuthContextType';
+import { useEffect, useState, type JSX, type ReactNode } from "react";
+import { AuthContext } from "@context/AuthContext";
+import { type Usuario } from "@dto/auth.types";
+import { storage } from "@utils/storage";
 
+interface AuthProviderProps {
+  children: ReactNode;
+}
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  // Estado para almacenar el usuario autenticado o null si no hay sesión
-  const [user, setUser] = useState<AuthContextType['user']>(null);
-  // Estado para controlar si la carga de la sesión está en proceso
-  const [loading, setLoading] = useState(true);
+export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
+  const [authState, setAuthState] = useState<{
+    usuario: Usuario | null;
+    accessToken: string | null;
+    refreshToken: string | null;
+    estaAutenticado: boolean;
+    cargando: boolean;
+  }>(() => {
+    // Usar storage en lugar de localStorage directamente
+    const usuarioGuardado = storage.getUser();
+    const accessTokenGuardado = storage.getToken();
+
+    if (usuarioGuardado && accessTokenGuardado) {
+      return {
+        usuario: usuarioGuardado,
+        accessToken: accessTokenGuardado,
+        refreshToken: null,
+        estaAutenticado: true,
+        cargando: false,
+      };
+    }
+
+    return {
+      usuario: null,
+      accessToken: null,
+      refreshToken: null,
+      estaAutenticado: false,
+      cargando: true,
+    };
+  });
 
   useEffect(() => {
-    // Al montar el componente, obtener la sesión actual de Supabase
-    supabase.auth.getSession().then(({ data }) => {
-      // Actualizar el estado con el usuario si existe sesión, o null si no
-      setUser(data.session?.user ?? null);
-      // Cambiar loading a false porque ya se obtuvo la sesión
-      setLoading(false);
-    });
-
-    // Suscribirse a los cambios en el estado de autenticación (login, logout, refresh)
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      // Actualizar el estado del usuario según la nueva sesión
-      setUser(session?.user ?? null);
-    });
-
-    // Cleanup: al desmontar el componente, cancelar la suscripción para evitar fugas de memoria
-    return () => {
-      listener.subscription.unsubscribe();
-    };
+    setAuthState((prev) => ({ ...prev, cargando: false }));
   }, []);
 
-  // Proveer el contexto con el usuario y el estado de carga a todos los hijos
+  const iniciarSesion = (data: {
+    usuario: Usuario;
+    access_token: string;
+    refresh_token?: string; // <-- Hacer opcional
+  }) => {
+    const { usuario, access_token, refresh_token } = data;
+
+    // Usar storage en lugar de localStorage directamente
+    storage.setUser(usuario);
+    storage.setToken(access_token);
+    
+    // Guardar refresh_token si viene (está en cookie, pero por si acaso)
+    if (refresh_token) {
+      storage.setRefreshToken(refresh_token);
+    }
+
+    setAuthState({
+      usuario,
+      accessToken: access_token,
+      refreshToken: refresh_token || null,
+      estaAutenticado: true,
+      cargando: false,
+    });
+  };
+
+  const cerrarSesion = () => {
+    // Usar storage.clearAuth() que limpia todo
+    storage.clearAuth();
+
+    setAuthState({
+      usuario: null,
+      accessToken: null,
+      refreshToken: null,
+      estaAutenticado: false,
+      cargando: false,
+    });
+  };
+
+  const actualizarToken = (nuevoAccessToken: string) => {
+    setAuthState((prev) => {
+      storage.setToken(nuevoAccessToken);
+      return {
+        ...prev,
+        accessToken: nuevoAccessToken,
+      };
+    });
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider
+      value={{
+        ...authState,
+        iniciarSesion,
+        cerrarSesion,
+        actualizarToken,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

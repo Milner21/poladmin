@@ -8,17 +8,19 @@
     "baseUrl": "./src",
     "paths": {
       "@assets/*": ["assets/*"],
-      "@interfaces/*": ["types/*"],
+      "@dto/*": ["types/*"],
       "@components": ["components/index.ts"],
       "@components/*": ["components/*"],
       "@hooks/*": ["hooks/*"],
       "@utils/*": ["utils/*"],
+      "@routes/*": ["routes/*"],
       "@pages/*": ["pages/*"],
       "@pages": ["pages/index.ts"],
       "@context/*": ["context/*"],
       "@data/*": ["data/*"],
       "@services/*": ["services/*"],
-      "@themes/*": ["themes/*"]
+      "@themes/*": ["themes/*"],
+      "@api/*": ["api/*"]
     }
   }
 }

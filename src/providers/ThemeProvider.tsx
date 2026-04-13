@@ -1,44 +1,28 @@
-import { useState, type FC, type ReactNode } from "react";
-import { App, ConfigProvider, theme as antdTheme } from "antd";
-import ThemeContext, { type ThemeContextType } from "../context/ThemeContext";
-import { THEME_COLORS } from "../themes/color";
+import { useEffect, useState, type ReactNode } from 'react';
+import { ThemeContext } from '@context/ThemeContext';
 
 interface ThemeProviderProps {
   children: ReactNode;
 }
 
-const ThemeProvider: FC<ThemeProviderProps> = ({ children }) => {
-  const [darkMode, setDarkMode] = useState(false);
-  const toggleDarkMode = () => setDarkMode((prev) => !prev);
+export const ThemeProvider = ({ children }: ThemeProviderProps) => {
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    const saved = localStorage.getItem('darkMode');
+    return saved ? JSON.parse(saved) : false;
+  });
 
-  const themeConfig = darkMode
-    ? antdTheme.darkAlgorithm
-    : antdTheme.defaultAlgorithm;
+  useEffect(() => {
+    localStorage.setItem('darkMode', JSON.stringify(darkMode));
+    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
 
-  const contextValue: ThemeContextType = {
-    darkMode,
-    toggleDarkMode,
+  const toggleTheme = () => {
+    setDarkMode(prev => !prev);
   };
 
   return (
-    <ThemeContext.Provider value={contextValue}>
-      <ConfigProvider
-        theme={{
-          algorithm: themeConfig,
-          token: {
-            colorPrimary: darkMode
-              ? THEME_COLORS.dark.primary
-              : THEME_COLORS.light.primary,
-            colorBgBase: darkMode
-              ? THEME_COLORS.dark.backgoundBase
-              : THEME_COLORS.light.backgroundContent,
-          },
-        }}
-      >
-        <App>{children}</App>
-      </ConfigProvider>
+    <ThemeContext.Provider value={{ darkMode, toggleTheme }}>
+      {children}
     </ThemeContext.Provider>
   );
 };
-
-export default ThemeProvider;

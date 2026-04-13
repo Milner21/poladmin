@@ -1,17 +1,11 @@
-import { createContext} from 'react';
+import { createContext } from 'react';
 
-export type ThemeContextType = {
+interface ThemeContextType {
   darkMode: boolean;
-  toggleDarkMode: () => void;
-};
+  toggleTheme: () => void;
+}
 
-const ThemeContext = createContext<ThemeContextType>({
+export const ThemeContext = createContext<ThemeContextType>({
   darkMode: false,
-  toggleDarkMode: () => {
-    if (process.env.NODE_ENV !== "production") {
-      console.warn("toggleDarkMode llamado sin ThemeProvider");
-    }
-  },
+  toggleTheme: () => {},
 });
-
-export default ThemeContext;
