@@ -1,6 +1,6 @@
 {
-  "name": "Poliadmin - Gestión Política",
-  "short_name": "Poliadmin",
+  "name": "Poladmin - Gestión Política",
+  "short_name": "Poladmin",
   "description": "Aplicación para gestión y administración política eficiente",
   "start_url": "/",
   "display": "standalone",
@@ -10,6 +10,7 @@
   "scope": "/",
   "lang": "es-ES",
   "dir": "ltr",
+  "version": "1.1.0",
   
   "icons": [
     {
