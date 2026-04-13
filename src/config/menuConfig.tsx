@@ -44,6 +44,27 @@ export const menuConfig: MenuItemConfig[] = [
   // ADMINISTRACIÓN (Solo ROOT)
   // ==========================================
   {
+    key: "permisos",
+    icon: <Shield size={18} />,
+    label: "Permisos",
+    path: RoutesConfig.permisos,
+    modulo: "permisos",
+  },
+  {
+    key: "niveles",
+    icon: <Layers size={18} />,
+    label: "Niveles",
+    path: RoutesConfig.niveles,
+    modulo: "niveles",
+  },
+  {
+    key: "perfiles",
+    icon: <UsersRound size={18} />,
+    label: "Perfiles",
+    path: RoutesConfig.perfiles,
+    modulo: "perfiles",
+  },
+  {
     key: "partidos",
     icon: <Flag size={18} />,
     label: "Partidos",
@@ -64,34 +85,6 @@ export const menuConfig: MenuItemConfig[] = [
     path: RoutesConfig.configuracion,
     modulo: "campanas",
   },
-  {
-    key: "niveles",
-    icon: <Layers size={18} />,
-    label: "Niveles",
-    path: RoutesConfig.niveles,
-    modulo: "niveles",
-  },
-  {
-    key: "permisos",
-    icon: <Shield size={18} />,
-    label: "Permisos",
-    path: RoutesConfig.permisos,
-    modulo: "permisos",
-  },
-  {
-    key: "perfiles",
-    icon: <UsersRound size={18} />,
-    label: "Perfiles",
-    path: RoutesConfig.perfiles,
-    modulo: "perfiles",
-  },
-  {
-    key: "usuarios",
-    icon: <Users size={18} />,
-    label: "Usuarios",
-    path: RoutesConfig.usuarios,
-    modulo: "usuarios",
-  },
 
   // ==========================================
   // PADRÓN
@@ -103,6 +96,19 @@ export const menuConfig: MenuItemConfig[] = [
     path: RoutesConfig.padronCargar,
     modulo: "padron",
   },
+
+  // ==========================================
+  // USUARIOS
+  // ==========================================
+  {
+    key: "usuarios",
+    icon: <Users size={18} />,
+    label: "Usuarios",
+    path: RoutesConfig.usuarios,
+    modulo: "usuarios",
+  },
+
+  
   // ==========================================
   // SIMPATIZANTES
   // ==========================================
