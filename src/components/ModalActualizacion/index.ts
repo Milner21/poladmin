@@ -1,0 +1,1 @@
+export { ModalActualizacion } from "./ModalActualizacion";

@@ -9,3 +9,4 @@ export { default as ErrorBoundary } from "./errorBoundary";
 export { CTable } from "./CTable";
 export { PageHeader } from "./CPageHeader";
 export { ProtectedAction } from "./ProtectedAction";
+export { ModalActualizacion } from "./ModalActualizacion";
