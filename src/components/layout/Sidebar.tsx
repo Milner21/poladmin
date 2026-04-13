@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import type { MenuItem } from "../../types/layout.types";
 import { usePermisos } from "@hooks/usePermisos";
 import { menuConfig, type MenuItemConfig } from "../../config/menuConfig";
+import { useVersion } from "@hooks/useVersion";
 
 const SIDEBAR_WIDTH = 250;
 
@@ -20,18 +21,25 @@ export const Sidebar = ({
   const navigate = useNavigate();
   const location = useLocation();
   const { puedeVer, tienePermiso } = usePermisos();
+  const version = useVersion();
 
   // Filtrar items según permisos
   const menuItems: MenuItem[] = menuConfig.filter((item) => {
     const itemConfig = item as MenuItemConfig;
 
     // 1. Validar permiso de módulo general
-    if (itemConfig.modulo && !puedeVer(itemConfig.modulo as Parameters<typeof puedeVer>[0])) {
+    if (
+      itemConfig.modulo &&
+      !puedeVer(itemConfig.modulo as Parameters<typeof puedeVer>[0])
+    ) {
       return false;
     }
 
     // 2. Validar permiso específico (si existe)
-    if (itemConfig.permisoEspecifico && !tienePermiso(itemConfig.permisoEspecifico)) {
+    if (
+      itemConfig.permisoEspecifico &&
+      !tienePermiso(itemConfig.permisoEspecifico)
+    ) {
       return false;
     }
 
@@ -50,25 +58,34 @@ export const Sidebar = ({
     "dashboard";
 
   const menuContent = (
-    <>
+    <div className="flex flex-col h-full">
       {/* Logo Header */}
-      <div className="h-16 flex items-center justify-center gap-2 border-b border-border">
-        <div
-          className="bg-white flex items-center p-1.5"
-          style={{ clipPath: "polygon(0 50%, 50% 0, 100% 50%, 50% 100%)" }}
-        >
-          <img src={logo} alt="Poladmin" width={25} />
+      <div className="border-b border-border text-center shrink-0 bg-bg-sidebar">
+        <div className="pt-4 h-12 flex items-center justify-center gap-2">
+          <div
+            className="bg-white flex items-center p-1.5"
+            style={{ clipPath: "polygon(0 50%, 50% 0, 100% 50%, 50% 100%)" }}
+          >
+            <img src={logo} alt="Poladmin" width={25} />
+          </div>
+          <h2 className="text-white text-xl font-semibold m-0">Poladmin</h2>
         </div>
-        <h2 className="text-white text-xl font-semibold m-0">Poladmin</h2>
+        {version && (
+          <span className="text-xs text-text-tertiary pb-2 block">
+            v{version}
+          </span>
+        )}
       </div>
 
-      {/* Menu */}
-      <CMenuSidebar
-        selectedKey={selectedKey}
-        menuItems={menuItems}
-        onMenuClick={handleMenuClick}
-      />
-    </>
+      {/* Menu scrolleable */}
+      <div className="flex-1 overflow-y-auto">
+        <CMenuSidebar
+          selectedKey={selectedKey}
+          menuItems={menuItems}
+          onMenuClick={handleMenuClick}
+        />
+      </div>
+    </div>
   );
 
   if (isMobile) {
