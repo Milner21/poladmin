@@ -35,6 +35,7 @@ export interface ResultadoCargaPadron {
   tipo: TipoPadron;
   total_filas: number;
   insertados: number;
+  omitidos: number;
   actualizados: number;
   errores_count: number;
   errores: { fila: number; motivo: string }[];

@@ -1,7 +1,7 @@
 import type { ColumnDef } from '@components/CTable/CTable.types';
 import type { Usuario } from '@dto/usuario.types';
 
-export const getUsuariosColumns = (): ColumnDef<Usuario>[] => [
+export const getUsuariosColumns = (perfilesUnicos: string[]): ColumnDef<Usuario>[] => [
   {
     key: 'nro',
     title: 'Nro',
@@ -35,13 +35,7 @@ export const getUsuariosColumns = (): ColumnDef<Usuario>[] => [
     key: 'perfil',
     title: 'Perfil',
     filterable: true,
-    filters: [
-      { text: 'ROOT', value: 'ROOT' },
-      { text: 'INTENDENTE', value: 'INTENDENTE' },
-      { text: 'CONCEJAL', value: 'CONCEJAL' },
-      { text: 'GESTOR', value: 'GESTOR' },
-      { text: 'LIDER', value: 'LIDER' },
-    ],
+    filters: perfilesUnicos.map(perfil => ({ text: perfil, value: perfil })),
     onFilter: (value: string, record: Usuario) => record.perfil.nombre === value,
     render: (record: Usuario) => (
       <span className="inline-block px-2 py-0.5 rounded text-white text-xs bg-info">

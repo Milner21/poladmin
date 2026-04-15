@@ -75,7 +75,7 @@ const CrearUsuario: FC = () => {
   );
 
   // Hooks de datos
-  const { esRoot, esOperativo, getNivelOrden, obtenerTodosLosPermisos } =
+  const { esRoot,  getNivelOrden, obtenerTodosLosPermisos } =
     usePermisos();
   const { data: perfiles } = usePerfiles();
   const { campanaSeleccionada } = useCampanaSeleccionada();
@@ -96,6 +96,14 @@ const CrearUsuario: FC = () => {
   const perfilesConDisponibilidad = useMemo(() => {
     if (!perfiles) return [];
     const nivelActual = getNivelOrden();
+    const todosLosPermisos = obtenerTodosLosPermisos();
+
+    const tienePermisoCrearPolitico = todosLosPermisos.includes(
+      "crear_usuario_politico",
+    );
+    const tienePermisoCrearOperativo = todosLosPermisos.includes(
+      "crear_usuario_operativo",
+    );
 
     return perfiles.map((perfil) => {
       let disponible = false;
@@ -103,10 +111,8 @@ const CrearUsuario: FC = () => {
 
       // Si estamos en la tab "Operativo"
       if (tipoUsuario === "operativo") {
-        if (esOperativo) {
-          razon = "Los operativos no pueden crear otros operativos";
-        } else if (nivelActual === 3) {
-          razon = "Los líderes no pueden crear operativos";
+        if (!tienePermisoCrearOperativo) {
+          razon = "No tenés permiso para crear usuarios operativos";
         } else if (!perfil.es_operativo) {
           razon = "Este perfil es político, no operativo";
         } else {
@@ -120,24 +126,36 @@ const CrearUsuario: FC = () => {
           razon = "Este perfil es operativo, no político";
         } else if (esRoot && perfil.nombre === "ROOT") {
           razon = "No se puede crear otro ROOT";
-        } else if (esOperativo) {
-          razon = "Los operativos no pueden crear políticos";
-        } else if (nivelActual === 3) {
-          razon = "Los líderes no pueden crear otros usuarios";
+        } else if (!tienePermisoCrearPolitico) {
+          razon = "No tenés permiso para crear usuarios políticos";
         } else if (!esRoot && perfil.nivel?.exclusivo_root) {
           razon = "Solo ROOT puede crear este nivel (facturable)";
         } else if (!perfil.nivel) {
           razon = "Perfil sin nivel asignado";
-        } else if (perfil.nivel.orden <= nivelActual) {
-          razon = "Solo podés crear usuarios de nivel inferior";
         } else {
-          disponible = true;
+          // Validación jerárquica: el perfil debe ser de nivel INFERIOR
+          // Si soy ROOT, cualquier nivel es válido
+          // Si soy político, comparo mi nivel
+          // Si soy operativo con permiso, comparo el nivel de mi candidato superior
+
+          if (esRoot) {
+            disponible = true;
+          } else {
+            // Determinar el nivel de referencia para comparar
+            const nivelReferencia = nivelActual;
+
+            if (perfil.nivel.orden <= nivelReferencia) {
+              razon = "Solo podés crear usuarios de nivel inferior";
+            } else {
+              disponible = true;
+            }
+          }
         }
       }
 
       return { ...perfil, disponible, razon };
     });
-  }, [perfiles, tipoUsuario, esRoot, esOperativo, getNivelOrden]);
+  }, [perfiles, tipoUsuario, esRoot, getNivelOrden, obtenerTodosLosPermisos]);
 
   const perfilesFiltrados = perfilesConDisponibilidad.filter(
     (p) => p.disponible,

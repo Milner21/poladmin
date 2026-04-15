@@ -4,7 +4,7 @@ import { useAuth } from "@hooks/useAuth";
 import { useCampanaSeleccionada } from "@hooks/useCampanaSeleccionada";
 import RoutesConfig from "@routes/RoutesConfig";
 import { Trash2, UserCheck, UserPlus, UserX, X } from "lucide-react";
-import { useState, type FC } from "react";
+import { useMemo, useState, type FC } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUsuariosColumns } from "./components/usuariosColumns";
 import { useActualizarUsuario } from "./hooks/useActualizarUsuario";
@@ -59,7 +59,19 @@ const Usuarios: FC = () => {
     });
   };
 
-  const columns = getUsuariosColumns();
+  // Extraer perfiles únicos de los usuarios cargados
+  const perfilesUnicos = useMemo(() => {
+    if (!usuarios || usuarios.length === 0) return [];
+
+    const perfilesSet = new Set<string>();
+    usuarios.forEach((usuario) => {
+      perfilesSet.add(usuario.perfil.nombre);
+    });
+
+    return Array.from(perfilesSet).sort();
+  }, [usuarios]);
+
+  const columns = getUsuariosColumns(perfilesUnicos);
 
   return (
     <div className="py-4 px-6">

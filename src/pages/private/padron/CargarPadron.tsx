@@ -458,9 +458,9 @@ const CargarPadron: FC = () => {
               </div>
               <div className="text-center p-4 bg-accent/10 rounded-lg">
                 <p className="text-2xl font-bold text-accent">
-                  {resultado.actualizados}
+                  {resultado.omitidos}
                 </p>
-                <p className="text-sm text-text-secondary">Actualizados</p>
+                <p className="text-sm text-text-secondary">Ya existian</p>
               </div>
               <div className="text-center p-4 bg-error/10 rounded-lg">
                 <p className="text-2xl font-bold text-error">
