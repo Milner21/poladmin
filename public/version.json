@@ -1,10 +1,7 @@
 {
-  "version": "1.2.1",
-  "fecha": "2026-04-13",
+  "version": "1.2.2",
+  "fecha": "2026-04-15",
   "cambios": [
-    "Nuevas estadísticas en el dashboard",
-    "Filtrado de padrón por partido y distrito",
-    "Registro de simpatizantes en red jerárquica",
-    "Mejoras de permisos y seguridad"
+    "Arreglo de permisos de usuario para acceder a ciertas funciones."
   ]
 }
