@@ -30,6 +30,7 @@ interface UsuarioFormProps {
   errors: FormErrors;
   isPending: boolean;
   isEditing?: boolean;
+  puedeEditarUsername?: boolean;
   perfiles: Perfil[];
   tipoUsuario: "politico" | "operativo";
   onChangeTipoUsuario?: (tipo: "politico" | "operativo") => void;
@@ -47,6 +48,7 @@ export const UsuarioForm: FC<UsuarioFormProps> = ({
   errors,
   isPending,
   isEditing = false,
+  puedeEditarUsername,
   perfiles,
   tipoUsuario,
   onChangeTipoUsuario,
@@ -341,6 +343,71 @@ export const UsuarioForm: FC<UsuarioFormProps> = ({
           </div>
         )}
       </div>
+
+      {/* Username manual - solo si el perfil lo requiere y es creacion */}
+      {!isEditing && usernameEsManual && (
+        <div>
+          <label className="block text-sm font-medium text-text-primary mb-1">
+            Usuario <span className="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            value={values.username}
+            onChange={(e) => onChange("username", e.target.value)}
+            className={`
+                w-full px-4 py-2 rounded-lg border bg-bg-content
+                text-text-primary placeholder:text-text-tertiary
+                focus:outline-none focus:ring-2 focus:ring-primary
+                transition-all
+                ${errors.username ? "border-danger ring-2 ring-danger/20" : "border-border"}
+              `}
+          />
+          {errors.username && (
+            <p className="text-danger text-xs mt-1">{errors.username}</p>
+          )}
+        </div>
+      )}
+
+      {/* Username en edición - solo si tiene permiso */}
+      {isEditing && (
+        <div>
+          <label className="block text-sm font-medium text-text-primary mb-1">
+            Usuario
+            {!puedeEditarUsername && (
+              <span className="text-text-tertiary text-xs ml-1">
+                (solo lectura)
+              </span>
+            )}
+          </label>
+          <input
+            type="text"
+            value={values.username}
+            onChange={(e) => onChange("username", e.target.value)}
+            disabled={!puedeEditarUsername}
+            className={`
+                w-full px-4 py-2 rounded-lg border bg-bg-content
+                text-text-primary placeholder:text-text-tertiary
+                focus:outline-none focus:ring-2 focus:ring-primary
+                transition-all
+                ${!puedeEditarUsername ? "opacity-50 cursor-not-allowed" : ""}
+                ${errors.username ? "border-danger ring-2 ring-danger/20" : "border-border"}
+              `}
+          />
+          {!puedeEditarUsername && (
+            <p className="text-text-tertiary text-xs mt-1">
+              No tenés permiso para editar el username
+            </p>
+          )}
+          {puedeEditarUsername && (
+            <p className="text-text-tertiary text-xs mt-1">
+              Se aplicará normalización automática (sin acentos, minúsculas)
+            </p>
+          )}
+          {errors.username && (
+            <p className="text-danger text-xs mt-1">{errors.username}</p>
+          )}
+        </div>
+      )}
 
       {/* Permisos Dinamicos (SOLO SI ES OPERATIVO) */}
       {tipoUsuario === "operativo" && onTogglePermiso && (

@@ -90,6 +90,7 @@ export interface CreateUsuarioDto {
 export interface UpdateUsuarioDto {
   nombre?: string;
   apellido?: string;
+  username?: string;
   documento?: string;
   telefono?: string;
   perfil_id?: string;

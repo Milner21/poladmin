@@ -33,6 +33,17 @@ export const usuariosService = {
     await axiosInstance.delete(`/usuarios/${id}`);
   },
 
+  cambiarPassword: async (
+    id: string,
+    data: { password_nuevo: string; password_actual?: string },
+  ): Promise<{ mensaje: string }> => {
+    const response = await axiosInstance.post(
+      `/usuarios/${id}/cambiar-password`,
+      data,
+    );
+    return response.data;
+  },
+
   getCandidatosSuperiores: async (
     campanaId: string,
     nivelOrden: number,

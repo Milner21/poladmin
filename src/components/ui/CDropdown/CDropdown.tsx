@@ -65,7 +65,7 @@ export const CDropdown: FC<CDropdownProps> = ({
           className={`
             absolute ${placementClasses[placement]}
             bg-bg-content border border-border rounded-lg shadow-lg
-            min-w-[180px] py-1 z-50
+            min-w-45 py-1 z-50
             animate-in fade-in-0 zoom-in-95 duration-200
           `}
         >

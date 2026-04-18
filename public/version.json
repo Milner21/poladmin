@@ -1,7 +1,9 @@
 {
-  "version": "1.2.2",
+  "version": "1.2.3",
   "fecha": "2026-04-15",
   "cambios": [
-    "Arreglo de permisos de usuario para acceder a ciertas funciones."
+    "mejoras en modulo usuarios",
+    "mejoras en modulo simpatizantes",
+    "correccion de errores en crear usuarios"
   ]
 }

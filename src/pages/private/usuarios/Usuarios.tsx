@@ -3,23 +3,27 @@ import type { Usuario } from "@dto/usuario.types";
 import { useAuth } from "@hooks/useAuth";
 import { useCampanaSeleccionada } from "@hooks/useCampanaSeleccionada";
 import RoutesConfig from "@routes/RoutesConfig";
-import { Trash2, UserCheck, UserPlus, UserX, X } from "lucide-react";
+import { Trash2, UserCheck, UserPlus, UserX, X, KeyRound } from "lucide-react";
 import { useMemo, useState, type FC } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUsuariosColumns } from "./components/usuariosColumns";
+import { CambiarPasswordModal } from "./components/CambiarPasswordModal";
 import { useActualizarUsuario } from "./hooks/useActualizarUsuario";
 import { useEliminarUsuario } from "./hooks/useEliminarUsuario";
+import { useCambiarPassword } from "./hooks/useCambiarPassword";
 import { useUsuarios } from "./hooks/useUsuarios";
 
 const Usuarios: FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUsuario, setSelectedUsuario] = useState<Usuario | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalPasswordVisible, setModalPasswordVisible] = useState(false);
   const [confirmarEliminar, setConfirmarEliminar] = useState(false);
   const navigate = useNavigate();
   const { usuario } = useAuth();
   const actualizarMutation = useActualizarUsuario();
   const eliminarMutation = useEliminarUsuario();
+  const cambiarPasswordMutation = useCambiarPassword();
   const { campanaActual, esRoot } = useCampanaSeleccionada();
 
   const { data: usuarios, isLoading } = useUsuarios(
@@ -35,6 +39,14 @@ const Usuarios: FC = () => {
     setModalVisible(false);
     setSelectedUsuario(null);
     setConfirmarEliminar(false);
+  };
+
+  const handleCerrarModalPassword = () => {
+    setModalPasswordVisible(false);
+  };
+
+  const handleAbrirModalPassword = () => {
+    setModalPasswordVisible(true);
   };
 
   const handleEditar = () => {
@@ -58,6 +70,83 @@ const Usuarios: FC = () => {
       onSuccess: handleCerrarModal,
     });
   };
+
+  const handleCambiarPassword = (
+    passwordNuevo: string,
+    passwordActual?: string,
+  ) => {
+    if (!selectedUsuario) return;
+
+    cambiarPasswordMutation.mutate(
+      {
+        id: selectedUsuario.id,
+        password_nuevo: passwordNuevo,
+        password_actual: passwordActual,
+      },
+      {
+        onSuccess: () => {
+          handleCerrarModalPassword();
+          handleCerrarModal();
+        },
+      },
+    );
+  };
+
+  // Determinar si el usuario actual puede cambiar contraseñas de otros
+  // Determinar si el usuario actual puede cambiar contraseñas de otros
+  const puedeEditarPassword = useMemo(() => {
+    if (!usuario) {
+      console.log("🔍 DEBUG puedeEditarPassword: No hay usuario");
+      return false;
+    }
+
+    console.log("🔍 DEBUG puedeEditarPassword - Usuario:", {
+      nombre: usuario.nombre,
+      perfil: usuario.perfil?.nombre,
+      permisosPerfil:
+        usuario.perfil?.permisos?.map((p) => p.permiso.nombre) || [],
+      permisosPersonalizados:
+        usuario.permisos_personalizados?.map((p) => p.permiso.nombre) || [],
+    });
+
+    if (usuario.perfil?.nombre === "ROOT") {
+      console.log("🔍 DEBUG puedeEditarPassword: Es ROOT - TRUE");
+      return true;
+    }
+
+    // Verificar si tiene el permiso específico
+    const todosLosPermisos = [
+      ...(usuario.perfil?.permisos?.map((p) => p.permiso.nombre) || []),
+      ...(usuario.permisos_personalizados?.map((p) => p.permiso.nombre) || []),
+    ];
+
+    console.log(
+      "🔍 DEBUG puedeEditarPassword - Todos los permisos:",
+      todosLosPermisos,
+    );
+
+    const tienePermiso = todosLosPermisos.includes("cambiar_password_usuario");
+    console.log(
+      "🔍 DEBUG puedeEditarPassword - Tiene permiso cambiar_password_usuario:",
+      tienePermiso,
+    );
+
+    return tienePermiso;
+  }, [usuario]);
+
+  // Determinar si requiere contraseña actual
+  const requierePasswordActual = useMemo(() => {
+    if (!selectedUsuario || !usuario) return true;
+
+    // ROOT nunca requiere contraseña actual
+    if (usuario.perfil?.nombre === "ROOT") return false;
+
+    // Si tiene permiso para cambiar contraseñas, no requiere la actual
+    if (puedeEditarPassword) return false;
+
+    // Si es su propia contraseña, sí requiere la actual
+    return selectedUsuario.id === usuario.id;
+  }, [selectedUsuario, usuario, puedeEditarPassword]);
 
   // Extraer perfiles únicos de los usuarios cargados
   const perfilesUnicos = useMemo(() => {
@@ -264,6 +353,23 @@ const Usuarios: FC = () => {
 
               {/* Acciones principales */}
               <div className="flex gap-2">
+                {/* Cambiar Contraseña - Solo si tiene permiso o es ROOT */}
+                {(puedeEditarPassword || selectedUsuario.id === usuario?.id) &&
+                  (usuario?.perfil?.nombre === "ROOT" ||
+                    !selectedUsuario.perfil.nivel?.exclusivo_root) && (
+                    <button
+                      onClick={handleAbrirModalPassword}
+                      className="
+            flex items-center gap-2 px-3 py-2 text-sm rounded-lg
+            bg-warning/10 hover:bg-warning/20 text-warning border border-warning/30
+            transition-colors font-medium
+          "
+                    >
+                      <KeyRound size={15} />
+                      Cambiar Contraseña
+                    </button>
+                  )}
+
                 {/* Activar / Desactivar - Solo ROOT o NO exclusivo_root */}
                 {(usuario?.perfil?.nombre === "ROOT" ||
                   !selectedUsuario.perfil.nivel?.exclusivo_root) && (
@@ -314,6 +420,23 @@ const Usuarios: FC = () => {
             </div>
           </div>
         </>
+      )}
+
+      {/* Modal Cambiar Contraseña */}
+      {modalPasswordVisible && selectedUsuario && (
+        <CambiarPasswordModal
+          visible={modalPasswordVisible}
+          usuario={{
+            id: selectedUsuario.id,
+            nombre: selectedUsuario.nombre,
+            apellido: selectedUsuario.apellido,
+            documento: selectedUsuario.documento,
+          }}
+          onClose={handleCerrarModalPassword}
+          onConfirm={handleCambiarPassword}
+          isPending={cambiarPasswordMutation.isPending}
+          requierePasswordActual={requierePasswordActual}
+        />
       )}
     </div>
   );
