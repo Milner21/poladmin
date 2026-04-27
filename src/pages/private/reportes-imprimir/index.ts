@@ -1,0 +1,1 @@
+export { default as ReportesImprimirPage } from './ReportesImprimirPage';

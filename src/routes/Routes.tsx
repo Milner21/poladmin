@@ -52,6 +52,8 @@ import SimpatizantesDeUsuarioPage from "@pages/private/simpatizantes/red/Simpati
 import SeguimientoSimpatizantesPage from "@pages/private/simpatizantes/seguimiento/SeguimientoSimpatizantesPage";
 import DuplicadosSimpatizantesPage from "@pages/private/simpatizantes/duplicados/DuplicadosSimpatizantesPage";
 import PadronDetallePage from "@pages/private/padron/PadronDetallePage";
+import { ReportesImprimirPage } from "@pages/private/reportes-imprimir";
+import LocalesVotacionPage from "@pages/private/simpatizantes/locales/LocalesVotacionPage";
 
 const AppRoutes = () => {
   return (
@@ -77,6 +79,7 @@ const AppRoutes = () => {
             {/* Reportes */}
             <Route element={<ProtectedModuleRoute modulo="dashboard" />}>
               <Route path={RoutesConfig.reportes} element={<Reportes />} />
+              <Route path={RoutesConfig.reportesImprimir} element={<ReportesImprimirPage />} />
             </Route>
 
             {/* Mapa de Calor */}
@@ -178,6 +181,10 @@ const AppRoutes = () => {
               <Route
                 path={RoutesConfig.simpatizantesDuplicados}
                 element={<DuplicadosSimpatizantesPage />}
+              />
+              <Route
+                path={RoutesConfig.simpatizantesLocales}
+                element={<LocalesVotacionPage />}
               />
             </Route>
 

@@ -47,6 +47,7 @@ const RoutesConfig = {
   simpatizantesSeguimiento: `${basePaths.admin}/simpatizantes/seguimiento`,
   simpatizantesDuplicados: `${basePaths.admin}/simpatizantes/duplicados`,
   simpatizantesCrear: `${basePaths.admin}/simpatizantes/crear`,
+  simpatizantesLocales: `${basePaths.admin}/simpatizantes/locales`,
 
   // Campañas
   campanas: `${basePaths.admin}/campanas`,
@@ -56,6 +57,7 @@ const RoutesConfig = {
 
   // Reportes
   reportes: `${basePaths.admin}/reportes`,
+  reportesImprimir: `${basePaths.admin}/reportes/imprimir`,
 
   // Mapa
   mapa: `${basePaths.admin}/mapa`,

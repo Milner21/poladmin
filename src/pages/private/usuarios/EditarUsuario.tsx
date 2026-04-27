@@ -10,6 +10,8 @@ import { useActualizarUsuario } from "./hooks/useActualizarUsuario";
 import { useUsuario } from "./hooks/useUsuario";
 import toast from "react-hot-toast";
 import type { UpdateUsuarioDto } from "@dto/usuario.types";
+import { SimpatizanteStatusCard } from "./components/SimpatizanteStatusCard";
+import { useSimpatizanteStatus } from "./hooks/useSimpatizanteStatus";
 
 interface FormValues {
   nombre: string;
@@ -34,7 +36,12 @@ const EditarUsuario: FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { usuario: usuarioActual } = useAuth();
-
+  const {
+    estadoSimpatizante,
+    cargandoEstado,
+    reactivarSimpatizante,
+    reactivandoSimpatizante,
+  } = useSimpatizanteStatus(id);
   // Estados del formulario
   const [values, setValues] = useState<FormValues>({
     nombre: "",
@@ -229,6 +236,12 @@ const EditarUsuario: FC = () => {
       />
 
       <div className="max-w-3xl">
+        <SimpatizanteStatusCard
+          estadoSimpatizante={estadoSimpatizante}
+          cargandoEstado={cargandoEstado}
+          onReactivar={() => id && reactivarSimpatizante(id)}
+          reactivandoSimpatizante={reactivandoSimpatizante}
+        />
         <div className="bg-bg-content border border-border rounded-xl p-6 shadow-sm">
           <UsuarioForm
             values={values}

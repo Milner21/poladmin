@@ -1,4 +1,4 @@
-import { useState, type FC } from 'react';
+import { useMemo, useState, type FC } from 'react';
 import { PageHeader } from '@components';
 import { useCampanaSeleccionada } from '@hooks/useCampanaSeleccionada';
 import { useReporteCaptacion } from './hooks/useReporteCaptacion';
@@ -19,22 +19,27 @@ const Reportes: FC = () => {
   const { campanaSeleccionada, campanaActual } = useCampanaSeleccionada();
   const [agrupacion, setAgrupacion] = useState<'dia' | 'semana' | 'mes'>('dia');
   
-  // Calcular fecha hace 30 días
-  const fechaHasta = new Date().toISOString();
-  const fechaDesde = new Date();
-  fechaDesde.setDate(fechaDesde.getDate() - 30);
-  const fechaDesdeStr = fechaDesde.toISOString();
+  // ✅ SOLUCIÓN: Usar useMemo para que las fechas se calculen solo una vez
+  const { fechaDesde, fechaHasta } = useMemo(() => {
+    const hasta = new Date().toISOString();
+    const desde = new Date();
+    desde.setDate(desde.getDate() - 30);
+    return {
+      fechaDesde: desde.toISOString(),
+      fechaHasta: hasta
+    };
+  }, []); // Array vacío = se calcula solo una vez
 
   const { data: captacion, isLoading: isLoadingCaptacion } = useReporteCaptacion({
     campana_id: campanaSeleccionada,
-    fecha_desde: fechaDesdeStr,
+    fecha_desde: fechaDesde,
     fecha_hasta: fechaHasta,
     agrupacion,
   });
 
   const { data: topRegistradores, isLoading: isLoadingTop } = useTopRegistradores({
     campana_id: campanaSeleccionada,
-    fecha_desde: fechaDesdeStr,
+    fecha_desde: fechaDesde,
     fecha_hasta: fechaHasta,
   });
 

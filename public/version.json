@@ -1,9 +1,9 @@
 {
-  "version": "1.2.3",
-  "fecha": "2026-04-15",
+  "version": "1.2.4",
+  "fecha": "2026-04-26",
   "cambios": [
-    "mejoras en modulo usuarios",
-    "mejoras en modulo simpatizantes",
-    "correccion de errores en crear usuarios"
+    "correccion en modulo usuarios",
+    "correccion en modulo simpatizantes",
+    "modulo de local de votacion"
   ]
 }

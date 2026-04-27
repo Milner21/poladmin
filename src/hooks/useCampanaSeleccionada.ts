@@ -6,7 +6,9 @@ export const useCampanaSeleccionada = () => {
   const { usuario } = useAuth();
   const { data: campanas } = useCampanas();
   const [campanaSeleccionada, setCampanaSeleccionada] = useState<string>("");
+  const campanaActual = campanas?.find((c) => c.id === campanaSeleccionada);
 
+ 
   const esRoot = usuario?.perfil?.nombre === "ROOT";
 
   useEffect(() => {
@@ -27,6 +29,8 @@ export const useCampanaSeleccionada = () => {
     }
   }, [campanas, esRoot, usuario?.campana_id]);
 
+  
+
   useEffect(() => {
     const handleCampanaChange = () => {
       const nuevaCampana = localStorage.getItem("campana_seleccionada_root");
@@ -42,7 +46,7 @@ export const useCampanaSeleccionada = () => {
     };
   }, []);
 
-  const campanaActual = campanas?.find((c) => c.id === campanaSeleccionada);
+  
 
   return {
     campanaSeleccionada,

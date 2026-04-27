@@ -20,6 +20,8 @@ import {
   Printer,
   Flag,
   Copy,
+  FileDown,
+  MapPin,
 } from "lucide-react";
 import RoutesConfig from "@routes/RoutesConfig";
 import type { MenuItem } from "../types/layout.types";
@@ -108,7 +110,6 @@ export const menuConfig: MenuItemConfig[] = [
     modulo: "usuarios",
   },
 
-  
   // ==========================================
   // SIMPATIZANTES
   // ==========================================
@@ -151,6 +152,14 @@ export const menuConfig: MenuItemConfig[] = [
     path: RoutesConfig.simpatizantesDuplicados,
     modulo: "simpatizantes",
     permisoEspecifico: "ver_simpatizante",
+  },
+  {
+    key: "simpatizantes-locales",
+    icon: <MapPin size={18} />,
+    label: "Locales de Votación",
+    path: RoutesConfig.simpatizantesLocales,
+    modulo: "simpatizantes",
+    permisoEspecifico: "ver_locales_votacion",
   },
 
   // ==========================================
@@ -259,6 +268,14 @@ export const menuConfig: MenuItemConfig[] = [
     label: "Reportes",
     path: RoutesConfig.reportes,
     modulo: "dashboard",
+  },
+  {
+    key: "reportes-imprimir",
+    icon: <FileDown size={18} />,
+    label: "Exportar Reportes",
+    path: RoutesConfig.reportesImprimir,
+    modulo: "dashboard",
+    permisoEspecifico: "exportar_reportes",
   },
   {
     key: "mapa",

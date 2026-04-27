@@ -129,3 +129,23 @@ export interface EstadisticasUsuarios {
     cantidad: number;
   }>;
 }
+
+// ==========================================
+// ESTADO SIMPATIZANTE
+// ==========================================
+
+export interface EstadoSimpatizanteResponse {
+  es_simpatizante: boolean;
+  esta_eliminado: boolean;
+  puede_reactivar: boolean;
+  esta_en_padron: boolean;
+  simpatizante_id: string | null;
+  intencion_voto: string | null;
+  es_afiliado: boolean | null;
+  fecha_registro_simpatizante: string | null;
+  mensaje: string;
+}
+
+export interface ReactivarSimpatizanteResponse {
+  mensaje: string;
+}
