@@ -464,7 +464,7 @@ const CrearSimpatizante: FC<CrearSimpatizanteProps> = ({
     : null;
 
   return (
-    <div className={embebido ? "" : "min-h-screen bg-bg-base"}>
+    <div className={embebido ? "" : "bg-bg-base"}>
       {!embebido && (
         <div className="sticky top-0 z-10 bg-bg-content border-b border-border px-4 py-3 md:relative md:bg-transparent md:border-0 md:px-6 md:py-4">
           <PageHeader
@@ -475,7 +475,7 @@ const CrearSimpatizante: FC<CrearSimpatizanteProps> = ({
         </div>
       )}
 
-      <div className={embebido ? "" : "px-4 pb-6 md:px-6 max-w-2xl mx-auto"}>
+       <div className={embebido ? "space-y-4" : "px-4 pb-6 md:px-6 max-w-2xl mx-auto"}>
         {mostrarBusqueda && (
           <BusquedaCI
             value={ciBusqueda}

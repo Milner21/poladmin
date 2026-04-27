@@ -1,7 +1,7 @@
 {
-  "version": "1.2.5",
+  "version": "1.2.6",
   "fecha": "2026-04-27",
   "cambios": [
-    "Corrección de solicitudes de simpatizantes."
+    "Correcciones visuales en el header para movil."
   ]
 }
