@@ -213,7 +213,7 @@ const RegistrarSimpatizantePage: FC = () => {
       />
 
       <div className="max-w-2xl mb-8">
-        <CrearSimpatizante embebido />
+        <CrearSimpatizante/>
       </div>
 
       <div className="mt-4">
