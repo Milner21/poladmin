@@ -12,6 +12,7 @@ import {
   ChevronDown,
   ChevronUp,
   Copy,
+  Eye,
   Loader2,
   MapPin,
   Pencil,
@@ -34,6 +35,7 @@ import {
   HistorialContactos,
   ModalContacto,
   ModalGestionDuplicados,
+  ModalVerSimpatizante,
 } from "./components";
 
 const ListaSimpatizantes: FC = () => {
@@ -57,6 +59,7 @@ const ListaSimpatizantes: FC = () => {
   >(null);
   const [simpatizanteAEditar, setSimpatizanteAEditar] =
     useState<Simpatizante | null>(null);
+    const [simpatizanteAVerId, setSimpatizanteAVerId] = useState<string | null>(null);
   const puedeEditarIntencion = tienePermiso("actualizar_intencion_voto");
   const puedeGestionarDuplicados = tienePermiso(
     "gestionar_duplicados_simpatizantes",
@@ -231,12 +234,22 @@ const ListaSimpatizantes: FC = () => {
             </span>
           ),
       },
-      {
+            {
         key: "acciones",
         title: "Acciones",
         width: "120px",
         render: (record: Simpatizante) => (
           <div className="flex items-center gap-1">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setSimpatizanteAVerId(record.id);
+              }}
+              className="p-1.5 rounded-lg text-info hover:bg-info/10 transition-colors"
+              title="Ver detalle"
+            >
+              <Eye size={14} />
+            </button>
             {puedeEditar && (
               <button
                 onClick={(e) => {
@@ -740,6 +753,12 @@ const ListaSimpatizantes: FC = () => {
         isOpen={!!simpatizanteAEditar}
         simpatizante={simpatizanteAEditar}
         onClose={() => setSimpatizanteAEditar(null)}
+      />
+
+      <ModalVerSimpatizante
+        isOpen={!!simpatizanteAVerId}
+        simpatizanteId={simpatizanteAVerId}
+        onClose={() => setSimpatizanteAVerId(null)}
       />
     </div>
   );

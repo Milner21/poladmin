@@ -1,4 +1,4 @@
-export type OrigenRegistro = 'PADRON_INTERNO' | 'PADRON_GENERAL' | 'MANUAL';
+export type OrigenRegistro = "PADRON_INTERNO" | "PADRON_GENERAL" | "MANUAL";
 
 export interface Simpatizante {
   id: string;
@@ -31,6 +31,18 @@ export interface Simpatizante {
   fecha_registro: string;
   eliminado: boolean;
   [key: string]: unknown;
+}
+
+export interface SimpatizanteDetalle extends Simpatizante {
+  registrado_por: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    username: string;
+    perfil: {
+      nombre: string;
+    };
+  };
 }
 
 export interface CreateSimpatizanteDto {

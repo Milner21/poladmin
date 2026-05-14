@@ -1,14 +1,15 @@
 import axiosInstance from "@api/axios.config";
 import type {
-  Simpatizante,
-  CreateSimpatizanteDto,
-  DuplicadoSimpatizante,
-  ResultadoDuplicadosPorSimpatizante,
-} from "@dto/simpatizante.types";
-import type {
   ResultadoBusquedaInteligente,
   ResultadoPadronDto,
 } from "@dto/padron.types";
+import type {
+  CreateSimpatizanteDto,
+  DuplicadoSimpatizante,
+  ResultadoDuplicadosPorSimpatizante,
+  Simpatizante,
+  SimpatizanteDetalle,
+} from "@dto/simpatizante.types";
 
 export interface RespuestaDuplicadoRegistrado {
   duplicado_registrado: true;
@@ -133,6 +134,11 @@ export const simpatizantesService = {
     const response = await axiosInstance.get(
       `/simpatizantes/duplicados/por-simpatizante/${simpatizanteId}`,
     );
+    return response.data;
+  },
+
+  getById: async (id: string): Promise<SimpatizanteDetalle> => {
+    const response = await axiosInstance.get(`/simpatizantes/${id}`);
     return response.data;
   },
 
