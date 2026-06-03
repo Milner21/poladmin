@@ -48,7 +48,7 @@ export interface TrabajoImpresion extends Record<string, unknown> {
   id: string;
   impresora_id: string;
   usuario_id: string;
-  tipo: 'TICKET_TRANSPORTE' | 'REPORTE';
+  tipo: 'TICKET_TRANSPORTE' | 'TICKET_PADRON' | 'REPORTE';
   datos: Record<string, unknown>;
   estado: 'PENDIENTE' | 'ENVIADO' | 'COMPLETADO' | 'FALLIDO';
   error: string | null;

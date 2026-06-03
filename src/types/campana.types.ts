@@ -14,6 +14,10 @@ export interface ConfiguracionCampana {
   modo_eleccion: ModoEleccion;
   permitir_duplicados_simpatizantes: boolean;
   permitir_registro_manual_fuera_padron: boolean;
+  ticket_header_imagen: string | null;
+  ticket_header_linea1: string | null;
+  ticket_header_linea2: string | null;
+  ticket_header_linea3: string | null;
 }
 
 export interface Campana {

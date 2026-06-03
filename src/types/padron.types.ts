@@ -132,3 +132,33 @@ export interface DetallePadronResponse {
   total_paginas: number;
   registros: PadronInterno[] | PadronGeneral[];
 }
+
+// Tipos para consulta de votante
+export type EstadoVotante =
+  | "SIMPATIZANTE_REGISTRADO"
+  | "EN_PADRON_NO_REGISTRADO"
+  | "NO_ENCONTRADO";
+
+export interface DatosVotante {
+  ci: string;
+  nombre: string;
+  apellido: string;
+  local_votacion: string | null;
+  mesa: string | null;
+  orden: string | null;
+  departamento: string | null;
+  distrito: string | null;
+}
+
+export interface ResultadoConsultaVotante {
+  estado: EstadoVotante;
+  datos: DatosVotante | null;
+  simpatizante_id: string | null;
+  voto_internas: boolean;
+  voto_generales: boolean;
+  fecha_voto_internas: string | null;
+  fecha_voto_generales: string | null;
+  modo_eleccion: "INTERNAS" | "GENERALES";
+  permite_registro_manual: boolean;
+  mensaje: string;
+}

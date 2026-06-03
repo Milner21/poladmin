@@ -36,6 +36,7 @@ const RoutesConfig = {
   padronCargar: `${basePaths.admin}/padron/cargar`,
   padronDetalle: (tipo: string, departamento: string, distrito: string) =>
     `${basePaths.admin}/padron/detalle/${tipo}/${encodeURIComponent(departamento)}/${encodeURIComponent(distrito)}`,
+  padronConsultar: `${basePaths.admin}/padron/consultar`,
 
   // Simpatizantes
   simpatizantes: `${basePaths.admin}/simpatizantes`,

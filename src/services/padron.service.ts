@@ -8,6 +8,7 @@ import type {
   ResumenPadron,
   DetallePadronParams,
   DetallePadronResponse,
+  ResultadoConsultaVotante,
 } from "@dto/padron.types";
 
 export const padronService = {
@@ -65,6 +66,11 @@ export const padronService = {
           : {}),
       },
     });
+    return response.data;
+  },
+
+  consultarVotante: async (ci: string): Promise<ResultadoConsultaVotante> => {
+    const response = await axiosInstance.get(`/padron/consultar-votante/${ci}`);
     return response.data;
   },
 };

@@ -1,7 +1,7 @@
 {
-  "version": "1.2.7",
-  "fecha": "2026-05-13",
+  "version": "1.2.8",
+  "fecha": "2026-06-03",
   "cambios": [
-    "Agregado de vista detalle simpatizante."
+    "Agregado de consulta de padron con impresion - beta."
   ]
 }

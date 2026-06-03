@@ -166,4 +166,11 @@ export const simpatizantesService = {
     const response = await axiosInstance.delete(`/simpatizantes/${id}`);
     return response.data;
   },
+
+  marcarVoto: async (simpatizanteId: string): Promise<{ mensaje: string }> => {
+    const response = await axiosInstance.patch(
+      `/simpatizantes/${simpatizanteId}/marcar-voto`,
+    );
+    return response.data;
+  },
 };

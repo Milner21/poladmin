@@ -97,4 +97,16 @@ export const impresorasService = {
     });
     return response.data.data || response.data;
   },
+
+  imprimirPadron: async (
+    ci: string,
+  ): Promise<{
+    exitoso: boolean;
+    mensaje: string;
+  }> => {
+    const response = await axiosInstance.post("/impresoras/imprimir-padron", {
+      ci,
+    });
+    return response.data.data || response.data;
+  },
 };

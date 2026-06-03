@@ -22,6 +22,7 @@ import {
   Copy,
   FileDown,
   MapPin,
+  Search,
 } from "lucide-react";
 import RoutesConfig from "@routes/RoutesConfig";
 import type { MenuItem } from "../types/layout.types";
@@ -96,6 +97,14 @@ export const menuConfig: MenuItemConfig[] = [
     icon: <FileSpreadsheet size={18} />,
     label: "Cargar Padrón",
     path: RoutesConfig.padronCargar,
+    modulo: "padron",
+  },
+
+   {
+    key: "padron-consultar",
+    icon: <Search size={18} />,
+    label: "Consulta de Votantes",
+    path: RoutesConfig.padronConsultar,
     modulo: "padron",
   },
 

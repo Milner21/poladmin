@@ -54,6 +54,7 @@ import DuplicadosSimpatizantesPage from "@pages/private/simpatizantes/duplicados
 import PadronDetallePage from "@pages/private/padron/PadronDetallePage";
 import { ReportesImprimirPage } from "@pages/private/reportes-imprimir";
 import LocalesVotacionPage from "@pages/private/simpatizantes/locales/LocalesVotacionPage";
+import ConsultaVotantePage from "@pages/private/padron/consulta/ConsultaVotantePage";
 
 const AppRoutes = () => {
   return (
@@ -150,6 +151,10 @@ const AppRoutes = () => {
               <Route
                 path={`${basePaths.admin}/padron/detalle/:tipo/:departamento/:distrito`}
                 element={<PadronDetallePage />}
+              />
+              <Route
+                path={RoutesConfig.padronConsultar}
+                element={<ConsultaVotantePage />}
               />
             </Route>
             {/* Simpatizantes */}

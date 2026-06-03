@@ -30,6 +30,10 @@ export interface Simpatizante {
   registrado_por_id: string;
   fecha_registro: string;
   eliminado: boolean;
+  voto_internas: boolean;
+  fecha_voto_internas: string | null;
+  voto_generales: boolean;
+  fecha_voto_generales: string | null;
   [key: string]: unknown;
 }
 
@@ -71,6 +75,7 @@ export interface CreateSimpatizanteDto {
   lider_id?: string;
   candidato_id?: string;
   confirmar_duplicado?: boolean;
+  marcar_voto_automatico?: boolean;
 }
 
 export interface Direccion {
