@@ -1,21 +1,22 @@
 import { PageHeader } from "@components";
 import { useCampanaSeleccionada } from "@hooks/useCampanaSeleccionada";
 import {
-    AlertCircle,
-    Lock,
-    Printer,
-    Settings,
-    UserPlus,
-    Users,
+  AlertCircle,
+  Lock,
+  Printer,
+  Settings,
+  UserPlus,
+  Users,
+  FileText,
 } from "lucide-react";
 import { useEffect, useState, type FC } from "react";
 import {
-    useActualizarConfiguracionTransporte,
-    useConfiguracionTransporte,
+  useActualizarConfiguracionTransporte,
+  useConfiguracionTransporte,
 } from "../transportes/hooks/useConfiguacionTransporte";
 import {
-    useActualizarConfiguracionCampana,
-    useConfiguracionCampana,
+  useActualizarConfiguracionCampana,
+  useConfiguracionCampana,
 } from "./hooks/useConfiguracionCampana";
 
 const ConfiguracionCampanaPage: FC = () => {
@@ -39,6 +40,10 @@ const ConfiguracionCampanaPage: FC = () => {
   const [permitirDuplicadosTransporte, setPermitirDuplicadosTransporte] =
     useState(true);
 
+  const [ticketLinea1, setTicketLinea1] = useState("");
+  const [ticketLinea2, setTicketLinea2] = useState("");
+  const [ticketLinea3, setTicketLinea3] = useState("");
+
   useEffect(() => {
     if (campana?.configuracion) {
       setPermitirDuplicadosSimpatizantes(
@@ -47,6 +52,9 @@ const ConfiguracionCampanaPage: FC = () => {
       setPermitirRegistroManual(
         campana.configuracion.permitir_registro_manual_fuera_padron,
       );
+      setTicketLinea1(campana.configuracion.ticket_header_linea1 ?? "");
+      setTicketLinea2(campana.configuracion.ticket_header_linea2 ?? "");
+      setTicketLinea3(campana.configuracion.ticket_header_linea3 ?? "");
     }
   }, [campana]);
 
@@ -61,6 +69,14 @@ const ConfiguracionCampanaPage: FC = () => {
     actualizarCampanaMutation.mutate({
       permitir_duplicados_simpatizantes: permitirDuplicadosSimpatizantes,
       permitir_registro_manual_fuera_padron: permitirRegistroManual,
+    });
+  };
+
+  const handleGuardarTicketHeader = () => {
+    actualizarCampanaMutation.mutate({
+      ticket_header_linea1: ticketLinea1 || undefined,
+      ticket_header_linea2: ticketLinea2 || undefined,
+      ticket_header_linea3: ticketLinea3 || undefined,
     });
   };
 
@@ -119,6 +135,10 @@ const ConfiguracionCampanaPage: FC = () => {
       )}
 
       <div className="max-w-lg space-y-6">
+
+        {/* ==========================================
+            SIMPATIZANTES
+        ========================================== */}
         <div>
           <h2 className="text-sm font-semibold text-text-tertiary uppercase tracking-wider mb-3">
             Simpatizantes
@@ -244,6 +264,130 @@ const ConfiguracionCampanaPage: FC = () => {
           )}
         </div>
 
+        {/* ==========================================
+            HEADER DEL TICKET DE IMPRESION
+        ========================================== */}
+        <div>
+          <h2 className="text-sm font-semibold text-text-tertiary uppercase tracking-wider mb-3">
+            Header del Ticket de Impresión
+          </h2>
+
+          <div
+            className={`bg-bg-content border rounded-xl p-5 space-y-4 ${!esRoot ? "opacity-60" : ""}`}
+          >
+            <div className="flex items-start gap-3 pb-4 border-b border-border">
+              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
+                <FileText size={18} className="text-primary" />
+              </div>
+              <div>
+                <p className="font-medium text-text-primary">
+                  Texto de propaganda política
+                </p>
+                <p className="text-sm text-text-tertiary mt-1">
+                  Estas líneas aparecerán en la parte superior de cada ticket impreso.
+                  Podés usar hasta 3 líneas de texto.
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <label className="label">Línea 1</label>
+              <input
+                type="text"
+                className="input"
+                placeholder="Ej: MOVIMIENTO FUERZA REPUBLICANA"
+                maxLength={50}
+                disabled={!esRoot}
+                value={ticketLinea1}
+                onChange={(e) => setTicketLinea1(e.target.value)}
+              />
+              <p className="text-xs text-text-tertiary mt-1">
+                {ticketLinea1.length}/50 caracteres
+              </p>
+            </div>
+
+            <div>
+              <label className="label">Línea 2</label>
+              <input
+                type="text"
+                className="input"
+                placeholder="Ej: HUGO VELAZQUEZ INTENDENTE"
+                maxLength={50}
+                disabled={!esRoot}
+                value={ticketLinea2}
+                onChange={(e) => setTicketLinea2(e.target.value)}
+              />
+              <p className="text-xs text-text-tertiary mt-1">
+                {ticketLinea2.length}/50 caracteres
+              </p>
+            </div>
+
+            <div>
+              <label className="label">Línea 3</label>
+              <input
+                type="text"
+                className="input"
+                placeholder="Ej: ¡JUNTOS POR CIUDAD DEL ESTE!"
+                maxLength={50}
+                disabled={!esRoot}
+                value={ticketLinea3}
+                onChange={(e) => setTicketLinea3(e.target.value)}
+              />
+              <p className="text-xs text-text-tertiary mt-1">
+                {ticketLinea3.length}/50 caracteres
+              </p>
+            </div>
+
+            {(ticketLinea1 || ticketLinea2 || ticketLinea3) && (
+              <div className="bg-bg-surface border border-border rounded-lg p-4">
+                <p className="text-xs text-text-tertiary mb-3 font-semibold uppercase">
+                  Vista previa del header
+                </p>
+                <div className="font-mono text-xs border border-dashed border-border rounded p-3 space-y-1 text-center">
+                  {ticketLinea1 && (
+                    <p className="font-bold text-text-primary">
+                      {ticketLinea1.toUpperCase()}
+                    </p>
+                  )}
+                  {ticketLinea2 && (
+                    <p className="text-text-secondary">
+                      {ticketLinea2.toUpperCase()}
+                    </p>
+                  )}
+                  {ticketLinea3 && (
+                    <p className="text-text-secondary">
+                      {ticketLinea3.toUpperCase()}
+                    </p>
+                  )}
+                  <p className="text-text-tertiary pt-1">
+                    ════════════════════════════
+                  </p>
+                  <p className="text-text-tertiary text-xs">
+                    DATOS DE VOTACIÓN
+                  </p>
+                  <p className="text-text-tertiary text-xs">...</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {esRoot && (
+            <button
+              onClick={handleGuardarTicketHeader}
+              disabled={actualizarCampanaMutation.isPending}
+              className="w-full mt-4 btn btn-primary flex items-center justify-center gap-2"
+            >
+              <Printer size={16} />
+              {actualizarCampanaMutation.isPending
+                ? "Guardando..."
+                : "Guardar header del ticket"}
+            </button>
+          )}
+        </div>
+
+        {/* ==========================================
+            TRANSPORTE
+        ========================================== */}
         <div>
           <h2 className="text-sm font-semibold text-text-tertiary uppercase tracking-wider mb-3">
             Transporte
@@ -363,6 +507,7 @@ const ConfiguracionCampanaPage: FC = () => {
             </button>
           )}
         </div>
+
       </div>
     </div>
   );

@@ -74,11 +74,6 @@ export const ConfigurarReporteSimpatizantesModal: FC<
   const [configVotacion, setConfigVotacion] = useState<ConfigVotacion>(
     CONFIG_VOTACION_INICIAL,
   );
-  const [columnasVotacionEnabled, setColumnasVotacionEnabled] = useState({
-    local_votacion: true,
-    mesa_votacion: true,
-    orden_votacion: true,
-  });
   const [generando, setGenerando] = useState(false);
   const [searchCandidato, setSearchCandidato] = useState("");
   const [dropdownCandidatoAbierto, setDropdownCandidatoAbierto] =
@@ -125,14 +120,14 @@ export const ConfigurarReporteSimpatizantesModal: FC<
   // Columnas base + columnas de votacion inyectadas dinamicamente
   const columnasConVotacion = useMemo((): ColumnaReporte[] => {
     const base = [...columnas];
-    
+
     if (!configVotacion.incluir) return base;
 
     if (configVotacion.local) {
       base.push({
         key: COLUMNAS_VOTACION_KEYS.local,
         label: "Local",
-        enabled: columnasVotacionEnabled.local_votacion,
+        enabled: true,
       });
     }
 
@@ -140,7 +135,7 @@ export const ConfigurarReporteSimpatizantesModal: FC<
       base.push({
         key: COLUMNAS_VOTACION_KEYS.mesa,
         label: "Mesa",
-        enabled: columnasVotacionEnabled.mesa_votacion,
+        enabled: true,
       });
     }
 
@@ -148,12 +143,12 @@ export const ConfigurarReporteSimpatizantesModal: FC<
       base.push({
         key: COLUMNAS_VOTACION_KEYS.orden,
         label: "Orden",
-        enabled: columnasVotacionEnabled.orden_votacion,
+        enabled: true,
       });
     }
 
     return base;
-  }, [columnas, configVotacion, columnasVotacionEnabled]);
+  }, [columnas, configVotacion]);
 
   const columnasSeleccionadas = columnasConVotacion.filter(
     (c) => c.enabled,
@@ -193,40 +188,19 @@ export const ConfigurarReporteSimpatizantesModal: FC<
   );
 
   const handleColumnaToggle = useCallback((key: string) => {
-    // Si es una columna de votacion
-    if (key === COLUMNAS_VOTACION_KEYS.local || 
-        key === COLUMNAS_VOTACION_KEYS.mesa || 
-        key === COLUMNAS_VOTACION_KEYS.orden) {
-      setColumnasVotacionEnabled((prev) => ({
-        ...prev,
-        [key]: !prev[key as keyof typeof prev],
-      }));
-    } else {
-      // Es una columna base
-      setColumnas((prev) =>
-        prev.map((col) =>
-          col.key === key ? { ...col, enabled: !col.enabled } : col,
-        ),
-      );
-    }
+    setColumnas((prev) =>
+      prev.map((col) =>
+        col.key === key ? { ...col, enabled: !col.enabled } : col,
+      ),
+    );
   }, []);
 
   const handleSeleccionarTodasColumnas = useCallback(() => {
     setColumnas((prev) => prev.map((col) => ({ ...col, enabled: true })));
-    setColumnasVotacionEnabled({
-      local_votacion: true,
-      mesa_votacion: true,
-      orden_votacion: true,
-    });
   }, []);
 
   const handleDeseleccionarTodasColumnas = useCallback(() => {
     setColumnas((prev) => prev.map((col) => ({ ...col, enabled: false })));
-    setColumnasVotacionEnabled({
-      local_votacion: false,
-      mesa_votacion: false,
-      orden_votacion: false,
-    });
   }, []);
 
   const handleGenerarPDF = useCallback(async () => {
@@ -257,7 +231,7 @@ export const ConfigurarReporteSimpatizantesModal: FC<
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
 
-      //onClose();
+      onClose();
     } catch (error) {
       console.error("Error generando PDF:", error);
       alert("Error generando PDF de simpatizantes");
@@ -272,7 +246,7 @@ export const ConfigurarReporteSimpatizantesModal: FC<
     incluirUbicacion,
     configVotacion,
     columnasConVotacion,
-    //onClose,
+    onClose,
   ]);
 
   const handleGenerarExcel = useCallback(async () => {
@@ -296,7 +270,7 @@ export const ConfigurarReporteSimpatizantesModal: FC<
         configuracion: configuracionReporte,
       });
 
-      //onClose();
+      onClose();
     } catch (error) {
       console.error("Error generando Excel:", error);
       alert("Error generando Excel de simpatizantes");
@@ -311,7 +285,7 @@ export const ConfigurarReporteSimpatizantesModal: FC<
     incluirUbicacion,
     configVotacion,
     columnasConVotacion,
-    //onClose,
+    onClose,
   ]);
 
   // Return condicional SIEMPRE despues de todos los hooks

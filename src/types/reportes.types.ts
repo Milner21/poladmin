@@ -147,6 +147,12 @@ export interface SimpatizanteReporte {
   latitud: number | null;
   longitud: number | null;
   tiene_gps: boolean;
+  local_votacion_interna: string | null;
+  mesa_votacion_interna: string | null;
+  orden_votacion_interna: string | null;
+  local_votacion_general: string | null;
+  mesa_votacion_general: string | null;
+  orden_votacion_general: string | null;
 }
 
 export interface ReporteSimpatizantesResponse {

@@ -1,5 +1,21 @@
 import type { ColumnaReporte } from '@dto/reportes.types';
 
+export interface ConfigVotacion {
+  incluir: boolean;
+  tipo: 'interna' | 'general';
+  local: boolean;
+  mesa: boolean;
+  orden: boolean;
+}
+
+export const CONFIG_VOTACION_INICIAL: ConfigVotacion = {
+  incluir: false,
+  tipo: 'general',
+  local: true,
+  mesa: true,
+  orden: true,
+};
+
 export const columnasSimpatizantes: ColumnaReporte[] = [
   { key: 'nro', label: 'Nro', enabled: true },
   { key: 'nombre', label: 'Nombre', enabled: true },
@@ -18,6 +34,12 @@ export const columnasSimpatizantes: ColumnaReporte[] = [
   { key: 'fecha_registro', label: 'Fecha Registro', enabled: true },
   { key: 'tiene_gps', label: 'Tiene GPS', enabled: false },
 ];
+
+export const COLUMNAS_VOTACION_KEYS = {
+  local: 'local_votacion',
+  mesa: 'mesa_votacion',
+  orden: 'orden_votacion',
+} as const;
 
 export const intencionesVoto = [
   { key: 'todos', label: 'Todas las intenciones' },

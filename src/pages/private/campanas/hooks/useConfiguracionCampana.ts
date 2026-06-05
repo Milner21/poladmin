@@ -23,6 +23,9 @@ export const useActualizarConfiguracionCampana = (campanaId: string) => {
     mutationFn: (data: {
       permitir_duplicados_simpatizantes?: boolean;
       permitir_registro_manual_fuera_padron?: boolean;
+      ticket_header_linea1?: string;
+      ticket_header_linea2?: string;
+      ticket_header_linea3?: string;
     }) => campanasService.actualizarConfiguracion(campanaId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['configuracion-campana', campanaId] });

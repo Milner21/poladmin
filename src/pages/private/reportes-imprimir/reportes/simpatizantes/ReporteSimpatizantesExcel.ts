@@ -14,6 +14,7 @@ interface GenerarExcelSimpatizantesParams {
     generadoPor: string;
     agruparPorCandidato?: boolean;
     incluirUbicacion?: boolean;
+    tipoVotacion?: "interna" | "general";
   };
 }
 
@@ -86,6 +87,18 @@ export const generarExcelSimpatizantes = ({
         );
       case "tiene_gps":
         return simpatizante.tiene_gps ? "Sí" : "No";
+      case "local_votacion":
+        return configuracion.tipoVotacion === "interna"
+          ? simpatizante.local_votacion_interna || ""
+          : simpatizante.local_votacion_general || "";
+      case "mesa_votacion":
+        return configuracion.tipoVotacion === "interna"
+          ? simpatizante.mesa_votacion_interna || ""
+          : simpatizante.mesa_votacion_general || "";
+      case "orden_votacion":
+        return configuracion.tipoVotacion === "interna"
+          ? simpatizante.orden_votacion_interna || ""
+          : simpatizante.orden_votacion_general || "";
       default:
         return "";
     }
@@ -166,7 +179,7 @@ export const generarExcelSimpatizantes = ({
           nombreHoja = nombreHoja.replace(new RegExp("\\" + char, "g"), "");
         });
         nombreHoja = nombreHoja.substring(0, 31);
-        
+
         XLSX.utils.book_append_sheet(workbook, worksheet, nombreHoja);
       },
     );
@@ -277,6 +290,12 @@ function getColumnWidths(columnas: ColumnaReporte[]) {
         return { width: 25 };
       case "fecha_registro":
         return { width: 12 };
+      case "local_votacion":
+        return { width: 30 };
+      case "mesa_votacion":
+        return { width: 10 };
+      case "orden_votacion":
+        return { width: 10 };
       default:
         return { width: 15 };
     }
