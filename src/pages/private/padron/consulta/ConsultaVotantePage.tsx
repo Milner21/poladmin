@@ -1,23 +1,44 @@
 import { useState, type FC } from "react";
 import { PageHeader } from "@components";
-import { Search, CheckCircle, XCircle, Printer, UserPlus, Clock } from "lucide-react";
+import {
+  Search,
+  CheckCircle,
+  XCircle,
+  Printer,
+  UserPlus,
+  Clock,
+} from "lucide-react";
 import { useConsultaVotante } from "../hooks/useConsultaVotante";
 import { useMarcarVoto } from "@pages/private/simpatizantes/hooks/useMarcarVoto";
 import { useImprimirPadron } from "@pages/private/impresoras/hooks/useImprimirPadron";
 import { useMiImpresora } from "@pages/private/impresoras/hooks/useMiImpresora";
 import type { ResultadoConsultaVotante } from "@dto/padron.types";
 import ModalRegistrarSimpatizante from "./components/ModalRegistrarSimpatizante";
+import { usePermisos } from "@hooks/usePermisos";
+import RoutesConfig from "@routes/RoutesConfig";
+import { Navigate } from "react-router";
 
 const ConsultaVotantePage: FC = () => {
   const [ci, setCi] = useState("");
   const [ciBuscada, setCiBuscada] = useState("");
   const [modalRegistrarOpen, setModalRegistrarOpen] = useState(false);
-  const [resultadoActual, setResultadoActual] = useState<ResultadoConsultaVotante | null>(null);
+  const { tienePermiso } = usePermisos();
+  const puedeMarcarVotoPermiso = tienePermiso("marcar_voto");
+  const [resultadoActual, setResultadoActual] =
+    useState<ResultadoConsultaVotante | null>(null);
 
-  const { data: resultado, isLoading, refetch } = useConsultaVotante(ciBuscada, !!ciBuscada);
+  const {
+    data: resultado,
+    isLoading,
+    refetch,
+  } = useConsultaVotante(ciBuscada, !!ciBuscada);
   const marcarVotoMutation = useMarcarVoto();
   const imprimirMutation = useImprimirPadron();
   const { data: miImpresora } = useMiImpresora();
+
+  if (!tienePermiso("consultar_padron")) {
+    return <Navigate to={RoutesConfig.dashboard} replace />;
+  }
 
   const handleBuscar = () => {
     const ciLimpia = ci.trim().replace(/\./g, "");
@@ -54,7 +75,13 @@ const ConsultaVotantePage: FC = () => {
   const renderEstadoVoto = () => {
     if (!resultado) return null;
 
-    const { modo_eleccion, voto_internas, voto_generales, fecha_voto_internas, fecha_voto_generales } = resultado;
+    const {
+      modo_eleccion,
+      voto_internas,
+      voto_generales,
+      fecha_voto_internas,
+      fecha_voto_generales,
+    } = resultado;
 
     if (modo_eleccion === "INTERNAS") {
       if (voto_internas) {
@@ -75,7 +102,9 @@ const ConsultaVotantePage: FC = () => {
         return (
           <div className="bg-warning/10 border border-warning/30 rounded-lg p-4 flex items-center gap-3">
             <Clock size={20} className="text-warning" />
-            <p className="font-semibold text-warning">Pendiente de votar en Internas</p>
+            <p className="font-semibold text-warning">
+              Pendiente de votar en Internas
+            </p>
           </div>
         );
       }
@@ -89,7 +118,9 @@ const ConsultaVotantePage: FC = () => {
             <div className="bg-primary/10 border border-primary/30 rounded-lg p-3 flex items-center gap-3">
               <CheckCircle size={16} className="text-primary" />
               <div>
-                <p className="text-sm font-medium text-primary">Votó en Internas</p>
+                <p className="text-sm font-medium text-primary">
+                  Votó en Internas
+                </p>
                 {fecha_voto_internas && (
                   <p className="text-xs text-text-tertiary">
                     {new Date(fecha_voto_internas).toLocaleString("es-PY")}
@@ -103,7 +134,9 @@ const ConsultaVotantePage: FC = () => {
             <div className="bg-success/10 border border-success/30 rounded-lg p-4 flex items-center gap-3">
               <CheckCircle size={20} className="text-success" />
               <div>
-                <p className="font-semibold text-success">Ya votó en Generales</p>
+                <p className="font-semibold text-success">
+                  Ya votó en Generales
+                </p>
                 {fecha_voto_generales && (
                   <p className="text-xs text-text-tertiary mt-1">
                     {new Date(fecha_voto_generales).toLocaleString("es-PY")}
@@ -114,7 +147,9 @@ const ConsultaVotantePage: FC = () => {
           ) : (
             <div className="bg-warning/10 border border-warning/30 rounded-lg p-4 flex items-center gap-3">
               <Clock size={20} className="text-warning" />
-              <p className="font-semibold text-warning">Pendiente de votar en Generales</p>
+              <p className="font-semibold text-warning">
+                Pendiente de votar en Generales
+              </p>
             </div>
           )}
         </div>
@@ -123,7 +158,8 @@ const ConsultaVotantePage: FC = () => {
   };
 
   const puedeMarcarVoto = () => {
-    if (!resultado || resultado.estado !== "SIMPATIZANTE_REGISTRADO") return false;
+    if (!resultado || resultado.estado !== "SIMPATIZANTE_REGISTRADO")
+      return false;
 
     const { modo_eleccion, voto_internas, voto_generales } = resultado;
 
@@ -145,10 +181,14 @@ const ConsultaVotantePage: FC = () => {
 
       <div className="max-w-2xl mx-auto mt-6">
         <div className="bg-bg-content border border-border rounded-xl p-6">
-          <div className="flex gap-3">
+          {/* Input y botón Buscar - Responsive */}
+          <div className="flex flex-col sm:flex-row gap-3 mb-6">
             <input
               type="text"
-              className="input flex-1"
+              className="w-full px-4 py-2 rounded-lg border border-border bg-bg-content
+                text-text-primary placeholder:text-text-tertiary
+                focus:outline-none focus:ring-2 focus:ring-primary
+                transition-all resize-none"
               placeholder="Ingresá el número de CI"
               value={ci}
               onChange={(e) => setCi(e.target.value)}
@@ -159,7 +199,10 @@ const ConsultaVotantePage: FC = () => {
             <button
               onClick={handleBuscar}
               disabled={isLoading || ci.trim().length === 0}
-              className="btn btn-primary flex items-center gap-2"
+              className="flex items-center px-4 py-2
+                bg-primary hover:bg-primary-hover
+                text-white text-sm font-medium rounded-lg
+                transition-colors gap-2 w-full sm:w-auto"
             >
               <Search size={18} />
               Buscar
@@ -173,7 +216,7 @@ const ConsultaVotantePage: FC = () => {
           )}
 
           {resultado && !isLoading && (
-            <div className="mt-6 space-y-4">
+            <div className="space-y-4">
               {resultado.estado === "NO_ENCONTRADO" ? (
                 <div className="bg-danger/10 border border-danger/30 rounded-lg p-6 text-center">
                   <XCircle size={48} className="mx-auto mb-3 text-danger" />
@@ -181,7 +224,8 @@ const ConsultaVotantePage: FC = () => {
                     No se encontró la CI en el sistema
                   </p>
                   <p className="text-sm text-text-tertiary mt-2">
-                    Esta persona no figura en el padrón ni como simpatizante registrado
+                    Esta persona no figura en el padrón ni como simpatizante
+                    registrado
                   </p>
                 </div>
               ) : (
@@ -192,7 +236,9 @@ const ConsultaVotantePage: FC = () => {
                     </h3>
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-sm text-text-tertiary">Nombre completo</span>
+                        <span className="text-sm text-text-tertiary">
+                          Nombre completo
+                        </span>
                         <span className="text-sm font-semibold text-text-primary">
                           {resultado.datos?.nombre} {resultado.datos?.apellido}
                         </span>
@@ -212,7 +258,9 @@ const ConsultaVotantePage: FC = () => {
                     </h3>
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-sm text-text-tertiary">Local</span>
+                        <span className="text-sm text-text-tertiary">
+                          Local
+                        </span>
                         <span className="text-sm font-semibold text-text-primary">
                           {resultado.datos?.local_votacion || "-"}
                         </span>
@@ -224,7 +272,9 @@ const ConsultaVotantePage: FC = () => {
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm text-text-tertiary">Orden</span>
+                        <span className="text-sm text-text-tertiary">
+                          Orden
+                        </span>
                         <span className="text-sm font-semibold text-text-primary">
                           {resultado.datos?.orden || "-"}
                         </span>
@@ -234,22 +284,33 @@ const ConsultaVotantePage: FC = () => {
 
                   {renderEstadoVoto()}
 
-                  <div className="flex gap-3">
-                    {resultado.estado === "SIMPATIZANTE_REGISTRADO" && puedeMarcarVoto() && (
-                      <button
-                        onClick={handleMarcarVoto}
-                        disabled={marcarVotoMutation.isPending}
-                        className="flex-1 btn btn-primary flex items-center justify-center gap-2"
-                      >
-                        <CheckCircle size={18} />
-                        {marcarVotoMutation.isPending ? "Marcando..." : "Marcar que ya votó"}
-                      </button>
-                    )}
+                  {/* Botones de acción - Responsive */}
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    {resultado.estado === "SIMPATIZANTE_REGISTRADO" &&
+                      puedeMarcarVoto() &&
+                      puedeMarcarVotoPermiso && (
+                        <button
+                          onClick={handleMarcarVoto}
+                          disabled={marcarVotoMutation.isPending}
+                          className="flex items-center px-4 py-2
+                bg-primary hover:bg-primary-hover
+                text-white text-sm font-medium rounded-lg
+                transition-colors gap-2 w-full sm:w-auto"
+                        >
+                          <CheckCircle size={18} />
+                          {marcarVotoMutation.isPending
+                            ? "Marcando..."
+                            : "Marcar que ya votó"}
+                        </button>
+                      )}
 
                     {resultado.estado === "EN_PADRON_NO_REGISTRADO" && (
                       <button
                         onClick={handleAbrirModalRegistrar}
-                        className="flex-1 btn btn-primary flex items-center justify-center gap-2"
+                        className="flex items-center px-4 py-2
+                bg-primary hover:bg-primary-hover
+                text-white text-sm font-medium rounded-lg
+                transition-colors gap-2 w-full sm:w-auto"
                       >
                         <UserPlus size={18} />
                         Registrar como Simpatizante
@@ -260,10 +321,15 @@ const ConsultaVotantePage: FC = () => {
                       <button
                         onClick={handleImprimir}
                         disabled={imprimirMutation.isPending}
-                        className="flex-1 btn btn-outline flex items-center justify-center gap-2"
+                        className="flex items-center px-4 py-2
+                bg-primary hover:bg-primary-hover
+                text-white text-sm font-medium rounded-lg
+                transition-colors gap-2 w-full sm:w-auto"
                       >
                         <Printer size={18} />
-                        {imprimirMutation.isPending ? "Imprimiendo..." : "Imprimir Ticket"}
+                        {imprimirMutation.isPending
+                          ? "Imprimiendo..."
+                          : "Imprimir Ticket"}
                       </button>
                     )}
                   </div>
@@ -271,7 +337,8 @@ const ConsultaVotantePage: FC = () => {
                   {!tieneImpresora && (
                     <div className="bg-warning/10 border border-warning/30 rounded-lg p-3">
                       <p className="text-xs text-warning">
-                        No tenés una impresora conectada. Pedile a un administrador que te asigne una.
+                        No tenés una impresora conectada. Pedile a un
+                        administrador que te asigne una.
                       </p>
                     </div>
                   )}

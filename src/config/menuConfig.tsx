@@ -98,14 +98,16 @@ export const menuConfig: MenuItemConfig[] = [
     label: "Cargar Padrón",
     path: RoutesConfig.padronCargar,
     modulo: "padron",
+    permisoEspecifico: "cargar_padron",
   },
 
-   {
+  {
     key: "padron-consultar",
     icon: <Search size={18} />,
     label: "Consulta de Votantes",
     path: RoutesConfig.padronConsultar,
     modulo: "padron",
+    permisoEspecifico: "consultar_padron",
   },
 
   // ==========================================

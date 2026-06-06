@@ -80,7 +80,10 @@ const AppRoutes = () => {
             {/* Reportes */}
             <Route element={<ProtectedModuleRoute modulo="dashboard" />}>
               <Route path={RoutesConfig.reportes} element={<Reportes />} />
-              <Route path={RoutesConfig.reportesImprimir} element={<ReportesImprimirPage />} />
+              <Route
+                path={RoutesConfig.reportesImprimir}
+                element={<ReportesImprimirPage />}
+              />
             </Route>
 
             {/* Mapa de Calor */}
@@ -142,7 +145,7 @@ const AppRoutes = () => {
               />
             </Route>
 
-            {/* Padron - solo ROOT */}
+            {/* Padron */}
             <Route element={<ProtectedModuleRoute modulo="padron" />}>
               <Route
                 path={RoutesConfig.padronCargar}
