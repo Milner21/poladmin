@@ -1,60 +1,75 @@
-import { Navigate, Route, Routes } from "react-router";
+//src/routes/Routes.tsx
 import { PWAInstallBanner } from "@components";
-import RoutesConfig, { basePaths } from "./RoutesConfig";
 import { MainLayout } from "@components/layout";
 import {
-  Dashboard,
-  Login,
-  NotFound,
-  Usuarios,
-  CrearUsuario,
-  EditarUsuario,
-  Permisos,
-  Perfiles,
-  CrearPerfil,
-  EditarPerfil,
-  Niveles,
   CargarPadron,
+  CrearPerfil,
+  CrearUsuario,
+  Dashboard,
+  EditarPerfil,
+  EditarUsuario,
+  Login,
+  Niveles,
+  NotFound,
+  Perfiles,
+  Permisos,
+  Usuarios,
 } from "@pages";
-import { ProtectedRoute } from "./ProtectedRoute";
-import { PublicRoute } from "./PublicRoutes";
-import { ProtectedModuleRoute } from "./ProtectedModuleRoute";
+import ActivadorPage from "@pages/private/activador/ActivadorPage";
+import CuposActivadorPage from "@pages/private/activador/CuposActivadorPage";
+import Campanas from "@pages/private/campanas/Campanas";
+import ConfiguracionCampanaPage from "@pages/private/campanas/ConfiguracionCampanaPage";
+import CrearCampana from "@pages/private/campanas/CrearCampana";
+import EditarCampana from "@pages/private/campanas/EditarCampana";
+import CrearImpresoraPage from "@pages/private/impresoras/CrearImpresoraPage";
+import ImpresorasListaPage from "@pages/private/impresoras/ImpresorasListaPage";
+import ReporteImpresionesPage from "@pages/private/impresoras/ReporteImpresionesPage";
+import ImpresoraDetallePage from "@pages/private/impresoras/components/ImpresoraDetallePage";
+import { MapaCalor } from "@pages/private/mapa";
+import PadronDetallePage from "@pages/private/padron/PadronDetallePage";
+import ConsultaVotantePage from "@pages/private/padron/consulta/ConsultaVotantePage";
+import { PartidosPage } from "@pages/private/partidos";
+import CrearPuestoPage from "@pages/private/puestos/CrearPuestoPage";
+import PuestosListaPage from "@pages/private/puestos/PuestosListaPage";
+import PuestoDetallePage from "@pages/private/puestos/components/PuestoDetallePage";
+import { Reportes } from "@pages/private/reportes";
+import { ReportesImprimirPage } from "@pages/private/reportes-imprimir";
 import {
   CrearSimpatizante,
   ListaSimpatizantes,
+  RegistrarParaPage,
 } from "@pages/private/simpatizantes";
-import Campanas from "@pages/private/campanas/Campanas";
-import CrearCampana from "@pages/private/campanas/CrearCampana";
-import EditarCampana from "@pages/private/campanas/EditarCampana";
-import { Reportes } from "@pages/private/reportes";
-import { MapaCalor } from "@pages/private/mapa";
-import SolicitudesListaPage from "@pages/private/solicitudes/lista/SolicitudesListaPage";
-import TransportistasListaPage from "@pages/private/transportes/transportistas/TransportistasListaPage";
-import PasajerosListaPage from "@pages/private/transportes/pasajeros/PasajerosListaPage";
-import VerificacionesListaPage from "@pages/private/transportes/verificaciones/VerificacionesListaPage";
-import CrearSolicitudPage from "@pages/private/solicitudes/crear/CrearSolicitudPage";
-import CrearTransportistaPage from "@pages/private/transportes/transportistas/CrearTransportistaPage";
-import RegistrarPasajeroPage from "@pages/private/transportes/pasajeros/RegistrarPasajeroPage";
-import SolicitudDetallePage from "@pages/private/solicitudes/detalle/SolicitudDetallePage";
-import ConfiguracionTransportePage from "@pages/private/transportes/configuracion/ConfiguracionTransportePage";
-import TransportistaDetallePage from "@pages/private/transportes/transportistas/TransportistaDetallePage";
-import TransportistaOperativaPage from "@pages/private/transportes/operativa/TransportistaOperativaPage";
-import EscanearTransportePage from "@pages/private/transportes/escanear/EscanearTransportePage";
-import ConfirmarTransportePage from "@pages/private/transportes/confirmar/ConfirmarTransportePage";
-import ImpresorasListaPage from "@pages/private/impresoras/ImpresorasListaPage";
-import CrearImpresoraPage from "@pages/private/impresoras/CrearImpresoraPage";
-import ImpresoraDetallePage from "@pages/private/impresoras/components/ImpresoraDetallePage";
-import { PartidosPage } from "@pages/private/partidos";
-import ConfiguracionCampanaPage from "@pages/private/campanas/ConfiguracionCampanaPage";
-import RegistrarSimpatizantePage from "@pages/private/simpatizantes/registrar/RegistrarSimpatizantePage";
+import ConsultaVotoPage from "@pages/private/simpatizantes/consulta-voto/ConsultaVotoPage";
+import DashboardVotacionPage from "@pages/private/simpatizantes/dashboard-votacion/DashboardVotacionPage";
+import DuplicadosSimpatizantesPage from "@pages/private/simpatizantes/duplicados/DuplicadosSimpatizantesPage";
+import LocalesVotacionPage from "@pages/private/simpatizantes/locales/LocalesVotacionPage";
 import RedSimpatizantesPage from "@pages/private/simpatizantes/red/RedSimpatizantesPage";
 import SimpatizantesDeUsuarioPage from "@pages/private/simpatizantes/red/SimpatizantesDeUsuarioPage";
+import RegistrarSimpatizantePage from "@pages/private/simpatizantes/registrar/RegistrarSimpatizantePage";
 import SeguimientoSimpatizantesPage from "@pages/private/simpatizantes/seguimiento/SeguimientoSimpatizantesPage";
-import DuplicadosSimpatizantesPage from "@pages/private/simpatizantes/duplicados/DuplicadosSimpatizantesPage";
-import PadronDetallePage from "@pages/private/padron/PadronDetallePage";
-import { ReportesImprimirPage } from "@pages/private/reportes-imprimir";
-import LocalesVotacionPage from "@pages/private/simpatizantes/locales/LocalesVotacionPage";
-import ConsultaVotantePage from "@pages/private/padron/consulta/ConsultaVotantePage";
+import CrearSolicitudPage from "@pages/private/solicitudes/crear/CrearSolicitudPage";
+import SolicitudDetallePage from "@pages/private/solicitudes/detalle/SolicitudDetallePage";
+import SolicitudesListaPage from "@pages/private/solicitudes/lista/SolicitudesListaPage";
+import ConfiguracionTransportePage from "@pages/private/transportes/configuracion/ConfiguracionTransportePage";
+import ConfirmarTransportePage from "@pages/private/transportes/confirmar/ConfirmarTransportePage";
+import EscanearTransportePage from "@pages/private/transportes/escanear/EscanearTransportePage";
+import TransportistaOperativaPage from "@pages/private/transportes/operativa/TransportistaOperativaPage";
+import PasajerosListaPage from "@pages/private/transportes/pasajeros/PasajerosListaPage";
+import RegistrarPasajeroPage from "@pages/private/transportes/pasajeros/RegistrarPasajeroPage";
+import CrearTransportistaPage from "@pages/private/transportes/transportistas/CrearTransportistaPage";
+import TransportistaDetallePage from "@pages/private/transportes/transportistas/TransportistaDetallePage";
+import TransportistasListaPage from "@pages/private/transportes/transportistas/TransportistasListaPage";
+import VerificacionesListaPage from "@pages/private/transportes/verificaciones/VerificacionesListaPage";
+import { Navigate, Route, Routes } from "react-router";
+import { ProtectedModuleRoute } from "./ProtectedModuleRoute";
+import { ProtectedRoute } from "./ProtectedRoute";
+import { PublicRoute } from "./PublicRoutes";
+import RoutesConfig, { basePaths } from "./RoutesConfig";
+import SolidaridadPage from "@pages/private/solidaridad/SolidaridadPage";
+import VerificadorPage from "@pages/private/verificador/VerificadorPage";
+import ConfiguracionListaPage from "@pages/private/campanas/ConfiguracionListaPage";
+import TemplateEditorPage from "@pages/private/templates/TemplateEditorPage";
+import TemplatesListaPage from "@pages/private/templates/TemplatesListaPage";
 
 const AppRoutes = () => {
   return (
@@ -105,6 +120,10 @@ const AppRoutes = () => {
               />
               <Route
                 path={RoutesConfig.configuracion}
+                element={<ConfiguracionListaPage />}
+              />
+              <Route
+                path={`${RoutesConfig.configuracion}/:campanaId`}
                 element={<ConfiguracionCampanaPage />}
               />
             </Route>
@@ -171,6 +190,10 @@ const AppRoutes = () => {
                 element={<RegistrarSimpatizantePage />}
               />
               <Route
+                path={RoutesConfig.simpatizantesRegistrarPara}
+                element={<RegistrarParaPage />}
+              />
+              <Route
                 path={RoutesConfig.simpatizantesLista}
                 element={<ListaSimpatizantes />}
               />
@@ -193,6 +216,14 @@ const AppRoutes = () => {
               <Route
                 path={RoutesConfig.simpatizantesLocales}
                 element={<LocalesVotacionPage />}
+              />
+              <Route
+                path={RoutesConfig.simpatizantesConsultaVoto}
+                element={<ConsultaVotoPage />}
+              />
+              <Route
+                path={RoutesConfig.simpatizantesDashboardVotacion}
+                element={<DashboardVotacionPage />}
               />
             </Route>
 
@@ -269,6 +300,52 @@ const AppRoutes = () => {
               <Route
                 path={RoutesConfig.impresorasDetalle}
                 element={<ImpresoraDetallePage />}
+              />
+              <Route
+                path={RoutesConfig.impresorasReportes}
+                element={<ReporteImpresionesPage />}
+              />
+            </Route>
+            {/* Puestos de Control */}
+            <Route element={<ProtectedModuleRoute modulo="puestos" />}>
+              <Route
+                path={RoutesConfig.puestosLista}
+                element={<PuestosListaPage />}
+              />
+              <Route
+                path={RoutesConfig.puestosCrear}
+                element={<CrearPuestoPage />}
+              />
+              <Route
+                path={`${RoutesConfig.puestosLista}/:id`}
+                element={<PuestoDetallePage />}
+              />
+            </Route>
+            {/* Activador */}
+            <Route element={<ProtectedModuleRoute modulo="tickets" />}>
+              <Route
+                path={RoutesConfig.activadorPanel}
+                element={<ActivadorPage />}
+              />
+              <Route
+                path={RoutesConfig.activadorCupos}
+                element={<CuposActivadorPage />}
+              />
+              <Route
+                path={RoutesConfig.verificadorPanel}
+                element={<VerificadorPage />}
+              />
+              <Route
+                path={RoutesConfig.solidaridadPanel}
+                element={<SolidaridadPage />}
+              />
+               <Route
+                path={RoutesConfig.templateLista}
+                element={<TemplatesListaPage />}
+              />
+              <Route
+                path="/admin/templates/:campanaId/:modo"
+                element={<TemplateEditorPage />}
               />
             </Route>
 

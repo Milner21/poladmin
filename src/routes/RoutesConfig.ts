@@ -1,3 +1,4 @@
+//src/routes/RoutesConfig.ts
 export const basePaths = {
   admin: "/admin",
 };
@@ -41,6 +42,7 @@ const RoutesConfig = {
   // Simpatizantes
   simpatizantes: `${basePaths.admin}/simpatizantes`,
   simpatizantesRegistrar: `${basePaths.admin}/simpatizantes/registrar`,
+  simpatizantesRegistrarPara: `${basePaths.admin}/simpatizantes/registrar/para`,
   simpatizantesLista: `${basePaths.admin}/simpatizantes/lista`,
   simpatizantesRed: `${basePaths.admin}/simpatizantes/red`,
   simpatizantesRedUsuario: (id: string) =>
@@ -49,12 +51,16 @@ const RoutesConfig = {
   simpatizantesDuplicados: `${basePaths.admin}/simpatizantes/duplicados`,
   simpatizantesCrear: `${basePaths.admin}/simpatizantes/crear`,
   simpatizantesLocales: `${basePaths.admin}/simpatizantes/locales`,
+  simpatizantesConsultaVoto: `${basePaths.admin}/simpatizantes/consulta-voto`,
+  simpatizantesDashboardVotacion: `${basePaths.admin}/simpatizantes/dashboard-votacion`,
 
   // Campañas
   campanas: `${basePaths.admin}/campanas`,
   campanasCrear: `${basePaths.admin}/campanas/crear`,
   campanasEditar: (id: string) => `${basePaths.admin}/campanas/editar/${id}`,
   configuracion: `${basePaths.admin}/configuracion`,
+  configuracionDetalle: (campanaId: string) =>
+    `${basePaths.admin}/configuracion/${campanaId}`,
 
   // Reportes
   reportes: `${basePaths.admin}/reportes`,
@@ -87,6 +93,27 @@ const RoutesConfig = {
   impresorasLista: "/admin/impresoras",
   impresorasDetalle: "/admin/impresoras/:id",
   impresorasCrear: "/admin/impresoras/crear",
+  impresorasReportes: "/admin/impresoras/reportes",
+
+  // PUESTOS DE CONTROL
+  puestosLista: `${basePaths.admin}/puestos`,
+  puestosCrear: `${basePaths.admin}/puestos/crear`,
+  puestosDetalle: (id: string) => `${basePaths.admin}/puestos/${id}`,
+
+  // ACTIVADOR
+  activadorPanel: `${basePaths.admin}/activador`,
+  activadorCupos: `${basePaths.admin}/activador/cupos`,
+
+  // VERIFICADOR
+  verificadorPanel: `${basePaths.admin}/verificador`,
+
+  // SOLIDARIDAD
+  solidaridadPanel: `${basePaths.admin}/solidaridad`,
+
+  // TEMPLATES DE TICKETS
+  templateLista: `${basePaths.admin}/templates`,
+  templateEditor: (campanaId: string, modo: string) =>
+    `${basePaths.admin}/templates/${campanaId}/${modo}`,
 };
 
 // Named export para compatibilidad con axios.config.ts

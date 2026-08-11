@@ -75,4 +75,15 @@ export const dashboardService = {
     const response = await axiosInstance.get("/dashboard/intencion-voto");
     return response.data.data;
   },
+
+  getEstadisticasImpresiones: async (
+    fechaDesde?: string,
+  ): Promise<import("@dto/impresora.types").EstadisticasImpresionesDto> => {
+    const params = fechaDesde ? { fecha_desde: fechaDesde } : {};
+    const response = await axiosInstance.get(
+      "/dashboard/estadisticas-impresiones",
+      { params },
+    );
+    return response.data.data;
+  },
 };

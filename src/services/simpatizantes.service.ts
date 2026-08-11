@@ -49,6 +49,17 @@ export const simpatizantesService = {
     return response.data.data || response.data;
   },
 
+  crearParaTercero: async (
+    paraUsuarioId: string,
+    datos: CreateSimpatizanteDto,
+  ): Promise<Simpatizante | RespuestaDuplicadoRegistrado> => {
+    const response = await axiosInstance.post(
+      `/simpatizantes/para/${paraUsuarioId}`,
+      datos,
+    );
+    return response.data.data || response.data;
+  },
+
   actualizar: async (
     id: string,
     data: {
@@ -170,6 +181,54 @@ export const simpatizantesService = {
   marcarVoto: async (simpatizanteId: string): Promise<{ mensaje: string }> => {
     const response = await axiosInstance.patch(
       `/simpatizantes/${simpatizanteId}/marcar-voto`,
+    );
+    return response.data;
+  },
+
+  consultarVoto: async (
+    ci: string,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data: {
+      nombre: string;
+      apellido: string;
+      documento: string;
+      voto_internas: boolean;
+      fecha_voto_internas: string | null;
+      voto_generales: boolean;
+      fecha_voto_generales: string | null;
+      local_votacion: string | null;
+      mesa_votacion: string | null;
+      orden_votacion: string | null;
+    } | null;
+  }> => {
+    const response = await axiosInstance.get(
+      `/simpatizantes/consulta-voto/${ci}`,
+    );
+    return response.data;
+  },
+
+  // Pegar antes del }; que cierra simpatizantesService
+
+  getEstadisticasVotacion: async (): Promise<{
+    success: boolean;
+    data: {
+      total_simpatizantes: number;
+      votantes_internas: number;
+      votantes_generales: number;
+      votantes_ambas: number;
+      pendientes_internas: number;
+      pendientes_generales: number;
+      votantes_hoy_internas: number;
+      votantes_hoy_generales: number;
+      porcentaje_participacion_internas: number;
+      porcentaje_participacion_generales: number;
+      porcentaje_votantes_completos: number;
+    };
+  }> => {
+    const response = await axiosInstance.get(
+      "/simpatizantes/estadisticas-votacion",
     );
     return response.data;
   },

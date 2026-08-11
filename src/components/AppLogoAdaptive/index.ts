@@ -1,0 +1,1 @@
+export { AppLogoAdaptive, default } from './AppLogoAdaptive';

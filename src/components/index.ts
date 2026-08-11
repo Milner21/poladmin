@@ -10,3 +10,5 @@ export { CTable } from "./CTable";
 export { PageHeader } from "./CPageHeader";
 export { ProtectedAction } from "./ProtectedAction";
 export { ModalActualizacion } from "./ModalActualizacion";
+export { AppLogoAdaptive } from './AppLogoAdaptive';
+export { default as CThemeSelector } from './CThemeSelector';

@@ -15,6 +15,11 @@ interface ErrorResponse {
 
 export type { ErrorDuplicadoPayload };
 
+/**
+ * @deprecated El registro automatico de simpatizantes organicos ahora ocurre internamente
+ * al imprimir el ticket (Fase 4). Este hook se conserva por compatibilidad con codigo legacy.
+ */
+
 export const useCrearSimpatizante = () => {
   const queryClient = useQueryClient();
 

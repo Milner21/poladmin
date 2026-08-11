@@ -4,4 +4,4 @@ export { Permisos } from './permisos';
 export { Perfiles, CrearPerfil, EditarPerfil } from './perfiles';
 export { Niveles } from './niveles';
 export { CargarPadron } from './padron';
-export { CrearSimpatizante } from './simpatizantes';
+export * from './simpatizantes';

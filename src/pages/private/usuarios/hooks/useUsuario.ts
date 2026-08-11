@@ -1,3 +1,4 @@
+//src/pages/private/usuarios/hooks/useUsuario.ts
 import { useQuery } from '@tanstack/react-query';
 import { usuariosService } from '@services/usuarios.service';
 

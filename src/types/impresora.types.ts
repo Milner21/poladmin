@@ -5,7 +5,7 @@ export interface Impresora extends Record<string, unknown> {
   nombre: string;
   descripcion: string | null;
   ubicacion: string | null;
-  estado: 'CONECTADA' | 'DESCONECTADA';
+  estado: "CONECTADA" | "DESCONECTADA";
   ip_ultima: string | null;
   hostname_ultimo: string | null;
   ultima_conexion: string | null;
@@ -48,9 +48,9 @@ export interface TrabajoImpresion extends Record<string, unknown> {
   id: string;
   impresora_id: string;
   usuario_id: string;
-  tipo: 'TICKET_TRANSPORTE' | 'TICKET_PADRON' | 'REPORTE';
+  tipo: "TICKET_TRANSPORTE" | "TICKET_PADRON" | "REPORTE";
   datos: Record<string, unknown>;
-  estado: 'PENDIENTE' | 'ENVIADO' | 'COMPLETADO' | 'FALLIDO';
+  estado: "PENDIENTE" | "ENVIADO" | "COMPLETADO" | "FALLIDO";
   error: string | null;
   creado_en: string;
   procesado_en: string | null;
@@ -85,4 +85,22 @@ export interface AsignarUsuarioDto {
 export interface CrearTrabajoDto {
   tipo: string;
   datos: Record<string, unknown>;
+}
+
+export interface EstadisticasImpresionesDto {
+  total_impresiones_hoy: number;
+  total_impresiones_acumulado: number;
+  total_ticket_padron: number;
+  total_ticket_transporte: number;
+}
+
+export interface ReporteUsuarioImpresion extends Record<string, unknown> {
+  usuario_id: string;
+  nombre: string;
+  apellido: string;
+  perfil: string;
+  total_ticket_padron: number;
+  total_ticket_transporte: number;
+  total_impresiones: number;
+  ultima_impresion: string | null;
 }

@@ -19,7 +19,10 @@ export type ModuloPermiso =
   | "solicitudes"
   | "transportes"
   | "impresoras"
-  | "padron";
+  | "padron"
+  | "puestos"
+  | "tickets"
+  | "estadisticas";
 
 export const MODULOS: ModuloPermiso[] = [
   "usuarios",
@@ -35,6 +38,9 @@ export const MODULOS: ModuloPermiso[] = [
   "transportes",
   "impresoras",
   "padron",
+  "puestos",
+  "tickets",
+  "estadisticas"
 ];
 
 export interface CreatePermisoDto {

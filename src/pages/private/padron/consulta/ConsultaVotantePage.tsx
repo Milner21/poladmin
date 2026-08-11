@@ -1,31 +1,29 @@
-import { useState, type FC } from "react";
 import { PageHeader } from "@components";
-import {
-  Search,
-  CheckCircle,
-  XCircle,
-  Printer,
-  UserPlus,
-  Clock,
-} from "lucide-react";
-import { useConsultaVotante } from "../hooks/useConsultaVotante";
-import { useMarcarVoto } from "@pages/private/simpatizantes/hooks/useMarcarVoto";
+import type { ResultadoConsultaVotante } from "@dto/padron.types";
+import { usePermisos } from "@hooks/usePermisos";
 import { useImprimirPadron } from "@pages/private/impresoras/hooks/useImprimirPadron";
 import { useMiImpresora } from "@pages/private/impresoras/hooks/useMiImpresora";
-import type { ResultadoConsultaVotante } from "@dto/padron.types";
-import ModalRegistrarSimpatizante from "./components/ModalRegistrarSimpatizante";
-import { usePermisos } from "@hooks/usePermisos";
+import { useMarcarVoto } from "@pages/private/simpatizantes/hooks/useMarcarVoto";
 import RoutesConfig from "@routes/RoutesConfig";
+import {
+  CheckCircle,
+  Clock,
+  Printer,
+  RefreshCw,
+  Search,
+  X,
+  XCircle,
+} from "lucide-react";
+import { useState, type FC } from "react";
 import { Navigate } from "react-router";
+import { useConsultaVotante } from "../hooks/useConsultaVotante";
 
 const ConsultaVotantePage: FC = () => {
   const [ci, setCi] = useState("");
   const [ciBuscada, setCiBuscada] = useState("");
-  const [modalRegistrarOpen, setModalRegistrarOpen] = useState(false);
   const { tienePermiso } = usePermisos();
   const puedeMarcarVotoPermiso = tienePermiso("marcar_voto");
-  const [resultadoActual, setResultadoActual] =
-    useState<ResultadoConsultaVotante | null>(null);
+  useState<ResultadoConsultaVotante | null>(null);
 
   const {
     data: resultado,
@@ -48,6 +46,11 @@ const ConsultaVotantePage: FC = () => {
     setCiBuscada(ciLimpia);
   };
 
+  const handleLimpiarCi = () => {
+    setCi("");
+    setCiBuscada("");
+  };
+
   const handleMarcarVoto = async () => {
     if (!resultado?.simpatizante_id) return;
 
@@ -55,20 +58,7 @@ const ConsultaVotantePage: FC = () => {
     refetch();
   };
 
-  const handleImprimir = async () => {
-    if (!ciBuscada) return;
-    await imprimirMutation.mutateAsync(ciBuscada);
-  };
-
-  const handleAbrirModalRegistrar = () => {
-    if (resultado) {
-      setResultadoActual(resultado);
-      setModalRegistrarOpen(true);
-    }
-  };
-
-  const handleRegistroExitoso = () => {
-    setModalRegistrarOpen(false);
+  const handleImprimirExitoso = () => {
     refetch();
   };
 
@@ -183,19 +173,34 @@ const ConsultaVotantePage: FC = () => {
         <div className="bg-bg-content border border-border rounded-xl p-6">
           {/* Input y botón Buscar - Responsive */}
           <div className="flex flex-col sm:flex-row gap-3 mb-6">
-            <input
-              type="text"
-              className="w-full px-4 py-2 rounded-lg border border-border bg-bg-content
-                text-text-primary placeholder:text-text-tertiary
-                focus:outline-none focus:ring-2 focus:ring-primary
-                transition-all resize-none"
-              placeholder="Ingresá el número de CI"
-              value={ci}
-              onChange={(e) => setCi(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleBuscar();
-              }}
-            />
+            <div className="relative w-full">
+              <input
+                type="text"
+                className="w-full px-4 py-2 pr-10 rounded-lg border border-border bg-bg-content
+                  text-text-primary placeholder:text-text-tertiary
+                  focus:outline-none focus:ring-2 focus:ring-primary
+                  transition-all resize-none"
+                placeholder="Ingresá el número de CI"
+                value={ci}
+                onChange={(e) => setCi(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleBuscar();
+                }}
+              />
+              {ci.trim().length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleLimpiarCi}
+                  className="absolute right-2 top-1/2 -translate-y-1/2
+                    p-1 rounded-full text-text-tertiary
+                    hover:text-text-primary hover:bg-bg-surface
+                    transition-colors"
+                  aria-label="Limpiar búsqueda"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
             <button
               onClick={handleBuscar}
               disabled={isLoading || ci.trim().length === 0}
@@ -217,7 +222,7 @@ const ConsultaVotantePage: FC = () => {
 
           {resultado && !isLoading && (
             <div className="space-y-4">
-              {resultado.estado === "NO_ENCONTRADO" ? (
+              {!resultado.datos ? (
                 <div className="bg-danger/10 border border-danger/30 rounded-lg p-6 text-center">
                   <XCircle size={48} className="mx-auto mb-3 text-danger" />
                   <p className="font-semibold text-danger text-lg">
@@ -284,7 +289,7 @@ const ConsultaVotantePage: FC = () => {
 
                   {renderEstadoVoto()}
 
-                  {/* Botones de acción - Responsive */}
+                  {/* Botones de accion */}
                   <div className="flex flex-col sm:flex-row gap-3">
                     {resultado.estado === "SIMPATIZANTE_REGISTRADO" &&
                       puedeMarcarVoto() &&
@@ -293,9 +298,9 @@ const ConsultaVotantePage: FC = () => {
                           onClick={handleMarcarVoto}
                           disabled={marcarVotoMutation.isPending}
                           className="flex items-center px-4 py-2
-                bg-primary hover:bg-primary-hover
-                text-white text-sm font-medium rounded-lg
-                transition-colors gap-2 w-full sm:w-auto"
+                            bg-primary hover:bg-primary-hover
+                            text-white text-sm font-medium rounded-lg
+                            transition-colors gap-2 w-full sm:w-auto"
                         >
                           <CheckCircle size={18} />
                           {marcarVotoMutation.isPending
@@ -304,34 +309,71 @@ const ConsultaVotantePage: FC = () => {
                         </button>
                       )}
 
-                    {resultado.estado === "EN_PADRON_NO_REGISTRADO" && (
-                      <button
-                        onClick={handleAbrirModalRegistrar}
-                        className="flex items-center px-4 py-2
-                bg-primary hover:bg-primary-hover
-                text-white text-sm font-medium rounded-lg
-                transition-colors gap-2 w-full sm:w-auto"
-                      >
-                        <UserPlus size={18} />
-                        Registrar como Simpatizante
-                      </button>
-                    )}
+                    {tieneImpresora &&
+                      resultado.datos &&
+                      resultado.estado !== "NO_ENCONTRADO" &&
+                      (() => {
+                        const yaImpreso =
+                          resultado.modo_eleccion === "INTERNAS"
+                            ? resultado.ticket_impreso_internas
+                            : resultado.ticket_impreso_generales;
 
-                    {tieneImpresora && resultado.datos && (
-                      <button
-                        onClick={handleImprimir}
-                        disabled={imprimirMutation.isPending}
-                        className="flex items-center px-4 py-2
-                bg-primary hover:bg-primary-hover
-                text-white text-sm font-medium rounded-lg
-                transition-colors gap-2 w-full sm:w-auto"
-                      >
-                        <Printer size={18} />
-                        {imprimirMutation.isPending
-                          ? "Imprimiendo..."
-                          : "Imprimir Ticket"}
-                      </button>
-                    )}
+                        const fechaImpresion =
+                          resultado.modo_eleccion === "INTERNAS"
+                            ? resultado.fecha_impresion_internas
+                            : resultado.fecha_impresion_generales;
+
+                        if (yaImpreso && !resultado.puede_reimprimir) {
+                          return (
+                            <div className="bg-bg-surface border border-border rounded-lg px-4 py-2 flex items-center gap-2">
+                              <Printer
+                                size={16}
+                                className="text-text-tertiary"
+                              />
+                              <div>
+                                <p className="text-xs font-medium text-text-tertiary">
+                                  Ticket ya impreso
+                                </p>
+                                {fechaImpresion && (
+                                  <p className="text-xs text-text-tertiary">
+                                    {new Date(fechaImpresion).toLocaleString(
+                                      "es-PY",
+                                    )}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <button
+                            onClick={() => {
+                              imprimirMutation.mutate(ciBuscada, {
+                                onSuccess: (data) => {
+                                  if (data.exitoso) handleImprimirExitoso();
+                                },
+                              });
+                            }}
+                            disabled={imprimirMutation.isPending}
+                            className="flex items-center px-4 py-2
+                            bg-primary hover:bg-primary-hover
+                            text-white text-sm font-medium rounded-lg
+                            transition-colors gap-2 w-full sm:w-auto"
+                          >
+                            {yaImpreso ? (
+                              <RefreshCw size={18} />
+                            ) : (
+                              <Printer size={18} />
+                            )}
+                            {imprimirMutation.isPending
+                              ? "Imprimiendo..."
+                              : yaImpreso
+                                ? "Reimprimir Ticket"
+                                : "Imprimir Ticket"}
+                          </button>
+                        );
+                      })()}
                   </div>
 
                   {!tieneImpresora && (
@@ -348,15 +390,6 @@ const ConsultaVotantePage: FC = () => {
           )}
         </div>
       </div>
-
-      {resultadoActual && (
-        <ModalRegistrarSimpatizante
-          isOpen={modalRegistrarOpen}
-          onClose={() => setModalRegistrarOpen(false)}
-          datos={resultadoActual.datos}
-          onSuccess={handleRegistroExitoso}
-        />
-      )}
     </div>
   );
 };

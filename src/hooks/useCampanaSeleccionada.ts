@@ -1,3 +1,4 @@
+//src/hooks/useCampanaSeleccionada.ts
 import { useState, useEffect } from "react";
 import { useAuth } from "./useAuth";
 import { useCampanas } from "@pages/private/campanas/hooks/useCampanas";

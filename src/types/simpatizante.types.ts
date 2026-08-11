@@ -1,3 +1,5 @@
+//src/types/simpatizante.types.ts
+
 export type OrigenRegistro = "PADRON_INTERNO" | "PADRON_GENERAL" | "MANUAL";
 
 export interface Simpatizante {
@@ -76,6 +78,7 @@ export interface CreateSimpatizanteDto {
   candidato_id?: string;
   confirmar_duplicado?: boolean;
   marcar_voto_automatico?: boolean;
+  es_registro_dia_d?: boolean;
 }
 
 export interface Direccion {

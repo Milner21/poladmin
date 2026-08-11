@@ -5,6 +5,8 @@ import type {
   UpdateImpresoraDto,
   AsignarUsuarioDto,
   CrearTrabajoDto,
+  EstadisticasImpresionesDto,
+  ReporteUsuarioImpresion,
 } from "@dto/impresora.types";
 
 export const impresorasService = {
@@ -103,9 +105,31 @@ export const impresorasService = {
   ): Promise<{
     exitoso: boolean;
     mensaje: string;
+    es_duplicado?: boolean;
   }> => {
     const response = await axiosInstance.post("/impresoras/imprimir-padron", {
       ci,
+    });
+    return response.data.data || response.data;
+  },
+
+  getEstadisticasImpresiones: async (
+    fechaDesde?: string,
+  ): Promise<EstadisticasImpresionesDto> => {
+    const params = fechaDesde ? { fecha_desde: fechaDesde } : {};
+    const response = await axiosInstance.get(
+      "/dashboard/estadisticas-impresiones",
+      { params },
+    );
+    return response.data.data || response.data;
+  },
+
+  getReporteUsuarios: async (
+    fechaDesde?: string,
+  ): Promise<ReporteUsuarioImpresion[]> => {
+    const params = fechaDesde ? { fecha_desde: fechaDesde } : {};
+    const response = await axiosInstance.get("/impresoras/reporte-usuarios", {
+      params,
     });
     return response.data.data || response.data;
   },

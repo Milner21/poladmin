@@ -1,0 +1,42 @@
+/* ============================================
+   ESTRUCTURA BASE DE TEMAS
+   Variables que se repetirán en cada tema
+   ============================================ */
+
+@theme inline {
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-active: var(--color-primary-active);
+  --color-primary-dark: var(--color-primary-dark);
+
+  --color-bg-base: var(--color-bg-base);
+  --color-bg-content: var(--color-bg-content);
+  --color-bg-header: var(--color-bg-header);
+  --color-bg-sidebar: var(--color-bg-sidebar);
+  --color-bg-title: var(--color-bg-title);
+
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-tertiary: var(--color-text-tertiary);
+
+  --color-border: var(--color-border);
+  --color-border-light: var(--color-border-light);
+
+  --color-sidebar-text: var(--color-sidebar-text);
+  --color-sidebar-text-active: var(--color-sidebar-text-active);
+  --color-sidebar-hover: var(--color-sidebar-hover);
+  --color-sidebar-selected: var(--color-sidebar-selected);
+
+  --color-danger: var(--color-danger);
+  --color-warning: var(--color-warning);
+  --color-success: var(--color-success);
+  --color-info: var(--color-info);
+
+  --color-logo-primary: var(--color-logo-primary);
+  --color-logo-secondary: var(--color-logo-secondary);
+}
+
+/* Tema por defecto */
+:root {
+  /* Se aplicará el tema verde claro por defecto */
+}

@@ -1,14 +1,18 @@
+//src/pages/private/dashboard/Dashboard.tsx
+
 import { CFooter, PageHeader } from "@components";
 import { useCampanaSeleccionada } from "@hooks/useCampanaSeleccionada";
 import { usePermisos } from "@hooks/usePermisos";
 import { useEstadisticasUsuarios } from "@pages/private/usuarios/hooks/useEstadisticasUsuarios";
 import {
+  Activity,
   Car,
   FileSpreadsheet,
   MapPin,
   Network,
   Phone,
   PhoneOff,
+  Printer,
   ThumbsUp,
   TrendingUp,
   UserCheck,
@@ -25,25 +29,41 @@ import { SimpatizantesAreaChart } from "./components/simpatizantesAreaChart/simp
 import { StatCard } from "./components/statCard/StatCard";
 import { TopRegistradoresChart } from "./components/TopRegistradoresChart";
 import { useDashboard } from "./hooks/useDashboard";
+import { useEstadisticasImpresiones } from "./hooks/useEstadisticasImpresiones";
+import { FunnelDiaD } from "./components/diad/FunnelDiaD";
+import { ResumenOrganicos } from "./components/diad/ResumenOrganicos";
+import { TablaPuestosDiaD } from "./components/diad/TablaPuestosDiaD";
+import { useEstadisticasDiaD } from "@hooks/useEstadisticasDiaD";
 
 const Dashboard: FC = () => {
   const isMobile = window.innerWidth < 768;
   const fixedHeight = isMobile ? 200 : 280;
   const [filtroActivo, setFiltroActivo] = useState<string>("dia");
   const [seccionActiva, setSeccionActiva] = useState<
-    "simpatizantes" | "usuarios"
+    "simpatizantes" | "usuarios" | "diad"
   >("simpatizantes");
 
   const { campanaSeleccionada, campanaActual } = useCampanaSeleccionada();
 
   const { tienePermiso } = usePermisos();
 
+  const { data: statsImpresiones } = useEstadisticasImpresiones();
+  const { data: statsDiaD } = useEstadisticasDiaD();
   const puedeVerEquipo = tienePermiso("ver_equipo_dashboard");
+  const puedeVerDiaD = tienePermiso("ver_estadisticas_especiales");
+  const puedeVerOrganicos = tienePermiso("ver_detalle_organicos");
   const puedeVerTopRegistradores = tienePermiso("ver_top_registradores");
   const puedeVerMapa = tienePermiso("ver_mapa_dashboard");
   const puedeVerOrigenRegistro = tienePermiso("ver_origen_registro");
   const puedeVerContactabilidad = tienePermiso("ver_contactabilidad");
   const puedeVerIndicadores = tienePermiso("ver_indicadores_dashboard");
+  const puedeVerReportesImpresion = tienePermiso("ver_reportes_impresion");
+  const mostrarTabDiaD =
+    puedeVerDiaD &&
+    statsDiaD !== undefined &&
+    (statsDiaD.usar_activador_ticket ||
+      statsDiaD.usar_verificador_asistencia ||
+      statsDiaD.usar_solidaridad);
 
   const {
     estadisticas,
@@ -165,6 +185,25 @@ const Dashboard: FC = () => {
             )}
           </button>
         )}
+
+        {mostrarTabDiaD && (
+          <button
+            onClick={() => setSeccionActiva("diad")}
+            className={`px-4 py-2 text-sm font-medium transition-colors relative ${
+              seccionActiva === "diad"
+                ? "text-primary"
+                : "text-text-tertiary hover:text-text-primary"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Activity size={16} />
+              Dia D
+            </div>
+            {seccionActiva === "diad" && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+            )}
+          </button>
+        )}
       </div>
 
       {seccionActiva === "simpatizantes" ? (
@@ -230,22 +269,32 @@ const Dashboard: FC = () => {
           {/* Fila 2 - Estadisticas de calidad */}
           {(puedeVerOrigenRegistro ||
             puedeVerContactabilidad ||
-            puedeVerIndicadores) && (
+            puedeVerIndicadores ||
+            puedeVerReportesImpresion) && (
             <div
               className={`grid grid-cols-1 gap-4 mb-6 ${
                 [
                   puedeVerOrigenRegistro,
                   puedeVerContactabilidad,
                   puedeVerIndicadores,
-                ].filter(Boolean).length === 3
-                  ? "lg:grid-cols-3"
+                  puedeVerReportesImpresion,
+                ].filter(Boolean).length === 4
+                  ? "lg:grid-cols-4"
                   : [
                         puedeVerOrigenRegistro,
                         puedeVerContactabilidad,
                         puedeVerIndicadores,
-                      ].filter(Boolean).length === 2
-                    ? "lg:grid-cols-2"
-                    : ""
+                        puedeVerReportesImpresion,
+                      ].filter(Boolean).length === 3
+                    ? "lg:grid-cols-3"
+                    : [
+                          puedeVerOrigenRegistro,
+                          puedeVerContactabilidad,
+                          puedeVerIndicadores,
+                          puedeVerReportesImpresion,
+                        ].filter(Boolean).length === 2
+                      ? "lg:grid-cols-2"
+                      : ""
               }`}
             >
               {puedeVerOrigenRegistro && (
@@ -444,6 +493,84 @@ const Dashboard: FC = () => {
                   </div>
                 </div>
               )}
+
+              {puedeVerReportesImpresion && (
+                <div className="bg-bg-content border border-border rounded-xl p-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Printer size={18} className="text-primary" />
+                    <h3 className="text-sm font-semibold text-text-primary">
+                      Tickets Impresos
+                    </h3>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-1.5">
+                          <FileSpreadsheet size={13} className="text-info" />
+                          <span className="text-xs text-text-secondary">
+                            Consulta Votante
+                          </span>
+                        </div>
+                        <span className="text-xs font-bold text-info">
+                          {statsImpresiones?.total_ticket_padron ?? 0}
+                        </span>
+                      </div>
+                      <BarraProgreso
+                        valor={
+                          statsImpresiones?.total_impresiones_acumulado
+                            ? (statsImpresiones.total_ticket_padron /
+                                statsImpresiones.total_impresiones_acumulado) *
+                              100
+                            : 0
+                        }
+                        color="bg-info"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-1.5">
+                          <Car size={13} className="text-warning" />
+                          <span className="text-xs text-text-secondary">
+                            Tickets Transporte
+                          </span>
+                        </div>
+                        <span className="text-xs font-bold text-warning">
+                          {statsImpresiones?.total_ticket_transporte ?? 0}
+                        </span>
+                      </div>
+                      <BarraProgreso
+                        valor={
+                          statsImpresiones?.total_impresiones_acumulado
+                            ? (statsImpresiones.total_ticket_transporte /
+                                statsImpresiones.total_impresiones_acumulado) *
+                              100
+                            : 0
+                        }
+                        color="bg-warning"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-1.5">
+                          <Printer size={13} className="text-success" />
+                          <span className="text-xs text-text-secondary">
+                            Total Hoy
+                          </span>
+                        </div>
+                        <span className="text-xs font-bold text-success">
+                          {statsImpresiones?.total_impresiones_hoy ?? 0}
+                        </span>
+                      </div>
+                      <div className="text-right mt-1">
+                        <span className="text-xs text-text-tertiary">
+                          Total:{" "}
+                          {statsImpresiones?.total_impresiones_acumulado ?? 0}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -492,7 +619,7 @@ const Dashboard: FC = () => {
             </div>
           )}
         </>
-      ) : (
+      ) : seccionActiva === "usuarios" ? (
         puedeVerEquipo && (
           <>
             {/* Stats usuarios */}
@@ -530,7 +657,16 @@ const Dashboard: FC = () => {
             </div>
           </>
         )
-      )}
+      ) : seccionActiva === "diad" && statsDiaD ? (
+        <div className="space-y-6">
+          <FunnelDiaD data={statsDiaD} />
+          <ResumenOrganicos
+            data={statsDiaD}
+            puedeVerOrganicos={puedeVerOrganicos}
+          />
+          <TablaPuestosDiaD data={statsDiaD} />
+        </div>
+      ) : null}
 
       <div className="mt-auto pt-6">
         <CFooter />

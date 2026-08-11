@@ -1,0 +1,61 @@
+/* ============================================
+   ESTILOS DEL LOGO ADAPTATIVO
+   ============================================ */
+
+.logo-adaptive {
+  color: var(--color-logo-primary);
+  transition: color 0.2s ease;
+}
+
+.logo-adaptive-secondary {
+  color: var(--color-logo-secondary);
+  transition: color 0.2s ease;
+}
+
+.logo-adaptive:hover {
+  filter: brightness(1.1);
+}
+
+/* Variantes del logo para diferentes contextos */
+.logo-header {
+  color: var(--color-primary);
+}
+
+.logo-sidebar {
+  color: var(--color-sidebar-text);
+}
+
+.logo-sidebar .logo-primary {
+  color: var(--color-primary);
+}
+
+.logo-sidebar .logo-secondary {
+  color: var(--color-sidebar-text);
+}
+
+/* Animación del logo */
+.logo-animated {
+  transition: all 0.3s ease;
+}
+
+.logo-animated:hover {
+  transform: scale(1.05);
+}
+
+/* Logo responsive */
+.logo-responsive {
+  width: 100%;
+  height: auto;
+  max-width: 60px;
+  max-height: 60px;
+}
+
+/* Logo con efecto de loading */
+.logo-pulse {
+  animation: logoPulse 2s ease-in-out infinite;
+}
+
+@keyframes logoPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}

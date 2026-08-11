@@ -1,0 +1,6 @@
+/* Importar la estructura base y todos los temas */
+@import "./base.css";
+@import "./green.css";
+@import "./red.css";
+@import "./blue.css";
+@import "./orange.css";

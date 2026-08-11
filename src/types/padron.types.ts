@@ -160,5 +160,10 @@ export interface ResultadoConsultaVotante {
   fecha_voto_generales: string | null;
   modo_eleccion: "INTERNAS" | "GENERALES";
   permite_registro_manual: boolean;
+  ticket_impreso_internas: boolean;
+  ticket_impreso_generales: boolean;
+  fecha_impresion_internas: string | null;
+  fecha_impresion_generales: string | null;
+  puede_reimprimir: boolean;
   mensaje: string;
 }

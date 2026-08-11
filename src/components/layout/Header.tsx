@@ -1,12 +1,15 @@
-import { CThemeButton } from "@components";
+
+import { AppLogoAdaptive } from "@components/AppLogoAdaptive";
 import { CDropdown, type DropdownItem } from "@components/ui";
 import { useAuth } from "@hooks/useAuth";
+import { usePermisos } from "@hooks/usePermisos";
 import RoutesConfig from "@routes/RoutesConfig";
 import { Lock, LogOut, Menu as MenuIcon, User } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SelectorCampanaHeader } from "./SelectorCampanaHeader";
 import { CambiarPasswordPersonalModal } from "./CambiarPasswordPersonalModal";
+import CThemeSelector from "@components/CThemeSelector";
 
 interface HeaderProps {
   isMobile: boolean;
@@ -21,6 +24,7 @@ const getInitials = (nombre?: string, apellido?: string): string => {
 
 export const Header = ({ isMobile, onMenuClick }: HeaderProps) => {
   const { cerrarSesion, usuario } = useAuth();
+  const { esRoot } = usePermisos();
   const navigate = useNavigate();
   const [modalPasswordVisible, setModalPasswordVisible] = useState(false);
 
@@ -63,26 +67,51 @@ export const Header = ({ isMobile, onMenuClick }: HeaderProps) => {
       <header className="h-16 bg-bg-header border-b border-border sticky top-0 z-50 flex items-center justify-between px-4 md:px-6">
         {/* Left Section */}
         <div className="flex items-center gap-3">
+          {/* Botón menú móvil */}
           {isMobile && (
             <button
               onClick={onMenuClick}
               className="p-2 text-text-primary hover:bg-bg-base rounded-lg transition-colors"
+              aria-label="Abrir menú"
             >
               <MenuIcon size={22} />
             </button>
           )}
 
-          {!isMobile && <SelectorCampanaHeader />}
+          {/* Logo para móvil */}
+          {isMobile && (
+            <div className="flex items-center gap-2">
+              <AppLogoAdaptive 
+                width={32} 
+                height={32} 
+                variant="header"
+                animated
+              />
+              <h1 className="text-lg font-semibold text-text-primary">
+                Poladmin
+              </h1>
+            </div>
+          )}
+
+          {/* Selector de campaña para ROOT (solo desktop) */}
+          {!isMobile && esRoot && <SelectorCampanaHeader />}
         </div>
 
         {/* Right Section */}
         <div className="flex items-center gap-2 md:gap-4">
-          {/* Theme Button */}
+          {/* Nuevo Selector de Tema */}
           <div className="shrink-0">
-            <CThemeButton />
+            <CThemeSelector />
           </div>
 
-          {/* Notifications Badge - Solo en desktop 
+          {/* Selector de campaña para ROOT (solo móvil) */}
+          {isMobile && esRoot && (
+            <div className="shrink-0">
+              <SelectorCampanaHeader />
+            </div>
+          )}
+
+          {/* Notifications Badge - Solo en desktop (comentado)
           {!isMobile && (
             <button className="relative p-2 hover:bg-bg-base rounded-lg transition-colors shrink-0">
               <Bell size={20} className="text-text-secondary" />
@@ -105,9 +134,14 @@ export const Header = ({ isMobile, onMenuClick }: HeaderProps) => {
 
                 {/* User Name - Solo en desktop */}
                 {!isMobile && (
-                  <span className="text-sm font-medium text-text-primary whitespace-nowrap">
-                    {usuario?.nombre || "Usuario"} {usuario?.apellido || ""}
-                  </span>
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-medium text-text-primary whitespace-nowrap leading-none">
+                      {usuario?.nombre || "Usuario"} {usuario?.apellido || ""}
+                    </span>
+                    <span className="text-xs text-text-secondary leading-none mt-0.5">
+                      {usuario?.perfil?.nombre || ""}
+                    </span>
+                  </div>
                 )}
               </div>
             }

@@ -40,6 +40,10 @@ export const campanasService = {
       ticket_header_linea1?: string | null;
       ticket_header_linea2?: string | null;
       ticket_header_linea3?: string | null;
+      usar_activador_ticket?: boolean;
+      usar_verificador_asistencia?: boolean;
+      usar_solidaridad?: boolean;
+      metodo_verificacion?: "PIN" | "QR";
     },
   ): Promise<ConfiguracionCampana> => {
     const response = await axiosInstance.patch(

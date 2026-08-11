@@ -1,6 +1,7 @@
 export type ModoEleccion = 'INTERNAS' | 'GENERALES';
 export type NivelCampana = 'PAIS' | 'DEPARTAMENTO' | 'DISTRITO';
 export type TipoCampana = 'PARTIDO' | 'MOVIMIENTO';
+export type MetodoVerificacion = 'PIN' | 'QR';
 
 export interface PartidoResumen {
   id: string;
@@ -18,6 +19,10 @@ export interface ConfiguracionCampana {
   ticket_header_linea1: string | null;
   ticket_header_linea2: string | null;
   ticket_header_linea3: string | null;
+  usar_activador_ticket: boolean;
+  usar_verificador_asistencia: boolean;
+  usar_solidaridad: boolean;
+  metodo_verificacion: MetodoVerificacion;
 }
 
 export interface Campana {
