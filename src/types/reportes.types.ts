@@ -1,3 +1,5 @@
+//src/types/reportes.types.ts
+
 export interface FiltrosReporte {
   campana_id?: string;
   fecha_desde?: string;

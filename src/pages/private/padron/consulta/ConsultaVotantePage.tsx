@@ -1,3 +1,5 @@
+// src/pages/private/padron/consulta/ConsultaVotantePage.tsx
+
 import { PageHeader } from "@components";
 import type { ResultadoConsultaVotante } from "@dto/padron.types";
 import { usePermisos } from "@hooks/usePermisos";
@@ -40,9 +42,7 @@ const ConsultaVotantePage: FC = () => {
 
   const handleBuscar = () => {
     const ciLimpia = ci.trim().replace(/\./g, "");
-    if (ciLimpia.length === 0) {
-      return;
-    }
+    if (ciLimpia.length === 0) return;
     setCiBuscada(ciLimpia);
   };
 
@@ -53,7 +53,6 @@ const ConsultaVotantePage: FC = () => {
 
   const handleMarcarVoto = async () => {
     if (!resultado?.simpatizante_id) return;
-
     await marcarVotoMutation.mutateAsync(resultado.simpatizante_id);
     refetch();
   };
@@ -65,24 +64,18 @@ const ConsultaVotantePage: FC = () => {
   const renderEstadoVoto = () => {
     if (!resultado) return null;
 
-    const {
-      modo_eleccion,
-      voto_internas,
-      voto_generales,
-      fecha_voto_internas,
-      fecha_voto_generales,
-    } = resultado;
+    const { modo_eleccion, voto, fecha_voto } = resultado;
 
     if (modo_eleccion === "INTERNAS") {
-      if (voto_internas) {
+      if (voto) {
         return (
           <div className="bg-success/10 border border-success/30 rounded-lg p-4 flex items-center gap-3">
             <CheckCircle size={20} className="text-success" />
             <div>
               <p className="font-semibold text-success">Ya votó en Internas</p>
-              {fecha_voto_internas && (
+              {fecha_voto && (
                 <p className="text-xs text-text-tertiary mt-1">
-                  {new Date(fecha_voto_internas).toLocaleString("es-PY")}
+                  {new Date(fecha_voto).toLocaleString("es-PY")}
                 </p>
               )}
             </div>
@@ -99,65 +92,39 @@ const ConsultaVotantePage: FC = () => {
         );
       }
     } else {
-      const tieneVotoInternas = voto_internas;
-      const tieneVotoGenerales = voto_generales;
-
-      return (
-        <div className="space-y-3">
-          {tieneVotoInternas && (
-            <div className="bg-primary/10 border border-primary/30 rounded-lg p-3 flex items-center gap-3">
-              <CheckCircle size={16} className="text-primary" />
-              <div>
-                <p className="text-sm font-medium text-primary">
-                  Votó en Internas
-                </p>
-                {fecha_voto_internas && (
-                  <p className="text-xs text-text-tertiary">
-                    {new Date(fecha_voto_internas).toLocaleString("es-PY")}
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
-
-          {tieneVotoGenerales ? (
-            <div className="bg-success/10 border border-success/30 rounded-lg p-4 flex items-center gap-3">
-              <CheckCircle size={20} className="text-success" />
-              <div>
-                <p className="font-semibold text-success">
-                  Ya votó en Generales
-                </p>
-                {fecha_voto_generales && (
-                  <p className="text-xs text-text-tertiary mt-1">
-                    {new Date(fecha_voto_generales).toLocaleString("es-PY")}
-                  </p>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="bg-warning/10 border border-warning/30 rounded-lg p-4 flex items-center gap-3">
-              <Clock size={20} className="text-warning" />
-              <p className="font-semibold text-warning">
-                Pendiente de votar en Generales
+      if (voto) {
+        return (
+          <div className="bg-success/10 border border-success/30 rounded-lg p-4 flex items-center gap-3">
+            <CheckCircle size={20} className="text-success" />
+            <div>
+              <p className="font-semibold text-success">
+                Ya votó en Generales
               </p>
+              {fecha_voto && (
+                <p className="text-xs text-text-tertiary mt-1">
+                  {new Date(fecha_voto).toLocaleString("es-PY")}
+                </p>
+              )}
             </div>
-          )}
-        </div>
-      );
+          </div>
+        );
+      } else {
+        return (
+          <div className="bg-warning/10 border border-warning/30 rounded-lg p-4 flex items-center gap-3">
+            <Clock size={20} className="text-warning" />
+            <p className="font-semibold text-warning">
+              Pendiente de votar en Generales
+            </p>
+          </div>
+        );
+      }
     }
   };
 
   const puedeMarcarVoto = () => {
     if (!resultado || resultado.estado !== "SIMPATIZANTE_REGISTRADO")
       return false;
-
-    const { modo_eleccion, voto_internas, voto_generales } = resultado;
-
-    if (modo_eleccion === "INTERNAS") {
-      return !voto_internas;
-    } else {
-      return !voto_generales;
-    }
+    return !resultado.voto;
   };
 
   const tieneImpresora = miImpresora && miImpresora.estado === "CONECTADA";
@@ -171,7 +138,6 @@ const ConsultaVotantePage: FC = () => {
 
       <div className="max-w-2xl mx-auto mt-6">
         <div className="bg-bg-content border border-border rounded-xl p-6">
-          {/* Input y botón Buscar - Responsive */}
           <div className="flex flex-col sm:flex-row gap-3 mb-6">
             <div className="relative w-full">
               <input
@@ -289,7 +255,6 @@ const ConsultaVotantePage: FC = () => {
 
                   {renderEstadoVoto()}
 
-                  {/* Botones de accion */}
                   <div className="flex flex-col sm:flex-row gap-3">
                     {resultado.estado === "SIMPATIZANTE_REGISTRADO" &&
                       puedeMarcarVoto() &&
@@ -313,15 +278,8 @@ const ConsultaVotantePage: FC = () => {
                       resultado.datos &&
                       resultado.estado !== "NO_ENCONTRADO" &&
                       (() => {
-                        const yaImpreso =
-                          resultado.modo_eleccion === "INTERNAS"
-                            ? resultado.ticket_impreso_internas
-                            : resultado.ticket_impreso_generales;
-
-                        const fechaImpresion =
-                          resultado.modo_eleccion === "INTERNAS"
-                            ? resultado.fecha_impresion_internas
-                            : resultado.fecha_impresion_generales;
+                        const yaImpreso = resultado.ticket_impreso;
+                        const fechaImpresion = resultado.fecha_impresion;
 
                         if (yaImpreso && !resultado.puede_reimprimir) {
                           return (

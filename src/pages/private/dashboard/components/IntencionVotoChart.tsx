@@ -1,3 +1,5 @@
+//src/pages/private/dashboard/components/IntencionVotoChart.tsx
+
 import { type FC } from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import type { IntencionVotoDashboard } from "@dto/dashboard.types";
@@ -50,7 +52,7 @@ export const IntencionVotoChart: FC<Props> = ({ data, isLoading }) => {
       <div className="flex flex-col lg:flex-row items-center gap-6">
         {/* Grafico dona */}
         <div className="w-full lg:w-48 h-48 shrink-0">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={192}>
             <PieChart>
               <Pie
                 data={entradas}

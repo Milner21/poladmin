@@ -1,3 +1,5 @@
+//src/pages/private/transportes/confirmar/components/ModalCarruselPasajeros.tsx
+
 import { useState, type FC } from "react";
 import { X, ChevronLeft, ChevronRight, User } from "lucide-react";
 import type { PasajeroTransporte } from "@dto/transporte.types";
@@ -42,7 +44,9 @@ export const ModalCarruselPasajeros: FC<ModalCarruselPasajerosProps> = ({
               <User size={20} className="text-warning" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-text-primary">Registro Manual</h3>
+              <h3 className="text-lg font-bold text-text-primary">
+                Registro Manual
+              </h3>
               <p className="text-xs text-text-tertiary">
                 Pasajero {indiceActual + 1} de {pasajeros.length}
               </p>
@@ -62,32 +66,42 @@ export const ModalCarruselPasajeros: FC<ModalCarruselPasajerosProps> = ({
             {/* Nombre */}
             <div className="text-center mb-6">
               <h2 className="text-3xl font-bold text-text-primary mb-2">
-                {pasajeroActual.simpatizante?.nombre} {pasajeroActual.simpatizante?.apellido}
+                {pasajeroActual.simpatizante?.nombre}{" "}
+                {pasajeroActual.simpatizante?.apellido}
               </h2>
-              <p className="text-xl text-text-tertiary">CI: {pasajeroActual.simpatizante?.documento}</p>
+              <p className="text-xl text-text-tertiary">
+                CI: {pasajeroActual.simpatizante?.documento}
+              </p>
             </div>
 
             {/* Datos de votación */}
             <div className="grid grid-cols-1 gap-4 mb-6">
               <div className="bg-bg-content rounded-lg p-4 border border-border">
-                <p className="text-xs text-text-tertiary uppercase mb-1">Local de Votación</p>
+                <p className="text-xs text-text-tertiary uppercase mb-1">
+                  Local de Votación
+                </p>
                 <p className="text-lg font-bold text-text-primary">
-                  {pasajeroActual.simpatizante?.local_votacion_general || pasajeroActual.simpatizante?.local_votacion_interna || 'No especificado'}
+                  {pasajeroActual.simpatizante?.local_votacion ??
+                    "No especificado"}
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-bg-content rounded-lg p-4 border border-border">
-                  <p className="text-xs text-text-tertiary uppercase mb-1">Mesa</p>
+                  <p className="text-xs text-text-tertiary uppercase mb-1">
+                    Mesa
+                  </p>
                   <p className="text-2xl font-bold text-primary text-center">
-                    {pasajeroActual.simpatizante?.mesa_votacion_general || pasajeroActual.simpatizante?.mesa_votacion_interna || '-'}
+                    {pasajeroActual.simpatizante?.mesa_votacion ?? "-"}
                   </p>
                 </div>
 
                 <div className="bg-bg-content rounded-lg p-4 border border-border">
-                  <p className="text-xs text-text-tertiary uppercase mb-1">Orden</p>
+                  <p className="text-xs text-text-tertiary uppercase mb-1">
+                    Orden
+                  </p>
                   <p className="text-2xl font-bold text-primary text-center">
-                    {pasajeroActual.simpatizante?.orden_votacion_general || pasajeroActual.simpatizante?.orden_votacion_interna || '-'}
+                    {pasajeroActual.simpatizante?.orden_votacion ?? "-"}
                   </p>
                 </div>
               </div>
@@ -119,8 +133,8 @@ export const ModalCarruselPasajeros: FC<ModalCarruselPasajerosProps> = ({
                 onClick={() => setIndiceActual(index)}
                 className={`w-2 h-2 rounded-full transition-all ${
                   index === indiceActual
-                    ? 'bg-primary w-6'
-                    : 'bg-text-tertiary/30 hover:bg-text-tertiary/50'
+                    ? "bg-primary w-6"
+                    : "bg-text-tertiary/30 hover:bg-text-tertiary/50"
                 }`}
               />
             ))}

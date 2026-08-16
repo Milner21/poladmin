@@ -1,3 +1,5 @@
+//src/services/simpatizantes.service.ts
+
 import axiosInstance from "@api/axios.config";
 import type {
   ResultadoBusquedaInteligente,
@@ -173,6 +175,26 @@ export const simpatizantesService = {
     return response.data;
   },
 
+  getByCandidato: async (
+    candidatoId: string,
+  ): Promise<{
+    usuario: {
+      id: string;
+      nombre: string;
+      apellido: string;
+      username: string;
+      nivel: { id: string; nombre: string; orden: number } | null;
+      perfil: { id: string; nombre: string; es_operativo: boolean };
+    };
+    simpatizantes: Simpatizante[];
+    total: number;
+  }> => {
+    const response = await axiosInstance.get(
+      `/simpatizantes/por-candidato/${candidatoId}`,
+    );
+    return response.data;
+  },
+
   eliminar: async (id: string): Promise<{ mensaje: string }> => {
     const response = await axiosInstance.delete(`/simpatizantes/${id}`);
     return response.data;
@@ -194,10 +216,9 @@ export const simpatizantesService = {
       nombre: string;
       apellido: string;
       documento: string;
-      voto_internas: boolean;
-      fecha_voto_internas: string | null;
-      voto_generales: boolean;
-      fecha_voto_generales: string | null;
+      modo_eleccion: "INTERNAS" | "GENERALES";
+      voto: boolean;
+      fecha_voto: string | null;
       local_votacion: string | null;
       mesa_votacion: string | null;
       orden_votacion: string | null;

@@ -1,3 +1,5 @@
+// src/pages/private/simpatizantes/consulta-voto/ConsultaVotoPage.tsx
+
 import { PageHeader } from "@components";
 import { simpatizantesService } from "@services/simpatizantes.service";
 import { useMutation } from "@tanstack/react-query";
@@ -14,10 +16,9 @@ interface ConsultaVotoResult {
     nombre: string;
     apellido: string;
     documento: string;
-    voto_internas: boolean;
-    fecha_voto_internas: string | null;
-    voto_generales: boolean;
-    fecha_voto_generales: string | null;
+    modo_eleccion: "INTERNAS" | "GENERALES";
+    voto: boolean;
+    fecha_voto: string | null;
     local_votacion: string | null;
     mesa_votacion: string | null;
     orden_votacion: string | null;
@@ -34,7 +35,7 @@ const ConsultaVotoPage: FC = () => {
   const consultaMutation = useMutation({
     mutationFn: (ci: string) => simpatizantesService.consultarVoto(ci),
     onSuccess: (data) => {
-      setResultado(data);
+      setResultado(data as ConsultaVotoResult);
     },
   });
 
@@ -67,6 +68,14 @@ const ConsultaVotoPage: FC = () => {
     );
   }
 
+  const etiquetaModo =
+    resultado?.data?.modo_eleccion === "INTERNAS"
+      ? "Elecciones Internas"
+      : "Elecciones Generales";
+
+  const etiquetaModoCorta =
+    resultado?.data?.modo_eleccion === "INTERNAS" ? "internas" : "generales";
+
   return (
     <div className="p-6">
       <PageHeader
@@ -84,7 +93,6 @@ const ConsultaVotoPage: FC = () => {
         </button>
       </div>
 
-      {/* Formulario de consulta */}
       <div className="bg-bg-content border border-border rounded-xl p-6 mb-6">
         <div className="flex items-center gap-4 flex-wrap">
           <div className="flex items-center gap-2 flex-1 min-w-64">
@@ -126,12 +134,10 @@ const ConsultaVotoPage: FC = () => {
         </div>
       </div>
 
-      {/* Resultado */}
       {resultado && (
         <div className="bg-bg-content border border-border rounded-xl p-6">
           {resultado.success ? (
             <>
-              {/* Datos del votante */}
               <div className="mb-6 pb-4 border-b border-border">
                 <h3 className="text-lg font-semibold text-text-primary mb-3">
                   Datos del Votante
@@ -164,108 +170,56 @@ const ConsultaVotoPage: FC = () => {
                 </div>
               </div>
 
-              {/* Estado de voto */}
               <div>
                 <h3 className="text-lg font-semibold text-text-primary mb-4">
                   Estado de Voto
                 </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Internas */}
-                  <div className="bg-bg-surface border border-border rounded-lg p-4">
-                    <div className="flex items-center gap-3 mb-3">
-                      {resultado.data?.voto_internas ? (
-                        <CheckCircle className="text-success" size={20} />
-                      ) : (
-                        <XCircle className="text-text-tertiary" size={20} />
-                      )}
-                      <div>
-                        <h4 className="font-medium text-text-primary">
-                          Elecciones Internas
-                        </h4>
-                        <p className="text-xs text-text-tertiary">
-                          Estado del voto en internas
-                        </p>
-                      </div>
-                    </div>
-
-                    {resultado.data?.voto_internas ? (
-                      <div className="bg-success/10 border border-success/20 rounded-lg p-3">
-                        <p className="text-sm font-medium text-success mb-1">
-                          ✓ Ya votó en internas
-                        </p>
-                        {resultado.data.fecha_voto_internas && (
-                          <p className="text-xs text-text-secondary">
-                            Fecha:{" "}
-                            {new Date(
-                              resultado.data.fecha_voto_internas,
-                            ).toLocaleDateString("es-PY", {
-                              timeZone: "America/Sao_Paulo",
-                              year: "numeric",
-                              month: "2-digit",
-                              day: "2-digit",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </p>
-                        )}
-                      </div>
+                <div className="bg-bg-surface border border-border rounded-lg p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    {resultado.data?.voto ? (
+                      <CheckCircle className="text-success" size={20} />
                     ) : (
-                      <div className="bg-text-tertiary/10 border border-text-tertiary/20 rounded-lg p-3">
-                        <p className="text-sm text-text-tertiary">
-                          No ha votado en internas
-                        </p>
-                      </div>
+                      <XCircle className="text-text-tertiary" size={20} />
                     )}
+                    <div>
+                      <h4 className="font-medium text-text-primary">
+                        {etiquetaModo}
+                      </h4>
+                      <p className="text-xs text-text-tertiary">
+                        Estado del voto en el modo activo
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Generales */}
-                  <div className="bg-bg-surface border border-border rounded-lg p-4">
-                    <div className="flex items-center gap-3 mb-3">
-                      {resultado.data?.voto_generales ? (
-                        <CheckCircle className="text-success" size={20} />
-                      ) : (
-                        <XCircle className="text-text-tertiary" size={20} />
+                  {resultado.data?.voto ? (
+                    <div className="bg-success/10 border border-success/20 rounded-lg p-3">
+                      <p className="text-sm font-medium text-success mb-1">
+                        Ya votó en {etiquetaModoCorta}
+                      </p>
+                      {resultado.data.fecha_voto && (
+                        <p className="text-xs text-text-secondary">
+                          Fecha:{" "}
+                          {new Date(
+                            resultado.data.fecha_voto,
+                          ).toLocaleDateString("es-PY", {
+                            timeZone: "America/Sao_Paulo",
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </p>
                       )}
-                      <div>
-                        <h4 className="font-medium text-text-primary">
-                          Elecciones Generales
-                        </h4>
-                        <p className="text-xs text-text-tertiary">
-                          Estado del voto en generales
-                        </p>
-                      </div>
                     </div>
-
-                    {resultado.data?.voto_generales ? (
-                      <div className="bg-success/10 border border-success/20 rounded-lg p-3">
-                        <p className="text-sm font-medium text-success mb-1">
-                          ✓ Ya votó en generales
-                        </p>
-                        {resultado.data.fecha_voto_generales && (
-                          <p className="text-xs text-text-secondary">
-                            Fecha:{" "}
-                            {new Date(
-                              resultado.data.fecha_voto_generales,
-                            ).toLocaleDateString("es-PY", {
-                              timeZone: "America/Sao_Paulo",
-                              year: "numeric",
-                              month: "2-digit",
-                              day: "2-digit",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </p>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="bg-text-tertiary/10 border border-text-tertiary/20 rounded-lg p-3">
-                        <p className="text-sm text-text-tertiary">
-                          No ha votado en generales
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                  ) : (
+                    <div className="bg-text-tertiary/10 border border-text-tertiary/20 rounded-lg p-3">
+                      <p className="text-sm text-text-tertiary">
+                        No ha votado en {etiquetaModoCorta}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </>

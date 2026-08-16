@@ -72,6 +72,19 @@ export type EncontradoEn =
   | "PADRON_GENERAL"
   | "NO_ENCONTRADO";
 
+export interface DatosPadronInterno {
+  seccional: string | null;
+  local_votacion: string | null;
+  mesa: string | null;
+  orden: string | null;
+}
+
+export interface DatosPadronGeneral {
+  local_votacion: string | null;
+  mesa: string | null;
+  orden: string | null;
+}
+
 export interface DatosBusquedaInteligente {
   ci: string;
   nombre: string;
@@ -79,10 +92,8 @@ export interface DatosBusquedaInteligente {
   fecha_nacimiento: string | null;
   departamento: string | null;
   distrito: string | null;
-  seccional: string | null;
-  local_votacion: string | null;
-  mesa: string | null;
-  orden: string | null;
+  padron_interno: DatosPadronInterno | null;
+  padron_general: DatosPadronGeneral | null;
 }
 
 export interface ResultadoBusquedaInteligente {
@@ -154,16 +165,12 @@ export interface ResultadoConsultaVotante {
   estado: EstadoVotante;
   datos: DatosVotante | null;
   simpatizante_id: string | null;
-  voto_internas: boolean;
-  voto_generales: boolean;
-  fecha_voto_internas: string | null;
-  fecha_voto_generales: string | null;
   modo_eleccion: "INTERNAS" | "GENERALES";
-  permite_registro_manual: boolean;
-  ticket_impreso_internas: boolean;
-  ticket_impreso_generales: boolean;
-  fecha_impresion_internas: string | null;
-  fecha_impresion_generales: string | null;
+  voto: boolean;
+  fecha_voto: string | null;
+  ticket_impreso: boolean;
+  fecha_impresion: string | null;
   puede_reimprimir: boolean;
+  permite_registro_manual: boolean;
   mensaje: string;
 }

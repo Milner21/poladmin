@@ -1,3 +1,5 @@
+//src/types/usuario.types.ts
+
 import type { Nivel } from "./nivel.types";
 
 export interface Permiso {
@@ -54,6 +56,8 @@ export interface Usuario {
   es_operativo?: boolean;
   candidato_superior_id: string | null;
   estado: boolean;
+  activo_internas: boolean | null;
+  activo_generales: boolean | null;
   fecha_registro: string;
   registrado_por_id: string | null;
   creado_por_id: string | null;

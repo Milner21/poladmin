@@ -1,3 +1,5 @@
+//src/pages/private/reportes-imprimir/reportes/simpatizantes/ReporteSimpatizantesConfig.ts
+
 import type { ColumnaReporte } from '@dto/reportes.types';
 
 export interface ConfigVotacion {

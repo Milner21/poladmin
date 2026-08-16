@@ -1,11 +1,13 @@
-import { useState, type FC } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { transportesService } from '@services/transportes.service';
-import { useConfirmarPasajero } from '../../hooks/useConfirmarPasajero';
-import { useConfiguracionTransporte } from '../../hooks/useConfiguacionTransporte';
-import { CheckCircle, X, Printer, Eye, QrCode } from 'lucide-react';
-import type { PasajeroTransporte } from '@dto/transporte.types';
-import { ModalTicket } from './ModalTicket';
+//src/pages/private/transportes/pasajeros/components/ModalConfirmarPasajero.tsx
+
+import { useState, type FC } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { transportesService } from "@services/transportes.service";
+import { useConfirmarPasajero } from "../../hooks/useConfirmarPasajero";
+import { useConfiguracionTransporte } from "../../hooks/useConfiguacionTransporte";
+import { CheckCircle, X, Printer, Eye, QrCode } from "lucide-react";
+import type { PasajeroTransporte } from "@dto/transporte.types";
+import { ModalTicket } from "./ModalTicket";
 
 interface Props {
   isOpen: boolean;
@@ -21,14 +23,15 @@ export const ModalConfirmarPasajero: FC<Props> = ({
   onSiguiente,
 }) => {
   const [confirmado, setConfirmado] = useState(false);
-  const [pasajeroConfirmado, setPasajeroConfirmado] = useState<PasajeroTransporte | null>(null);
+  const [pasajeroConfirmado, setPasajeroConfirmado] =
+    useState<PasajeroTransporte | null>(null);
   const [modalTicketOpen, setModalTicketOpen] = useState(false);
 
   const confirmarMutation = useConfirmarPasajero();
   const { data: configuracion } = useConfiguracionTransporte();
 
   const { data: pasajeros } = useQuery({
-    queryKey: ['pasajeros'],
+    queryKey: ["pasajeros"],
     queryFn: () => transportesService.getAllPasajeros(),
     enabled: !!pasajeroId && isOpen,
   });
@@ -63,10 +66,18 @@ export const ModalConfirmarPasajero: FC<Props> = ({
   if (!pasajero) {
     return (
       <>
-        <div className="fixed inset-0 bg-black/50 z-40" onClick={handleCerrar} />
+        <div
+          className="fixed inset-0 bg-black/50 z-40"
+          onClick={handleCerrar}
+        />
         <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-bg-content border border-border rounded-xl shadow-xl w-full max-w-sm z-50 p-6 text-center">
-          <p className="text-danger text-sm">Pasajero no encontrado en el sistema</p>
-          <button onClick={handleCerrar} className="btn btn-outline mt-4 w-full">
+          <p className="text-danger text-sm">
+            Pasajero no encontrado en el sistema
+          </p>
+          <button
+            onClick={handleCerrar}
+            className="btn btn-outline mt-4 w-full"
+          >
             Cerrar
           </button>
         </div>
@@ -83,10 +94,13 @@ export const ModalConfirmarPasajero: FC<Props> = ({
           <div className="flex items-center gap-2">
             <QrCode size={18} className="text-primary" />
             <h3 className="text-base font-semibold text-text-primary">
-              {confirmado ? 'Pasajero Confirmado' : 'Confirmar Pasajero'}
+              {confirmado ? "Pasajero Confirmado" : "Confirmar Pasajero"}
             </h3>
           </div>
-          <button onClick={handleCerrar} className="text-text-tertiary hover:text-text-primary">
+          <button
+            onClick={handleCerrar}
+            className="text-text-tertiary hover:text-text-primary"
+          >
             <X size={20} />
           </button>
         </div>
@@ -96,7 +110,8 @@ export const ModalConfirmarPasajero: FC<Props> = ({
           <>
             <div className="bg-bg-base rounded-lg p-4 mb-4 space-y-2">
               <p className="text-lg font-semibold text-text-primary">
-                {pasajero.simpatizante?.nombre} {pasajero.simpatizante?.apellido}
+                {pasajero.simpatizante?.nombre}{" "}
+                {pasajero.simpatizante?.apellido}
               </p>
               <p className="text-sm text-text-tertiary">
                 CI: {pasajero.simpatizante?.documento}
@@ -104,13 +119,13 @@ export const ModalConfirmarPasajero: FC<Props> = ({
               <div className="border-t border-border pt-2 mt-2 space-y-1">
                 <p className="text-sm text-text-primary">
                   <span className="text-text-tertiary">Local: </span>
-                  {pasajero.simpatizante?.local_votacion_general || pasajero.simpatizante?.local_votacion_interna || '-'}
+                  {pasajero.simpatizante?.local_votacion ?? "-"}
                 </p>
                 <p className="text-sm text-text-primary">
                   <span className="text-text-tertiary">Mesa: </span>
-                  {pasajero.simpatizante?.mesa_votacion_general || pasajero.simpatizante?.mesa_votacion_interna || '-'}
+                  {pasajero.simpatizante?.mesa_votacion ?? "-"}
                   <span className="text-text-tertiary ml-3">Orden: </span>
-                  {pasajero.simpatizante?.orden_votacion_general || pasajero.simpatizante?.orden_votacion_interna || '-'}
+                  {pasajero.simpatizante?.orden_votacion ?? "-"}
                 </p>
                 <p className="text-sm text-text-primary">
                   <span className="text-text-tertiary">Transporte: </span>
@@ -133,7 +148,9 @@ export const ModalConfirmarPasajero: FC<Props> = ({
               className="w-full btn btn-primary flex items-center justify-center gap-2"
             >
               <CheckCircle size={16} />
-              {confirmarMutation.isPending ? 'Confirmando...' : 'Confirmar Pasajero'}
+              {confirmarMutation.isPending
+                ? "Confirmando..."
+                : "Confirmar Pasajero"}
             </button>
           </>
         )}
@@ -147,11 +164,12 @@ export const ModalConfirmarPasajero: FC<Props> = ({
               </div>
               <p className="text-lg font-semibold text-success">¡Confirmado!</p>
               <p className="text-sm text-text-secondary mt-1">
-                {pasajeroConfirmado.simpatizante?.nombre} {pasajeroConfirmado.simpatizante?.apellido}
+                {pasajeroConfirmado.simpatizante?.nombre}{" "}
+                {pasajeroConfirmado.simpatizante?.apellido}
               </p>
               <p className="text-xs text-text-tertiary">
-                Mesa: {pasajeroConfirmado.simpatizante?.mesa_votacion_general || pasajeroConfirmado.simpatizante?.mesa_votacion_interna} |
-                Orden: {pasajeroConfirmado.simpatizante?.orden_votacion_general || pasajeroConfirmado.simpatizante?.orden_votacion_interna}
+                Mesa: {pasajeroConfirmado.simpatizante?.mesa_votacion ?? "-"} |
+                Orden: {pasajeroConfirmado.simpatizante?.orden_votacion ?? "-"}
               </p>
             </div>
 

@@ -1,3 +1,5 @@
+//src/types/transporte.types.ts
+
 export const TipoVehiculo = {
   AUTO: "AUTO",
   SUV: "SUV",
@@ -76,16 +78,13 @@ export interface PasajeroTransporte {
     tipo_vehiculo: TipoVehiculo;
   };
   simpatizante?: {
-    id: string;
+     id: string;
     nombre: string;
     apellido: string;
     documento: string;
-    local_votacion_interna: string | null;
-    mesa_votacion_interna: string | null;
-    orden_votacion_interna: string | null;
-    local_votacion_general: string | null;
-    mesa_votacion_general: string | null;
-    orden_votacion_general: string | null;
+    local_votacion: string | null;
+    mesa_votacion: string | null;
+    orden_votacion: string | null;
     telefono: string | null;
   };
   registrado_por?: {

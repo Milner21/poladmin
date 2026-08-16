@@ -1,3 +1,5 @@
+//src/pages/private/simpatizantes/hooks/useSimpatizanteDetalle.ts
+
 import { useQuery } from "@tanstack/react-query";
 import { simpatizantesService } from "@services/simpatizantes.service";
 

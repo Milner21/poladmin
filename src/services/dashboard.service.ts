@@ -76,6 +76,13 @@ export const dashboardService = {
     return response.data.data;
   },
 
+  getComparativaModos: async (): Promise<
+    import("@dto/dashboard.types").ComparativaModos
+  > => {
+    const response = await axiosInstance.get("/dashboard/comparativa-modos");
+    return response.data.data;
+  },
+
   getEstadisticasImpresiones: async (
     fechaDesde?: string,
   ): Promise<import("@dto/impresora.types").EstadisticasImpresionesDto> => {

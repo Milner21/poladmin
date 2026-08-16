@@ -1,3 +1,5 @@
+//src/pages/private/simpatizantes/crear/CrearSimpatizante.tsx
+
 import { PageHeader } from "@components";
 import type {
   DatosBusquedaInteligente,
@@ -99,10 +101,8 @@ const datosVacios: DatosBusquedaInteligente = {
   fecha_nacimiento: null,
   departamento: null,
   distrito: null,
-  seccional: null,
-  local_votacion: null,
-  mesa: null,
-  orden: null,
+  padron_interno: null,
+  padron_general: null,
 };
 
 interface CrearSimpatizanteProps {
@@ -143,7 +143,6 @@ const CrearSimpatizante: FC<CrearSimpatizanteProps> = ({
   const tienePermisoSolicitud = tienePermiso("crear_solicitud");
 
   const handleLimpiar = () => {
-    console.log("handleLimpiar llamado desde:", new Error().stack);
     setCiBusqueda("");
     setDatosConfirmados(null);
     setModoManual(false);
@@ -278,7 +277,6 @@ const CrearSimpatizante: FC<CrearSimpatizanteProps> = ({
     if (!datosConfirmados?.datos) return null;
 
     const datos = datosConfirmados.datos;
-    const esInterno = datosConfirmados.encontrado_en === "PADRON_INTERNO";
 
     return {
       nombre: datos.nombre,
@@ -289,25 +287,22 @@ const CrearSimpatizante: FC<CrearSimpatizanteProps> = ({
       departamento: datos.departamento || undefined,
       distrito: datos.distrito || undefined,
       barrio: formData.barrio || undefined,
-      es_afiliado: esInterno,
+      es_afiliado: datos.padron_interno !== null,
       observaciones: formData.observaciones || undefined,
       necesita_transporte: formData.necesita_transporte,
       latitud: formData.latitud || undefined,
       longitud: formData.longitud || undefined,
-      origen_registro: esInterno ? "PADRON_INTERNO" : "PADRON_GENERAL",
+      origen_registro: datos.padron_interno
+        ? "PADRON_INTERNO"
+        : "PADRON_GENERAL",
       candidato_id: candidatoId || undefined,
-      ...(esInterno
-        ? {
-            seccional_interna: datos.seccional || undefined,
-            local_votacion_interna: datos.local_votacion || undefined,
-            mesa_votacion_interna: datos.mesa || undefined,
-            orden_votacion_interna: datos.orden || undefined,
-          }
-        : {
-            local_votacion_general: datos.local_votacion || undefined,
-            mesa_votacion_general: datos.mesa || undefined,
-            orden_votacion_general: datos.orden || undefined,
-          }),
+      seccional_interna: datos.padron_interno?.seccional || undefined,
+      local_votacion_interna: datos.padron_interno?.local_votacion || undefined,
+      mesa_votacion_interna: datos.padron_interno?.mesa || undefined,
+      orden_votacion_interna: datos.padron_interno?.orden || undefined,
+      local_votacion_general: datos.padron_general?.local_votacion || undefined,
+      mesa_votacion_general: datos.padron_general?.mesa || undefined,
+      orden_votacion_general: datos.padron_general?.orden || undefined,
     };
   };
 
@@ -332,7 +327,6 @@ const CrearSimpatizante: FC<CrearSimpatizanteProps> = ({
     if (!payload) return;
 
     payloadPendienteRef.current = payload;
-    console.log("ref asignado:", payloadPendienteRef.current);
 
     crearMutation.mutate(payload, {
       onSuccess: (respuesta) => {
@@ -455,11 +449,20 @@ const CrearSimpatizante: FC<CrearSimpatizanteProps> = ({
         fecha_nacimiento: datosConfirmados.datos.fecha_nacimiento,
         departamento: datosConfirmados.datos.departamento,
         distrito: datosConfirmados.datos.distrito,
-        seccional: datosConfirmados.datos.seccional,
-        local_votacion: datosConfirmados.datos.local_votacion,
-        mesa_votacion: datosConfirmados.datos.mesa,
-        orden_votacion: datosConfirmados.datos.orden,
-        es_afiliado: datosConfirmados.encontrado_en === "PADRON_INTERNO",
+        seccional: datosConfirmados.datos.padron_interno?.seccional ?? null,
+        local_votacion:
+          datosConfirmados.datos.padron_interno?.local_votacion ??
+          datosConfirmados.datos.padron_general?.local_votacion ??
+          null,
+        mesa_votacion:
+          datosConfirmados.datos.padron_interno?.mesa ??
+          datosConfirmados.datos.padron_general?.mesa ??
+          null,
+        orden_votacion:
+          datosConfirmados.datos.padron_interno?.orden ??
+          datosConfirmados.datos.padron_general?.orden ??
+          null,
+        es_afiliado: datosConfirmados.datos.padron_interno !== null,
       }
     : null;
 
@@ -475,7 +478,11 @@ const CrearSimpatizante: FC<CrearSimpatizanteProps> = ({
         </div>
       )}
 
-       <div className={embebido ? "space-y-4" : "px-4 pb-6 md:px-6 max-w-2xl mx-auto"}>
+      <div
+        className={
+          embebido ? "space-y-4" : "px-4 pb-6 md:px-6 max-w-2xl mx-auto"
+        }
+      >
         {mostrarBusqueda && (
           <BusquedaCI
             value={ciBusqueda}

@@ -1,6 +1,8 @@
-import { useState, type FC } from 'react';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-import type { PasajeroTransporte } from '@dto/transporte.types';
+//src/pages/private/transportes/pasajeros/components/CarruselPasajeros.tsx
+
+import { useState, type FC } from "react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import type { PasajeroTransporte } from "@dto/transporte.types";
 
 interface Props {
   isOpen: boolean;
@@ -8,7 +10,11 @@ interface Props {
   onClose: () => void;
 }
 
-export const CarruselPasajeros: FC<Props> = ({ isOpen, pasajeros, onClose }) => {
+export const CarruselPasajeros: FC<Props> = ({
+  isOpen,
+  pasajeros,
+  onClose,
+}) => {
   const [indiceActual, setIndiceActual] = useState(0);
 
   if (!isOpen || pasajeros.length === 0) return null;
@@ -33,7 +39,10 @@ export const CarruselPasajeros: FC<Props> = ({ isOpen, pasajeros, onClose }) => 
           <h3 className="text-base font-semibold text-text-primary">
             Registro Manual
           </h3>
-          <button onClick={onClose} className="text-text-tertiary hover:text-text-primary">
+          <button
+            onClick={onClose}
+            className="text-text-tertiary hover:text-text-primary"
+          >
             <X size={20} />
           </button>
         </div>
@@ -74,21 +83,25 @@ export const CarruselPasajeros: FC<Props> = ({ isOpen, pasajeros, onClose }) => 
                 Local de Votación
               </p>
               <p className="text-base font-semibold text-text-primary">
-                {pasajero.simpatizante?.local_votacion_general || pasajero.simpatizante?.local_votacion_interna || '-'}
+                {pasajero.simpatizante?.local_votacion ?? "-"}
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-text-tertiary uppercase font-medium mb-1">Mesa</p>
+                <p className="text-xs text-text-tertiary uppercase font-medium mb-1">
+                  Mesa
+                </p>
                 <p className="text-2xl font-bold text-primary">
-                  {pasajero.simpatizante?.mesa_votacion_general || pasajero.simpatizante?.mesa_votacion_interna || '-'}
+                  {pasajero.simpatizante?.mesa_votacion ?? "-"}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-text-tertiary uppercase font-medium mb-1">Orden</p>
+                <p className="text-xs text-text-tertiary uppercase font-medium mb-1">
+                  Orden
+                </p>
                 <p className="text-2xl font-bold text-primary">
-                  {pasajero.simpatizante?.orden_votacion_general || pasajero.simpatizante?.orden_votacion_interna || '-'}
+                  {pasajero.simpatizante?.orden_votacion ?? "-"}
                 </p>
               </div>
             </div>

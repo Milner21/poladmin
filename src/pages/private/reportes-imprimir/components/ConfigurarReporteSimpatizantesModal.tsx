@@ -1,3 +1,5 @@
+//src/pages/private/reportes-imprimir/components/ConfigurarReporteSimpatizantesModal.tsx
+
 import { useState, useEffect, useMemo, useCallback, type FC } from "react";
 import {
   X,

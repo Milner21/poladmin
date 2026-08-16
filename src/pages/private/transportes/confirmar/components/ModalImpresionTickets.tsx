@@ -1,3 +1,5 @@
+//src/pages/private/transportes/confirmar/components/ModalImpresionTickets.tsx
+
 import { useState, useEffect, type FC } from "react";
 import { X, Printer, CheckCircle, AlertTriangle, Loader2 } from "lucide-react";
 import type { PasajeroTransporte } from "@dto/transporte.types";
@@ -10,7 +12,13 @@ interface ModalImpresionTicketsProps {
   pasajeros: PasajeroTransporte[];
 }
 
-type EstadoImpresion = "verificando" | "agente" | "navegador" | "imprimiendo" | "completado" | "error";
+type EstadoImpresion =
+  | "verificando"
+  | "agente"
+  | "navegador"
+  | "imprimiendo"
+  | "completado"
+  | "error";
 
 export const ModalImpresionTickets: FC<ModalImpresionTicketsProps> = ({
   isOpen,
@@ -19,7 +27,10 @@ export const ModalImpresionTickets: FC<ModalImpresionTicketsProps> = ({
 }) => {
   const [estado, setEstado] = useState<EstadoImpresion>("verificando");
   const [nombreImpresora, setNombreImpresora] = useState<string | null>(null);
-  const [resultado, setResultado] = useState<{ exitosos: number; fallidos: number } | null>(null);
+  const [resultado, setResultado] = useState<{
+    exitosos: number;
+    fallidos: number;
+  } | null>(null);
 
   // Verificar agente al abrir
   useEffect(() => {
@@ -37,7 +48,8 @@ export const ModalImpresionTickets: FC<ModalImpresionTicketsProps> = ({
     setEstado("verificando");
 
     try {
-      const { conectada, impresora } = await impresorasService.verificarAgente();
+      const { conectada, impresora } =
+        await impresorasService.verificarAgente();
 
       if (conectada && impresora) {
         setNombreImpresora(impresora);
@@ -83,7 +95,6 @@ export const ModalImpresionTickets: FC<ModalImpresionTicketsProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
       <div className="bg-bg-content w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
-
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border bg-bg-surface">
           <div className="flex items-center gap-3">
@@ -91,8 +102,12 @@ export const ModalImpresionTickets: FC<ModalImpresionTicketsProps> = ({
               <Printer size={20} className="text-primary" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-text-primary">Tickets de Transporte</h3>
-              <p className="text-xs text-text-tertiary">{pasajeros.length} pasajero(s) confirmado(s)</p>
+              <h3 className="text-lg font-bold text-text-primary">
+                Tickets de Transporte
+              </h3>
+              <p className="text-xs text-text-tertiary">
+                {pasajeros.length} pasajero(s) confirmado(s)
+              </p>
             </div>
           </div>
           <button
@@ -108,7 +123,9 @@ export const ModalImpresionTickets: FC<ModalImpresionTicketsProps> = ({
           {estado === "verificando" && (
             <div className="flex items-center gap-3 p-3 bg-bg-surface border border-border rounded-lg">
               <Loader2 size={18} className="text-primary animate-spin" />
-              <p className="text-sm text-text-secondary">Verificando impresora disponible...</p>
+              <p className="text-sm text-text-secondary">
+                Verificando impresora disponible...
+              </p>
             </div>
           )}
 
@@ -134,7 +151,8 @@ export const ModalImpresionTickets: FC<ModalImpresionTicketsProps> = ({
                   Sin agente de impresión detectado
                 </p>
                 <p className="text-xs text-text-tertiary">
-                  Se usará la impresión del navegador. Asegurate de tener la impresora térmica configurada.
+                  Se usará la impresión del navegador. Asegurate de tener la
+                  impresora térmica configurada.
                 </p>
               </div>
               <button
@@ -185,69 +203,89 @@ export const ModalImpresionTickets: FC<ModalImpresionTicketsProps> = ({
               <div
                 key={pasajero.id}
                 className="border-2 border-dashed border-border rounded-lg p-4 bg-white text-black print:break-inside-avoid print:mb-4"
-                style={{ pageBreakInside: 'avoid' }}
+                style={{ pageBreakInside: "avoid" }}
               >
                 <div className="text-center border-b-2 border-dashed border-gray-300 pb-3 mb-3">
-                  <h4 className="text-lg font-bold uppercase">Ticket de Transporte</h4>
+                  <h4 className="text-lg font-bold uppercase">
+                    Ticket de Transporte
+                  </h4>
                   <p className="text-xs text-gray-600">Elecciones 2024</p>
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex justify-between items-start">
-                    <span className="text-xs text-gray-600 uppercase">Pasajero:</span>
+                    <span className="text-xs text-gray-600 uppercase">
+                      Pasajero:
+                    </span>
                     <span className="text-sm font-bold text-right">
-                      {pasajero.simpatizante?.nombre} {pasajero.simpatizante?.apellido}
+                      {pasajero.simpatizante?.nombre}{" "}
+                      {pasajero.simpatizante?.apellido}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-start">
                     <span className="text-xs text-gray-600 uppercase">CI:</span>
-                    <span className="text-sm font-bold">{pasajero.simpatizante?.documento}</span>
+                    <span className="text-sm font-bold">
+                      {pasajero.simpatizante?.documento}
+                    </span>
                   </div>
 
                   <div className="border-t border-dashed border-gray-300 my-2"></div>
 
                   <div className="flex justify-between items-start">
-                    <span className="text-xs text-gray-600 uppercase">Local:</span>
+                    <span className="text-xs text-gray-600 uppercase">
+                      Local:
+                    </span>
                     <span className="text-sm font-semibold text-right max-w-[60%]">
-                      {pasajero.simpatizante?.local_votacion_general || pasajero.simpatizante?.local_votacion_interna || 'N/A'}
+                      {pasajero.simpatizante?.local_votacion ?? "N/A"}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-start">
-                    <span className="text-xs text-gray-600 uppercase">Mesa:</span>
+                    <span className="text-xs text-gray-600 uppercase">
+                      Mesa:
+                    </span>
                     <span className="text-sm font-semibold">
-                      {pasajero.simpatizante?.mesa_votacion_general || pasajero.simpatizante?.mesa_votacion_interna || 'N/A'}
+                      {pasajero.simpatizante?.mesa_votacion ?? "N/A"}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-start">
-                    <span className="text-xs text-gray-600 uppercase">Orden:</span>
+                    <span className="text-xs text-gray-600 uppercase">
+                      Orden:
+                    </span>
                     <span className="text-sm font-semibold">
-                      {pasajero.simpatizante?.orden_votacion_general || pasajero.simpatizante?.orden_votacion_interna || 'N/A'}
+                      {pasajero.simpatizante?.orden_votacion ?? "N/A"}
                     </span>
                   </div>
 
                   <div className="border-t border-dashed border-gray-300 my-2"></div>
 
                   <div className="flex justify-between items-start">
-                    <span className="text-xs text-gray-600 uppercase">Transportista:</span>
+                    <span className="text-xs text-gray-600 uppercase">
+                      Transportista:
+                    </span>
                     <span className="text-xs font-medium text-right">
-                      {pasajero.transportista?.nombre} {pasajero.transportista?.apellido}
+                      {pasajero.transportista?.nombre}{" "}
+                      {pasajero.transportista?.apellido}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-start">
-                    <span className="text-xs text-gray-600 uppercase">Vehiculo:</span>
+                    <span className="text-xs text-gray-600 uppercase">
+                      Vehiculo:
+                    </span>
                     <span className="text-xs font-medium">
-                      {pasajero.transportista?.tipo_vehiculo} - {pasajero.transportista?.chapa_vehiculo}
+                      {pasajero.transportista?.tipo_vehiculo} -{" "}
+                      {pasajero.transportista?.chapa_vehiculo}
                     </span>
                   </div>
                 </div>
 
                 <div className="mt-3 pt-3 border-t-2 border-dashed border-gray-300 text-center">
                   <p className="text-[10px] text-gray-500">
-                    Confirmado: {new Date().toLocaleDateString('es-PY')} {new Date().toLocaleTimeString('es-PY')}
+                    Confirmado: {new Date().toLocaleDateString("es-PY")}{" "}
+                    {new Date().toLocaleTimeString("es-PY")}
                   </p>
                   <p className="text-[10px] text-gray-500 mt-1">
                     Ticket #{index + 1} de {pasajeros.length}

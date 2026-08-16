@@ -1,6 +1,8 @@
-import { useRef, type FC } from 'react';
-import { X, Printer } from 'lucide-react';
-import type { PasajeroTransporte } from '@dto/transporte.types';
+//src/pages/private/transportes/pasajeros/components/ModalTicket.tsx
+
+import { useRef, type FC } from "react";
+import { X, Printer } from "lucide-react";
+import type { PasajeroTransporte } from "@dto/transporte.types";
 
 interface Props {
   isOpen: boolean;
@@ -23,7 +25,7 @@ export const ModalTicket: FC<Props> = ({
     if (!ticketRef.current) return;
 
     const contenido = ticketRef.current.innerHTML;
-    const ventana = window.open('', '_blank', 'width=300,height=500');
+    const ventana = window.open("", "_blank", "width=300,height=500");
     if (!ventana) return;
 
     ventana.document.write(`
@@ -75,9 +77,12 @@ export const ModalTicket: FC<Props> = ({
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-base font-semibold text-text-primary">
-            {permitirImpresion ? 'Ticket de Transporte' : 'Datos del Pasajero'}
+            {permitirImpresion ? "Ticket de Transporte" : "Datos del Pasajero"}
           </h3>
-          <button onClick={onClose} className="text-text-tertiary hover:text-text-primary">
+          <button
+            onClick={onClose}
+            className="text-text-tertiary hover:text-text-primary"
+          >
             <X size={20} />
           </button>
         </div>
@@ -95,7 +100,8 @@ export const ModalTicket: FC<Props> = ({
             <div className="flex justify-between">
               <span className="font-bold">NOMBRE:</span>
               <span className="text-right">
-                {pasajero.simpatizante?.nombre} {pasajero.simpatizante?.apellido}
+                {pasajero.simpatizante?.nombre}{" "}
+                {pasajero.simpatizante?.apellido}
               </span>
             </div>
             <div className="flex justify-between">
@@ -103,39 +109,40 @@ export const ModalTicket: FC<Props> = ({
               <span>{pasajero.simpatizante?.documento}</span>
             </div>
           </div>
-
           <div className="border-t border-dashed border-gray-400 pt-2 mb-3 space-y-1">
             <div className="flex justify-between">
               <span className="font-bold">LOCAL:</span>
             </div>
-            <p className="text-xs">{pasajero.simpatizante?.local_votacion_general || pasajero.simpatizante?.local_votacion_interna || '-'}</p>
+            <p className="text-xs">
+              {pasajero.simpatizante?.local_votacion ?? "-"}
+            </p>
             <div className="flex justify-between mt-1">
               <span className="font-bold">MESA:</span>
-              <span>{pasajero.simpatizante?.mesa_votacion_general || pasajero.simpatizante?.mesa_votacion_interna || '-'}</span>
+              <span>{pasajero.simpatizante?.mesa_votacion ?? "-"}</span>
             </div>
             <div className="flex justify-between">
               <span className="font-bold">ORDEN:</span>
-              <span>{pasajero.simpatizante?.orden_votacion_general || pasajero.simpatizante?.orden_votacion_interna || '-'}</span>
+              <span>{pasajero.simpatizante?.orden_votacion ?? "-"}</span>
             </div>
           </div>
-
           <div className="border-t border-dashed border-gray-400 pt-2 space-y-1">
             <div className="flex justify-between">
               <span className="font-bold">CONDUCTOR:</span>
               <span>
-                {pasajero.transportista?.nombre} {pasajero.transportista?.apellido}
+                {pasajero.transportista?.nombre}{" "}
+                {pasajero.transportista?.apellido}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="font-bold">VEHÍCULO:</span>
               <span>
-                {pasajero.transportista?.tipo_vehiculo} - {pasajero.transportista?.chapa_vehiculo}
+                {pasajero.transportista?.tipo_vehiculo} -{" "}
+                {pasajero.transportista?.chapa_vehiculo}
               </span>
             </div>
           </div>
-
           <div className="border-t border-dashed border-gray-400 mt-3 pt-2 text-center text-xs text-gray-500">
-            {new Date().toLocaleString('es-PY')}
+            {new Date().toLocaleString("es-PY")}
           </div>
         </div>
 

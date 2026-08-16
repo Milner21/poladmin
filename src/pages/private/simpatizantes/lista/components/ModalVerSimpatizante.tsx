@@ -1,3 +1,5 @@
+//src/pages/private/simpatizantes/lista/components/ModalVerSimpatizante.tsx
+
 import { X, Loader2, User, Phone, MapPin, Calendar, FileText, TrendingUp, Car, CheckCircle, XCircle } from "lucide-react";
 import { type FC } from "react";
 import { useSimpatizanteDetalle } from "../../hooks/useSimpatizanteDetalle";

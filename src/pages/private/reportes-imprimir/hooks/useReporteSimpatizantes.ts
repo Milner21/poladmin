@@ -1,3 +1,5 @@
+//src/pages/private/reportes-imprimir/hooks/useReporteSimpatizantes.ts
+
 import { useQuery } from '@tanstack/react-query';
 import { reportesService } from '@services/reportes.service';
 import type { FiltrosReporte } from '@dto/reportes.types';

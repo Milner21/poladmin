@@ -32,10 +32,12 @@ export interface Simpatizante {
   registrado_por_id: string;
   fecha_registro: string;
   eliminado: boolean;
-  voto_internas: boolean;
-  fecha_voto_internas: string | null;
-  voto_generales: boolean;
-  fecha_voto_generales: string | null;
+  captador_id: string | null;
+  es_organico: boolean;
+  voto: boolean;
+  fecha_voto: string | null;
+  ticket_impreso: boolean;
+  fecha_impresion: string | null;
   [key: string]: unknown;
 }
 

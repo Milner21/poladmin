@@ -1,3 +1,5 @@
+//src/services/usuarios.service.ts
+
 import axiosInstance from "@api/axios.config";
 import type {
   Usuario,
@@ -80,6 +82,26 @@ export const usuariosService = {
     }>
   > => {
     const response = await axiosInstance.get("/usuarios/red/con-simpatizantes");
+    return response.data;
+  },
+
+  activarParaModo: async (
+    id: string,
+    activo: boolean,
+  ): Promise<{
+    mensaje: string;
+    usuario: {
+      id: string;
+      nombre: string;
+      apellido: string;
+      username: string;
+      activo_internas: boolean | null;
+      activo_generales: boolean | null;
+    };
+  }> => {
+    const response = await axiosInstance.post(`/usuarios/${id}/activar-modo`, {
+      activo,
+    });
     return response.data;
   },
 };

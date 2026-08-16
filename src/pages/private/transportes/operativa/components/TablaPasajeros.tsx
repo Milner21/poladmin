@@ -1,3 +1,5 @@
+//src/pages/private/transportes/operativa/components/TablaPasajeros.tsx
+
 import { type FC } from "react";
 import type { PasajeroTransporte } from "@dto/transporte.types";
 import { CheckCircle, User, Trash2, Loader2 } from "lucide-react";
@@ -10,7 +12,10 @@ interface TablaPasajerosProps {
   confirmados: boolean;
 }
 
-export const TablaPasajeros: FC<TablaPasajerosProps> = ({ pasajeros, confirmados }) => {
+export const TablaPasajeros: FC<TablaPasajerosProps> = ({
+  pasajeros,
+  confirmados,
+}) => {
   const queryClient = useQueryClient();
 
   const eliminarMutation = useMutation({
@@ -71,12 +76,18 @@ export const TablaPasajeros: FC<TablaPasajerosProps> = ({ pasajeros, confirmados
               </td>
               <td className="px-4 py-3">
                 <div className="flex items-center gap-2">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${confirmados ? "bg-success/20" : "bg-primary/20"}`}>
-                    <User size={16} className={confirmados ? "text-success" : "text-primary"} />
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${confirmados ? "bg-success/20" : "bg-primary/20"}`}
+                  >
+                    <User
+                      size={16}
+                      className={confirmados ? "text-success" : "text-primary"}
+                    />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-text-primary">
-                      {pasajero.simpatizante?.nombre} {pasajero.simpatizante?.apellido}
+                      {pasajero.simpatizante?.nombre}{" "}
+                      {pasajero.simpatizante?.apellido}
                     </p>
                     <p className="text-xs text-text-tertiary md:hidden">
                       CI: {pasajero.simpatizante?.documento}
@@ -88,10 +99,10 @@ export const TablaPasajeros: FC<TablaPasajerosProps> = ({ pasajeros, confirmados
                 {pasajero.simpatizante?.documento}
               </td>
               <td className="px-4 py-3 text-sm text-text-tertiary hidden lg:table-cell">
-                {pasajero.simpatizante?.local_votacion_interna ?? pasajero.simpatizante?.local_votacion_general ?? "-"}
+                {pasajero.simpatizante?.local_votacion ?? "-"}
               </td>
               <td className="px-4 py-3 text-sm text-text-tertiary hidden lg:table-cell">
-                {pasajero.simpatizante?.mesa_votacion_interna ?? pasajero.simpatizante?.mesa_votacion_general ?? "-"}
+                {pasajero.simpatizante?.mesa_votacion ?? "-"}
               </td>
               {!confirmados && (
                 <td className="px-4 py-3 text-center">

@@ -6,6 +6,7 @@ import { usePermisos } from "@hooks/usePermisos";
 import { useEstadisticasUsuarios } from "@pages/private/usuarios/hooks/useEstadisticasUsuarios";
 import {
   Activity,
+  ArrowLeftRight,
   Car,
   FileSpreadsheet,
   MapPin,
@@ -34,13 +35,14 @@ import { FunnelDiaD } from "./components/diad/FunnelDiaD";
 import { ResumenOrganicos } from "./components/diad/ResumenOrganicos";
 import { TablaPuestosDiaD } from "./components/diad/TablaPuestosDiaD";
 import { useEstadisticasDiaD } from "@hooks/useEstadisticasDiaD";
+import ComparativaModos from "./components/ComparativaModos";
 
 const Dashboard: FC = () => {
   const isMobile = window.innerWidth < 768;
   const fixedHeight = isMobile ? 200 : 280;
   const [filtroActivo, setFiltroActivo] = useState<string>("dia");
   const [seccionActiva, setSeccionActiva] = useState<
-    "simpatizantes" | "usuarios" | "diad"
+    "simpatizantes" | "usuarios" | "diad" | "comparativa"
   >("simpatizantes");
 
   const { campanaSeleccionada, campanaActual } = useCampanaSeleccionada();
@@ -64,12 +66,13 @@ const Dashboard: FC = () => {
     (statsDiaD.usar_activador_ticket ||
       statsDiaD.usar_verificador_asistencia ||
       statsDiaD.usar_solidaridad);
-
+  const puedeVerComparativa = tienePermiso("ver_comparativa_modos");
   const {
     estadisticas,
     simpatizantesEvolucionDiaria,
     top10Registros,
     intencionVoto,
+    comparativaModos,
     isLoading,
     isRefetching,
     refetch,
@@ -200,6 +203,24 @@ const Dashboard: FC = () => {
               Dia D
             </div>
             {seccionActiva === "diad" && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+            )}
+          </button>
+        )}
+        {puedeVerComparativa && (
+          <button
+            onClick={() => setSeccionActiva("comparativa")}
+            className={`px-4 py-2 text-sm font-medium transition-colors relative ${
+              seccionActiva === "comparativa"
+                ? "text-primary"
+                : "text-text-tertiary hover:text-text-primary"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <ArrowLeftRight size={16} />
+              Comparativa
+            </div>
+            {seccionActiva === "comparativa" && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
             )}
           </button>
@@ -588,10 +609,14 @@ const Dashboard: FC = () => {
               puedeVerTopRegistradores ? "lg:grid-cols-2" : ""
             }`}
           >
-            <div style={{ height: fixedHeight }}>
+            <div
+              style={{ height: fixedHeight }}
+              className="min-w-0 min-h-0 w-full"
+            >
               <SimpatizantesAreaChart
                 data={transformedData}
                 title="Registros por dia"
+                height={fixedHeight}
               />
             </div>
             {puedeVerTopRegistradores && (
@@ -666,8 +691,9 @@ const Dashboard: FC = () => {
           />
           <TablaPuestosDiaD data={statsDiaD} />
         </div>
+      ) : seccionActiva === "comparativa" ? (
+        <ComparativaModos data={comparativaModos} isLoading={isLoading} />
       ) : null}
-
       <div className="mt-auto pt-6">
         <CFooter />
       </div>

@@ -1,9 +1,11 @@
+//src/pages/private/usuarios/Usuarios.tsx
+
 import { CTable, PageHeader, ProtectedAction } from "@components";
 import type { Usuario } from "@dto/usuario.types";
 import { useAuth } from "@hooks/useAuth";
 import { useCampanaSeleccionada } from "@hooks/useCampanaSeleccionada";
 import RoutesConfig from "@routes/RoutesConfig";
-import { Trash2, UserCheck, UserPlus, UserX, X, KeyRound } from "lucide-react";
+import { Trash2, UserCheck, UserPlus, UserX, X, KeyRound, Shield } from "lucide-react";
 import { useMemo, useState, type FC } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUsuariosColumns } from "./components/usuariosColumns";
@@ -12,6 +14,9 @@ import { useActualizarUsuario } from "./hooks/useActualizarUsuario";
 import { useEliminarUsuario } from "./hooks/useEliminarUsuario";
 import { useCambiarPassword } from "./hooks/useCambiarPassword";
 import { useUsuarios } from "./hooks/useUsuarios";
+import { usuariosService } from "@services/usuarios.service";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const Usuarios: FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -29,6 +34,64 @@ const Usuarios: FC = () => {
   const { data: usuarios, isLoading } = useUsuarios(
     esRoot ? campanaActual?.id : undefined,
   );
+
+  const queryClient = useQueryClient();
+
+  const activarModoMutation = useMutation({
+    mutationFn: (params: { id: string; activo: boolean }) =>
+      usuariosService.activarParaModo(params.id, params.activo),
+    onSuccess: (data) => {
+      toast.success(data.mensaje);
+      void queryClient.invalidateQueries({ queryKey: ["usuarios"] });
+      handleCerrarModal();
+    },
+    onError: (error: unknown) => {
+      if (error !== null && typeof error === "object" && "response" in error) {
+        const axiosError = error as {
+          response?: { data?: { message?: string } };
+        };
+        toast.error(
+          axiosError.response?.data?.message ??
+            "Error al cambiar estado por modo",
+        );
+      } else {
+        toast.error("Error al cambiar estado por modo");
+      }
+    },
+  });
+
+  // Resolver si el usuario seleccionado esta activo en el modo actual
+  const modoActualCampana =
+    campanaActual?.configuracion?.modo_eleccion ?? "INTERNAS";
+
+  const estaActivoEnModoActual = useMemo(() => {
+    if (!selectedUsuario) return false;
+    if (modoActualCampana === "INTERNAS") {
+      return selectedUsuario.activo_internas === true;
+    }
+    return selectedUsuario.activo_generales === true;
+  }, [selectedUsuario, modoActualCampana]);
+
+  const handleToggleModo = () => {
+    if (!selectedUsuario) return;
+    activarModoMutation.mutate({
+      id: selectedUsuario.id,
+      activo: !estaActivoEnModoActual,
+    });
+  };
+
+  // Verificar permiso de activacion por modo
+  const puedeActivarModo = useMemo(() => {
+    if (!usuario) return false;
+    if (usuario.perfil?.nombre === "ROOT") return true;
+
+    const todosLosPermisos = [
+      ...(usuario.perfil?.permisos?.map((p) => p.permiso.nombre) || []),
+      ...(usuario.permisos_personalizados?.map((p) => p.permiso.nombre) || []),
+    ];
+
+    return todosLosPermisos.includes("activar_usuario_modo");
+  }, [usuario]);
 
   const handleRowDoubleClick = (record: Usuario) => {
     setSelectedUsuario(record);
@@ -96,21 +159,10 @@ const Usuarios: FC = () => {
   // Determinar si el usuario actual puede cambiar contraseñas de otros
   const puedeEditarPassword = useMemo(() => {
     if (!usuario) {
-      console.log("🔍 DEBUG puedeEditarPassword: No hay usuario");
       return false;
     }
 
-    console.log("🔍 DEBUG puedeEditarPassword - Usuario:", {
-      nombre: usuario.nombre,
-      perfil: usuario.perfil?.nombre,
-      permisosPerfil:
-        usuario.perfil?.permisos?.map((p) => p.permiso.nombre) || [],
-      permisosPersonalizados:
-        usuario.permisos_personalizados?.map((p) => p.permiso.nombre) || [],
-    });
-
     if (usuario.perfil?.nombre === "ROOT") {
-      console.log("🔍 DEBUG puedeEditarPassword: Es ROOT - TRUE");
       return true;
     }
 
@@ -120,16 +172,7 @@ const Usuarios: FC = () => {
       ...(usuario.permisos_personalizados?.map((p) => p.permiso.nombre) || []),
     ];
 
-    console.log(
-      "🔍 DEBUG puedeEditarPassword - Todos los permisos:",
-      todosLosPermisos,
-    );
-
     const tienePermiso = todosLosPermisos.includes("cambiar_password_usuario");
-    console.log(
-      "🔍 DEBUG puedeEditarPassword - Tiene permiso cambiar_password_usuario:",
-      tienePermiso,
-    );
 
     return tienePermiso;
   }, [usuario]);
@@ -367,6 +410,35 @@ const Usuarios: FC = () => {
                     >
                       <KeyRound size={15} />
                       Cambiar Contraseña
+                    </button>
+                  )}
+
+                {/* Activar/Desactivar por modo electoral */}
+                {puedeActivarModo &&
+                  selectedUsuario.perfil.nombre !== "ROOT" &&
+                  selectedUsuario.campana_id && (
+                    <button
+                      onClick={handleToggleModo}
+                      disabled={activarModoMutation.isPending}
+                      className={`
+                        flex items-center gap-2 px-3 py-2 text-sm rounded-lg
+                        transition-colors font-medium
+                        disabled:opacity-60 disabled:cursor-not-allowed
+                        ${
+                          estaActivoEnModoActual
+                            ? "bg-warning/10 hover:bg-warning/20 text-warning border border-warning/30"
+                            : "bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30"
+                        }
+                      `}
+                    >
+                      {activarModoMutation.isPending ? (
+                        <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Shield size={15} />
+                      )}
+                      {estaActivoEnModoActual
+                        ? `Desactivar ${modoActualCampana === "INTERNAS" ? "INT" : "GEN"}`
+                        : `Activar ${modoActualCampana === "INTERNAS" ? "INT" : "GEN"}`}
                     </button>
                   )}
 

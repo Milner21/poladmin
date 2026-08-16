@@ -47,6 +47,8 @@ const RoutesConfig = {
   simpatizantesRed: `${basePaths.admin}/simpatizantes/red`,
   simpatizantesRedUsuario: (id: string) =>
     `${basePaths.admin}/simpatizantes/red/${id}`,
+  simpatizantesRedCandidato: (id: string) =>
+    `${basePaths.admin}/simpatizantes/red/candidato/${id}`,
   simpatizantesSeguimiento: `${basePaths.admin}/simpatizantes/seguimiento`,
   simpatizantesDuplicados: `${basePaths.admin}/simpatizantes/duplicados`,
   simpatizantesCrear: `${basePaths.admin}/simpatizantes/crear`,

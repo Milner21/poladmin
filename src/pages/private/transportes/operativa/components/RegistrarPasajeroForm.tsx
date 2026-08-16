@@ -1,3 +1,5 @@
+//src/pages/private/transportes/operativa/components/RegistrarPasajeroForm.tsx
+
 import type { ResultadoBusquedaInteligente } from "@dto/padron.types";
 import { transportesService } from "@services/transportes.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -138,10 +140,8 @@ export const RegistrarPasajeroForm: FC<RegistrarPasajeroFormProps> = ({
             fecha_nacimiento: null,
             departamento: null,
             distrito: null,
-            seccional: null,
-            local_votacion: null,
-            mesa: null,
-            orden: null,
+            padron_interno: null,
+            padron_general: null,
           }
         }
         onConfirmar={handleConfirmar}

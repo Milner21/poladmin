@@ -1,3 +1,5 @@
+//src/pages/private/simpatizantes/lista/components/ModalEditarSimpatizante.tsx
+
 import {
   X,
   Loader2,

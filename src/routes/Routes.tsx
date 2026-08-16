@@ -70,6 +70,7 @@ import VerificadorPage from "@pages/private/verificador/VerificadorPage";
 import ConfiguracionListaPage from "@pages/private/campanas/ConfiguracionListaPage";
 import TemplateEditorPage from "@pages/private/templates/TemplateEditorPage";
 import TemplatesListaPage from "@pages/private/templates/TemplatesListaPage";
+import SimpatizantesDeCandidatoPage from "@pages/private/simpatizantes/red/SimpatizantesDeCandidatoPage";
 
 const AppRoutes = () => {
   return (
@@ -206,6 +207,10 @@ const AppRoutes = () => {
                 element={<SimpatizantesDeUsuarioPage />}
               />
               <Route
+                path={`${RoutesConfig.simpatizantesRed}/candidato/:candidatoId`}
+                element={<SimpatizantesDeCandidatoPage />}
+              />
+              <Route
                 path={RoutesConfig.simpatizantesSeguimiento}
                 element={<SeguimientoSimpatizantesPage />}
               />
@@ -339,7 +344,7 @@ const AppRoutes = () => {
                 path={RoutesConfig.solidaridadPanel}
                 element={<SolidaridadPage />}
               />
-               <Route
+              <Route
                 path={RoutesConfig.templateLista}
                 element={<TemplatesListaPage />}
               />

@@ -1,3 +1,5 @@
+//src/pages/private/simpatizantes/red/RedSimpatizantesPage.tsx
+
 import { PageHeader } from "@components";
 import { CTable } from "@components/CTable/CTable";
 import type { ColumnDef } from "@components/CTable/CTable.types";
@@ -168,7 +170,7 @@ const RedSimpatizantesPage: FC = () => {
         pagination={true}
         defaultPageSize={25}
         onRowDoubleClick={(record) => {
-          navigate(RoutesConfig.simpatizantesRedUsuario(record.id));
+          navigate(RoutesConfig.simpatizantesRedCandidato(record.id));
         }}
       />
     </div>

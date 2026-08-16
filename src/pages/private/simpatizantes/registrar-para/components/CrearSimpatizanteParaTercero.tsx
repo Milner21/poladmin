@@ -1,10 +1,10 @@
+//src/pages/private/simpatizantes/registrar-para/components/CrearSimpatizanteParaTercero.tsx
+
 import type {
   DatosBusquedaInteligente,
   ResultadoBusquedaInteligente,
 } from "@dto/padron.types";
-import type {
-  CreateSimpatizanteDto,
-} from "@dto/simpatizante.types";
+import type { CreateSimpatizanteDto } from "@dto/simpatizante.types";
 import { RotateCcw, Save, UserPlus } from "lucide-react";
 import { useState, useRef, type FC } from "react";
 import toast from "react-hot-toast";
@@ -79,10 +79,8 @@ const datosVacios: DatosBusquedaInteligente = {
   fecha_nacimiento: null,
   departamento: null,
   distrito: null,
-  seccional: null,
-  local_votacion: null,
-  mesa: null,
-  orden: null,
+  padron_interno: null,
+  padron_general: null,
 };
 
 interface CrearSimpatizanteParaTerceroProps {
@@ -209,7 +207,6 @@ const CrearSimpatizanteParaTercero: FC<CrearSimpatizanteParaTerceroProps> = ({
     if (!datosConfirmados?.datos) return null;
 
     const datos = datosConfirmados.datos;
-    const esInterno = datosConfirmados.encontrado_en === "PADRON_INTERNO";
 
     return {
       nombre: datos.nombre,
@@ -220,24 +217,21 @@ const CrearSimpatizanteParaTercero: FC<CrearSimpatizanteParaTerceroProps> = ({
       departamento: datos.departamento || undefined,
       distrito: datos.distrito || undefined,
       barrio: formData.barrio || undefined,
-      es_afiliado: esInterno,
+      es_afiliado: datos.padron_interno !== null,
       observaciones: formData.observaciones || undefined,
       necesita_transporte: formData.necesita_transporte,
       latitud: formData.latitud || undefined,
       longitud: formData.longitud || undefined,
-      origen_registro: esInterno ? "PADRON_INTERNO" : "PADRON_GENERAL",
-      ...(esInterno
-        ? {
-            seccional_interna: datos.seccional || undefined,
-            local_votacion_interna: datos.local_votacion || undefined,
-            mesa_votacion_interna: datos.mesa || undefined,
-            orden_votacion_interna: datos.orden || undefined,
-          }
-        : {
-            local_votacion_general: datos.local_votacion || undefined,
-            mesa_votacion_general: datos.mesa || undefined,
-            orden_votacion_general: datos.orden || undefined,
-          }),
+      origen_registro: datos.padron_interno
+        ? "PADRON_INTERNO"
+        : "PADRON_GENERAL",
+      seccional_interna: datos.padron_interno?.seccional || undefined,
+      local_votacion_interna: datos.padron_interno?.local_votacion || undefined,
+      mesa_votacion_interna: datos.padron_interno?.mesa || undefined,
+      orden_votacion_interna: datos.padron_interno?.orden || undefined,
+      local_votacion_general: datos.padron_general?.local_votacion || undefined,
+      mesa_votacion_general: datos.padron_general?.mesa || undefined,
+      orden_votacion_general: datos.padron_general?.orden || undefined,
     };
   };
 
@@ -381,11 +375,20 @@ const CrearSimpatizanteParaTercero: FC<CrearSimpatizanteParaTerceroProps> = ({
         fecha_nacimiento: datosConfirmados.datos.fecha_nacimiento,
         departamento: datosConfirmados.datos.departamento,
         distrito: datosConfirmados.datos.distrito,
-        seccional: datosConfirmados.datos.seccional,
-        local_votacion: datosConfirmados.datos.local_votacion,
-        mesa_votacion: datosConfirmados.datos.mesa,
-        orden_votacion: datosConfirmados.datos.orden,
-        es_afiliado: datosConfirmados.encontrado_en === "PADRON_INTERNO",
+        seccional: datosConfirmados.datos.padron_interno?.seccional ?? null,
+        local_votacion:
+          datosConfirmados.datos.padron_interno?.local_votacion ??
+          datosConfirmados.datos.padron_general?.local_votacion ??
+          null,
+        mesa_votacion:
+          datosConfirmados.datos.padron_interno?.mesa ??
+          datosConfirmados.datos.padron_general?.mesa ??
+          null,
+        orden_votacion:
+          datosConfirmados.datos.padron_interno?.orden ??
+          datosConfirmados.datos.padron_general?.orden ??
+          null,
+        es_afiliado: datosConfirmados.datos.padron_interno !== null,
       }
     : null;
 

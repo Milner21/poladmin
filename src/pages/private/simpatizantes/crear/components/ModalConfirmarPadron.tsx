@@ -1,3 +1,5 @@
+// src/pages/private/simpatizantes/crear/components/ModalConfirmarPadron.tsx
+
 import { CheckCircle, X, User } from 'lucide-react';
 import type { FC } from 'react';
 import type { DatosBusquedaInteligente, EncontradoEn } from '@dto/padron.types';
@@ -20,6 +22,8 @@ export const ModalConfirmarPadron: FC<Props> = ({
   if (!isOpen) return null;
 
   const esPadronGeneral = encontradoEn === 'PADRON_GENERAL';
+  const tieneInterno = datos.padron_interno !== null;
+  const tieneGeneral = datos.padron_general !== null;
 
   return (
     <>
@@ -73,11 +77,45 @@ export const ModalConfirmarPadron: FC<Props> = ({
               <span className="text-text-primary">{datos.distrito}</span>
             </div>
           )}
-          {datos.local_votacion && (
-            <div className="flex justify-between">
-              <span className="text-text-secondary">Local de votación</span>
-              <span className="text-text-primary">{datos.local_votacion}</span>
-            </div>
+
+          {tieneInterno && (
+            <>
+              {datos.padron_interno?.seccional && (
+                <div className="flex justify-between">
+                  <span className="text-text-secondary">Seccional</span>
+                  <span className="text-text-primary">{datos.padron_interno.seccional}</span>
+                </div>
+              )}
+              {datos.padron_interno?.local_votacion && (
+                <div className="flex justify-between">
+                  <span className="text-text-secondary">Local votacion (internas)</span>
+                  <span className="text-text-primary">{datos.padron_interno.local_votacion}</span>
+                </div>
+              )}
+              {datos.padron_interno?.mesa && (
+                <div className="flex justify-between">
+                  <span className="text-text-secondary">Mesa (internas)</span>
+                  <span className="text-text-primary">{datos.padron_interno.mesa}</span>
+                </div>
+              )}
+            </>
+          )}
+
+          {tieneGeneral && (
+            <>
+              {datos.padron_general?.local_votacion && (
+                <div className="flex justify-between">
+                  <span className="text-text-secondary">Local votacion (generales)</span>
+                  <span className="text-text-primary">{datos.padron_general.local_votacion}</span>
+                </div>
+              )}
+              {datos.padron_general?.mesa && (
+                <div className="flex justify-between">
+                  <span className="text-text-secondary">Mesa (generales)</span>
+                  <span className="text-text-primary">{datos.padron_general.mesa}</span>
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -88,7 +126,7 @@ export const ModalConfirmarPadron: FC<Props> = ({
             className="flex-1 px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 font-medium"
           >
             <CheckCircle className="w-4 h-4" />
-            Sí, es la persona
+            Si, es la persona
           </button>
           <button
             type="button"

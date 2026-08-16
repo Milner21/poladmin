@@ -1,3 +1,5 @@
+//src/services/reportes.service.ts
+
 import axiosInstance from "@api/axios.config";
 import type {
   FiltrosLocalesVotacion,
@@ -13,7 +15,6 @@ import type {
 
 export const reportesService = {
   getCaptacion: async (filtros: FiltrosReporte): Promise<ReporteCaptacion> => {
-    console.log("🔍 Llamando getCaptacion con filtros:", filtros);
     const params = new URLSearchParams();
 
     if (filtros.campana_id) params.append("campana_id", filtros.campana_id);
@@ -28,8 +29,7 @@ export const reportesService = {
     if (filtros.lider_id) params.append("lider_id", filtros.lider_id);
     if (filtros.agrupacion) params.append("agrupacion", filtros.agrupacion);
 
-    console.log("🔍 URL final:", `/reportes/captacion?${params.toString()}`);
-
+    
     const response = await axiosInstance.get(
       `/reportes/captacion?${params.toString()}`,
     );

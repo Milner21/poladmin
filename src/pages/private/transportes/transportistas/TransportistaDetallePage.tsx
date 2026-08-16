@@ -1,3 +1,5 @@
+//src/pages/private/transportes/transportistas/TransportistaDetallePage.tsx
+
 import { useState, type FC } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { PageHeader } from "@components";
@@ -113,25 +115,19 @@ const TransportistaDetallePage: FC = () => {
               CI: {pasajero.simpatizante?.documento}
             </p>
             <p className="text-xs text-text-secondary truncate">
-              {pasajero.simpatizante?.local_votacion_interna ||
-                pasajero.simpatizante?.local_votacion_general ||
-                "-"}
+              {pasajero.simpatizante?.local_votacion ?? "-"}
             </p>
             <div className="flex items-center gap-3 mt-1">
               <span className="text-xs text-text-tertiary">
                 Mesa:{" "}
                 <span className="font-medium text-text-primary">
-                  {pasajero.simpatizante?.mesa_votacion_interna ||
-                    pasajero.simpatizante?.mesa_votacion_general ||
-                    "-"}
+                  {pasajero.simpatizante?.mesa_votacion ?? "-"}
                 </span>
               </span>
               <span className="text-xs text-text-tertiary">
                 Orden:{" "}
                 <span className="font-medium text-text-primary">
-                  {pasajero.simpatizante?.orden_votacion_interna ||
-                    pasajero.simpatizante?.orden_votacion_general ||
-                    "-"}
+                  {pasajero.simpatizante?.orden_votacion ?? "-"}
                 </span>
               </span>
             </div>

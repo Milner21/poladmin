@@ -114,3 +114,38 @@ export interface IntencionVotoDashboard {
   contrario: number;
   total: number;
 }
+
+// Comparativa INTERNAS vs GENERALES
+
+export interface EstadisticasPorModo {
+  total: number;
+  votantes: number;
+  porcentaje_participacion: number;
+  organicos: number;
+  necesitan_transporte: number;
+  por_origen: {
+    padron_interno: number;
+    padron_general: number;
+    manual: number;
+  };
+  intencion_voto: {
+    seguro: number;
+    probable: number;
+    indeciso: number;
+    contrario: number;
+  };
+}
+
+export interface CruceModos {
+  solo_internas: number;
+  solo_generales: number;
+  en_ambas: number;
+  retencion_porcentaje: number;
+}
+
+export interface ComparativaModos {
+  campana_id: string;
+  internas: EstadisticasPorModo;
+  generales: EstadisticasPorModo;
+  cruce: CruceModos;
+}
