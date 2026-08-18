@@ -3,7 +3,7 @@
 import { PageHeader } from "@components";
 import { simpatizantesService } from "@services/simpatizantes.service";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowLeft, CheckCircle, Search, User, XCircle } from "lucide-react";
+import { AlertTriangle, ArrowLeft, CheckCircle, Search, User, XCircle } from "lucide-react";
 import { useState, type FC } from "react";
 import { useNavigate } from "react-router-dom";
 import RoutesConfig from "@routes/RoutesConfig";
@@ -22,6 +22,8 @@ interface ConsultaVotoResult {
     local_votacion: string | null;
     mesa_votacion: string | null;
     orden_votacion: string | null;
+    datos_padron_disponibles: boolean;
+    mensaje_padron: string | null;
   } | null;
 }
 
@@ -155,18 +157,41 @@ const ConsultaVotoPage: FC = () => {
                       {resultado.data?.documento}
                     </p>
                   </div>
-                  <div>
-                    <p className="text-xs text-text-tertiary mb-1">Local</p>
-                    <p className="text-sm text-text-secondary">
-                      {resultado.data?.local_votacion || "—"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-text-tertiary mb-1">Mesa</p>
-                    <p className="text-sm text-text-secondary">
-                      {resultado.data?.mesa_votacion || "—"}
-                    </p>
-                  </div>
+                  {resultado.data?.datos_padron_disponibles ? (
+                    <>
+                      <div>
+                        <p className="text-xs text-text-tertiary mb-1">Local</p>
+                        <p className="text-sm text-text-secondary">
+                          {resultado.data.local_votacion || "—"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-text-tertiary mb-1">Mesa</p>
+                        <p className="text-sm text-text-secondary">
+                          {resultado.data.mesa_votacion || "—"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-text-tertiary mb-1">Orden</p>
+                        <p className="text-sm text-text-secondary">
+                          {resultado.data.orden_votacion || "—"}
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="col-span-2">
+                      <div className="flex items-center gap-2 bg-warning/10 border border-warning/20 rounded-lg p-3">
+                        <AlertTriangle
+                          size={16}
+                          className="text-warning shrink-0"
+                        />
+                        <p className="text-sm text-warning">
+                          {resultado.data?.mensaje_padron ??
+                            "Los datos de votacion para este modo aun no fueron cargados"}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 

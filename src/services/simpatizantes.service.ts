@@ -222,6 +222,8 @@ export const simpatizantesService = {
       local_votacion: string | null;
       mesa_votacion: string | null;
       orden_votacion: string | null;
+      datos_padron_disponibles: boolean;
+      mensaje_padron: string | null;
     } | null;
   }> => {
     const response = await axiosInstance.get(
