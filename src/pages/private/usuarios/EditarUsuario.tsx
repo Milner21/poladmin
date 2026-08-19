@@ -18,6 +18,7 @@ interface FormValues {
   apellido: string;
   documento: string;
   telefono: string;
+  barrio: string;
   password: string;
   confirmarPassword: string;
   perfil_id: string;
@@ -48,6 +49,7 @@ const EditarUsuario: FC = () => {
     apellido: "",
     documento: "",
     telefono: "",
+    barrio: "",
     password: "",
     confirmarPassword: "",
     perfil_id: "",
@@ -107,6 +109,7 @@ const EditarUsuario: FC = () => {
         apellido: usuarioAEditar.apellido,
         documento: usuarioAEditar.documento,
         telefono: usuarioAEditar.telefono ?? "",
+        barrio: "",
         password: "",
         confirmarPassword: "",
         perfil_id: usuarioAEditar.perfil.id,

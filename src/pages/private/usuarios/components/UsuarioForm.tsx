@@ -8,6 +8,7 @@ interface FormValues {
   apellido: string;
   documento: string;
   telefono: string;
+  barrio: string;
   password: string;
   confirmarPassword: string;
   perfil_id: string;
@@ -19,6 +20,7 @@ interface FormErrors {
   apellido?: string;
   documento?: string;
   telefono?: string;
+  barrio?: string;
   password?: string;
   confirmarPassword?: string;
   perfil_id?: string;
@@ -180,7 +182,7 @@ export const UsuarioForm: FC<UsuarioFormProps> = ({
 
           <div>
             <label className="block text-sm font-medium text-text-primary mb-1">
-              Teléfono{" "}
+              Telefono{" "}
               <span className="text-text-tertiary text-xs ml-1">
                 (opcional)
               </span>
@@ -190,6 +192,22 @@ export const UsuarioForm: FC<UsuarioFormProps> = ({
               value={values.telefono}
               onChange={(e) => onChange("telefono", e.target.value)}
               placeholder="ej: 0981123456"
+              className="w-full px-4 py-2 rounded-lg border border-border bg-bg-content text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1">
+              Barrio{" "}
+              <span className="text-text-tertiary text-xs ml-1">
+                (opcional)
+              </span>
+            </label>
+            <input
+              type="text"
+              value={values.barrio ?? ""}
+              onChange={(e) => onChange("barrio", e.target.value)}
+              placeholder="ej: San Juan"
               className="w-full px-4 py-2 rounded-lg border border-border bg-bg-content text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary transition-all"
             />
           </div>

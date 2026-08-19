@@ -85,6 +85,7 @@ export interface CreateUsuarioDto {
   perfil_id: string;
   nivel_id?: string;
   telefono?: string;
+  barrio?: string;
   username?: string;
   candidato_superior_id?: string;
   permisos_ids?: string[];

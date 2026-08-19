@@ -18,6 +18,7 @@ interface FormValues {
   apellido: string;
   documento: string;
   telefono: string;
+  barrio: string;
   password: string;
   confirmarPassword: string;
   perfil_id: string;
@@ -42,6 +43,7 @@ const initialValues: FormValues = {
   apellido: "",
   documento: "",
   telefono: "",
+  barrio: "",
   password: "",
   confirmarPassword: "",
   perfil_id: "",
@@ -75,8 +77,7 @@ const CrearUsuario: FC = () => {
   );
 
   // Hooks de datos
-  const { esRoot,  getNivelOrden, obtenerTodosLosPermisos } =
-    usePermisos();
+  const { esRoot, getNivelOrden, obtenerTodosLosPermisos } = usePermisos();
   const { data: perfiles } = usePerfiles();
   const { campanaSeleccionada } = useCampanaSeleccionada();
   const { data: todosLosPermisosDb } = useListaPermisos();
@@ -302,6 +303,7 @@ const CrearUsuario: FC = () => {
         password: values.password,
         perfil_id: values.perfil_id,
         telefono: values.telefono.trim() || undefined,
+        barrio: values.barrio.trim() || undefined,
         campana_id: esRoot ? campanaSeleccionada : undefined,
         permisos_ids:
           tipoUsuario === "operativo" ? permisosSeleccionados : undefined,
