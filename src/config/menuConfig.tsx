@@ -307,14 +307,14 @@ export const menuConfig: MenuItemConfig[] = [
     icon: <BarChart3 size={18} />,
     label: "Reportes",
     path: RoutesConfig.reportes,
-    modulo: "dashboard",
+    modulo: "reportes",
   },
   {
     key: "reportes-imprimir",
     icon: <FileDown size={18} />,
     label: "Exportar Reportes",
     path: RoutesConfig.reportesImprimir,
-    modulo: "dashboard",
+    modulo: "reportes",
     permisoEspecifico: "exportar_reportes",
   },
   {
@@ -322,7 +322,7 @@ export const menuConfig: MenuItemConfig[] = [
     icon: <Map size={18} />,
     label: "Mapa de Calor",
     path: RoutesConfig.mapa,
-    modulo: "dashboard",
+    modulo: "reportes",
   },
   {
     key: "impresoras",

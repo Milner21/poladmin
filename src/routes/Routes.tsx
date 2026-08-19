@@ -94,7 +94,7 @@ const AppRoutes = () => {
             <Route path={RoutesConfig.dashboard} element={<Dashboard />} />
 
             {/* Reportes */}
-            <Route element={<ProtectedModuleRoute modulo="dashboard" />}>
+            <Route element={<ProtectedModuleRoute modulo="reportes" />}>
               <Route path={RoutesConfig.reportes} element={<Reportes />} />
               <Route
                 path={RoutesConfig.reportesImprimir}
@@ -103,7 +103,7 @@ const AppRoutes = () => {
             </Route>
 
             {/* Mapa de Calor */}
-            <Route element={<ProtectedModuleRoute modulo="dashboard" />}>
+            <Route element={<ProtectedModuleRoute modulo="reportes" />}>
               <Route path={RoutesConfig.mapa} element={<MapaCalor />} />
             </Route>
 

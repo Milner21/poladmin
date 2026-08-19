@@ -22,7 +22,8 @@ export type ModuloPermiso =
   | "padron"
   | "puestos"
   | "tickets"
-  | "estadisticas";
+  | "estadisticas"
+  | "reportes";
 
 export const MODULOS: ModuloPermiso[] = [
   "usuarios",
@@ -40,7 +41,8 @@ export const MODULOS: ModuloPermiso[] = [
   "padron",
   "puestos",
   "tickets",
-  "estadisticas"
+  "estadisticas",
+  "reportes",
 ];
 
 export interface CreatePermisoDto {

@@ -1,7 +1,7 @@
 {
-  "version": "1.6.2",
-  "fecha": "2026-08-18",
+  "version": "1.6.5",
+  "fecha": "2026-08-19",
   "cambios": [
-    "Nueva funcionalidades Generales"
+    "Correccion de permisos"
   ]
 }
