@@ -1,7 +1,8 @@
 {
-  "version": "1.6.5",
+  "version": "1.6.6",
   "fecha": "2026-08-19",
   "cambios": [
-    "Correccion de permisos"
+    "Correccion de permisos",
+    "Agregado de barrio en usuarios form"
   ]
 }
