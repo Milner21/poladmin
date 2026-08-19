@@ -1,4 +1,4 @@
-//src/pages/private/simpatizantes/crear/CrearSimpatizante.tsx
+// src/pages/private/simpatizantes/crear/CrearSimpatizante.tsx
 
 import { PageHeader } from "@components";
 import type {
@@ -159,14 +159,18 @@ const CrearSimpatizante: FC<CrearSimpatizanteProps> = ({
 
   const handleBuscar = async () => {
     if (!ciBusqueda.trim()) {
-      toast.error("Ingresá una cédula para buscar");
+      toast.error("Ingresa una cedula para buscar");
       return;
     }
 
     const resultado = await buscar(ciBusqueda.trim());
     if (!resultado) return;
 
-    if (resultado.encontrado_en === "SIMPATIZANTE") {
+    // Simpatizante existente con ficha en el modo activo: bloquear como duplicado
+    if (
+      resultado.encontrado_en === "SIMPATIZANTE" &&
+      !resultado.simpatizante_base_existente
+    ) {
       setModalActivo({
         tipo: "SIMPATIZANTE_EXISTENTE",
         datos: resultado.datos!,
@@ -180,6 +184,8 @@ const CrearSimpatizante: FC<CrearSimpatizanteProps> = ({
       return;
     }
 
+    // Persona en padron o simpatizante base existente sin ficha en modo activo:
+    // mostrar modal de confirmacion y continuar al formulario
     setModalActivo({
       tipo: "CONFIRMAR_PADRON",
       datos: resultado.datos!,
@@ -278,6 +284,8 @@ const CrearSimpatizante: FC<CrearSimpatizanteProps> = ({
 
     const datos = datosConfirmados.datos;
 
+    // Siempre enviar ambos bloques de datos de padron
+    // El backend guarda lo que corresponda y deja vacio lo que no existe
     return {
       nombre: datos.nombre,
       apellido: datos.apellido,
@@ -308,17 +316,17 @@ const CrearSimpatizante: FC<CrearSimpatizanteProps> = ({
 
   const handleGuardar = () => {
     if (!datosConfirmados && !modoManual) {
-      toast.error("Primero buscá una cédula en el padrón");
+      toast.error("Primero busca una cedula en el padron");
       return;
     }
 
     if (tieneSolicitud) {
       if (!solicitudData.titulo.trim()) {
-        toast.error('Completá el campo "Solicita" para registrar la solicitud');
+        toast.error('Completa el campo "Solicita" para registrar la solicitud');
         return;
       }
       if (!solicitudData.descripcion.trim()) {
-        toast.error("Completá el detalle de la solicitud");
+        toast.error("Completa el detalle de la solicitud");
         return;
       }
     }
@@ -402,7 +410,7 @@ const CrearSimpatizante: FC<CrearSimpatizanteProps> = ({
     const simpatizanteId = modalActivo.resultado.simpatizante_id;
 
     if (!simpatizanteId) {
-      toast.error("No se encontró el ID del simpatizante");
+      toast.error("No se encontro el ID del simpatizante");
       return;
     }
 
@@ -441,30 +449,11 @@ const CrearSimpatizante: FC<CrearSimpatizanteProps> = ({
   const mostrarBusqueda =
     !buscando && pasos.length === 0 && !datosConfirmados && !modoManual;
 
-  const datosPadronParaMostrar = datosConfirmados?.datos
-    ? {
-        ci: datosConfirmados.datos.ci,
-        nombre: datosConfirmados.datos.nombre,
-        apellido: datosConfirmados.datos.apellido,
-        fecha_nacimiento: datosConfirmados.datos.fecha_nacimiento,
-        departamento: datosConfirmados.datos.departamento,
-        distrito: datosConfirmados.datos.distrito,
-        seccional: datosConfirmados.datos.padron_interno?.seccional ?? null,
-        local_votacion:
-          datosConfirmados.datos.padron_interno?.local_votacion ??
-          datosConfirmados.datos.padron_general?.local_votacion ??
-          null,
-        mesa_votacion:
-          datosConfirmados.datos.padron_interno?.mesa ??
-          datosConfirmados.datos.padron_general?.mesa ??
-          null,
-        orden_votacion:
-          datosConfirmados.datos.padron_interno?.orden ??
-          datosConfirmados.datos.padron_general?.orden ??
-          null,
-        es_afiliado: datosConfirmados.datos.padron_interno !== null,
-      }
-    : null;
+  // Modo activo resuelto desde el resultado de busqueda
+  const modoEleccion: "INTERNAS" | "GENERALES" =
+    datosConfirmados?.modo_eleccion ??
+    modalActivo?.resultado?.modo_eleccion ??
+    "INTERNAS";
 
   return (
     <div className={embebido ? "" : "bg-bg-base"}>
@@ -496,8 +485,11 @@ const CrearSimpatizante: FC<CrearSimpatizanteProps> = ({
           <BusquedaEnProgreso pasos={pasos} buscando={buscando} />
         )}
 
-        {datosConfirmados && !modoManual && datosPadronParaMostrar && (
-          <DatosPadron datos={datosPadronParaMostrar} />
+        {datosConfirmados && !modoManual && datosConfirmados.datos && (
+          <DatosPadron
+            datos={datosConfirmados.datos}
+            modoEleccion={modoEleccion}
+          />
         )}
 
         {modoManual && (
@@ -606,6 +598,16 @@ const CrearSimpatizante: FC<CrearSimpatizanteProps> = ({
             ? modalActivo.resultado.encontrado_en
             : "PADRON_INTERNO"
         }
+        modoEleccion={
+          modalActivo?.tipo === "CONFIRMAR_PADRON"
+            ? modalActivo.resultado.modo_eleccion
+            : "INTERNAS"
+        }
+        simpatizanteBaseExistente={
+          modalActivo?.tipo === "CONFIRMAR_PADRON"
+            ? modalActivo.resultado.simpatizante_base_existente
+            : false
+        }
         datos={
           modalActivo?.tipo === "CONFIRMAR_PADRON"
             ? modalActivo.datos
@@ -652,7 +654,7 @@ const CrearSimpatizante: FC<CrearSimpatizanteProps> = ({
         }}
         onOmitir={() => {
           toast("Simpatizante guardado. La solicitud fue omitida.", {
-            icon: "⚠️",
+            icon: "i",
           });
           handleLimpiar();
         }}

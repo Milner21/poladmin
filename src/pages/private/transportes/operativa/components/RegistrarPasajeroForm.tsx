@@ -132,6 +132,8 @@ export const RegistrarPasajeroForm: FC<RegistrarPasajeroFormProps> = ({
       <ModalConfirmarPadron
         isOpen={modalConfirmarOpen}
         encontradoEn={resultadoBusqueda?.encontrado_en ?? "PADRON_GENERAL"}
+        modoEleccion={resultadoBusqueda?.modo_eleccion ?? "GENERALES"}
+        simpatizanteBaseExistente={false}
         datos={
           resultadoBusqueda?.datos ?? {
             ci: "",

@@ -7,7 +7,9 @@ import type { DatosBusquedaInteligente, EncontradoEn } from '@dto/padron.types';
 interface Props {
   isOpen: boolean;
   encontradoEn: EncontradoEn;
+  modoEleccion: 'INTERNAS' | 'GENERALES';
   datos: DatosBusquedaInteligente;
+  simpatizanteBaseExistente: boolean;
   onConfirmar: () => void;
   onCancelar: () => void;
 }
@@ -15,15 +17,35 @@ interface Props {
 export const ModalConfirmarPadron: FC<Props> = ({
   isOpen,
   encontradoEn,
+  modoEleccion,
   datos,
+  simpatizanteBaseExistente,
   onConfirmar,
   onCancelar,
 }) => {
   if (!isOpen) return null;
 
   const esPadronGeneral = encontradoEn === 'PADRON_GENERAL';
-  const tieneInterno = datos.padron_interno !== null;
-  const tieneGeneral = datos.padron_general !== null;
+  const esInternas = modoEleccion === 'INTERNAS';
+
+  // Resolver local/mesa/orden segun modo activo
+  const localVotacion = esInternas
+    ? datos.padron_interno?.local_votacion ?? null
+    : datos.padron_general?.local_votacion ?? null;
+
+  const mesaVotacion = esInternas
+    ? datos.padron_interno?.mesa ?? null
+    : datos.padron_general?.mesa ?? null;
+
+  const ordenVotacion = esInternas
+    ? datos.padron_interno?.orden ?? null
+    : datos.padron_general?.orden ?? null;
+
+  const seccional = esInternas
+    ? datos.padron_interno?.seccional ?? null
+    : null;
+
+  const etiquetaModo = esInternas ? 'Internas' : 'Generales';
 
   return (
     <>
@@ -38,19 +60,26 @@ export const ModalConfirmarPadron: FC<Props> = ({
         <div className="text-center mb-4">
           <h3 className="text-lg font-semibold text-text-primary mb-2">
             {esPadronGeneral
-              ? 'Persona encontrada en padrón general'
-              : 'Persona encontrada en padrón interno'}
+              ? 'Persona encontrada en padron general'
+              : 'Persona encontrada en padron interno'}
           </h3>
 
-          {esPadronGeneral && (
+          {simpatizanteBaseExistente && (
+            <p className="text-sm text-primary mb-3">
+              Esta persona ya existe en la campaña. Se registrara su ficha para{' '}
+              <strong>{etiquetaModo}</strong>.
+            </p>
+          )}
+
+          {esPadronGeneral && !simpatizanteBaseExistente && (
             <p className="text-sm text-warning mb-3">
-              Esta persona no figura en el padrón interno pero sí en el padrón general.
-              Si confirmás, se registrará con datos de generales.
+              Esta persona no figura en el padron interno pero si en el padron general.
+              Si confirmas, se registrara con datos de generales.
             </p>
           )}
 
           <p className="text-sm text-text-secondary mb-4">
-            ¿Es realmente la persona que estás buscando?
+            Es realmente la persona que estas buscando?
           </p>
         </div>
 
@@ -78,44 +107,40 @@ export const ModalConfirmarPadron: FC<Props> = ({
             </div>
           )}
 
-          {tieneInterno && (
-            <>
-              {datos.padron_interno?.seccional && (
-                <div className="flex justify-between">
-                  <span className="text-text-secondary">Seccional</span>
-                  <span className="text-text-primary">{datos.padron_interno.seccional}</span>
-                </div>
-              )}
-              {datos.padron_interno?.local_votacion && (
-                <div className="flex justify-between">
-                  <span className="text-text-secondary">Local votacion (internas)</span>
-                  <span className="text-text-primary">{datos.padron_interno.local_votacion}</span>
-                </div>
-              )}
-              {datos.padron_interno?.mesa && (
-                <div className="flex justify-between">
-                  <span className="text-text-secondary">Mesa (internas)</span>
-                  <span className="text-text-primary">{datos.padron_interno.mesa}</span>
-                </div>
-              )}
-            </>
+          {seccional && (
+            <div className="flex justify-between">
+              <span className="text-text-secondary">Seccional</span>
+              <span className="text-text-primary">{seccional}</span>
+            </div>
           )}
 
-          {tieneGeneral && (
-            <>
-              {datos.padron_general?.local_votacion && (
-                <div className="flex justify-between">
-                  <span className="text-text-secondary">Local votacion (generales)</span>
-                  <span className="text-text-primary">{datos.padron_general.local_votacion}</span>
-                </div>
-              )}
-              {datos.padron_general?.mesa && (
-                <div className="flex justify-between">
-                  <span className="text-text-secondary">Mesa (generales)</span>
-                  <span className="text-text-primary">{datos.padron_general.mesa}</span>
-                </div>
-              )}
-            </>
+          {localVotacion && (
+            <div className="flex justify-between">
+              <span className="text-text-secondary">Local votacion ({etiquetaModo})</span>
+              <span className="text-text-primary">{localVotacion}</span>
+            </div>
+          )}
+
+          {mesaVotacion && (
+            <div className="flex justify-between">
+              <span className="text-text-secondary">Mesa ({etiquetaModo})</span>
+              <span className="text-text-primary">{mesaVotacion}</span>
+            </div>
+          )}
+
+          {ordenVotacion && (
+            <div className="flex justify-between">
+              <span className="text-text-secondary">Orden ({etiquetaModo})</span>
+              <span className="text-text-primary">{ordenVotacion}</span>
+            </div>
+          )}
+
+          {!localVotacion && !mesaVotacion && !ordenVotacion && (
+            <div className="text-center py-2">
+              <span className="text-xs text-warning">
+                No se encontraron datos de local/mesa/orden para {etiquetaModo}
+              </span>
+            </div>
           )}
         </div>
 

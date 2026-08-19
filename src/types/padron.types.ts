@@ -99,9 +99,11 @@ export interface DatosBusquedaInteligente {
 export interface ResultadoBusquedaInteligente {
   encontrado_en: EncontradoEn;
   simpatizante_existente: boolean;
+  simpatizante_base_existente: boolean;
   simpatizante_id: string | null;
   permite_registro_manual: boolean;
   permite_duplicados_simpatizantes: boolean;
+  modo_eleccion: "INTERNAS" | "GENERALES";
   datos: DatosBusquedaInteligente | null;
   mensaje: string;
 }

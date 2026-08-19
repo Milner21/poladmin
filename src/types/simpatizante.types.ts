@@ -81,6 +81,7 @@ export interface CreateSimpatizanteDto {
   confirmar_duplicado?: boolean;
   marcar_voto_automatico?: boolean;
   es_registro_dia_d?: boolean;
+  para_usuario_id?: string;
 }
 
 export interface Direccion {
