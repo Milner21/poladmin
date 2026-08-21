@@ -98,6 +98,7 @@ export interface UpdateUsuarioDto {
   username?: string;
   documento?: string;
   telefono?: string;
+  barrio?: string;
   perfil_id?: string;
   nivel_id?: string;
   candidato_superior_id?: string;
@@ -148,9 +149,31 @@ export interface EstadoSimpatizanteResponse {
   intencion_voto: string | null;
   es_afiliado: boolean | null;
   fecha_registro_simpatizante: string | null;
+  barrio: string | null;
   mensaje: string;
 }
 
 export interface ReactivarSimpatizanteResponse {
   mensaje: string;
+}
+
+
+export interface VerificarUsuarioPorCiResponse {
+  existe: boolean;
+  eliminado?: boolean;
+  pertenece_otra_campana?: boolean;
+  activo_en_modo_actual?: boolean;
+  modo_eleccion?: string | null;
+  usuario?: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    documento: string;
+    telefono?: string | null;
+    perfil?: {
+      id: string;
+      nombre: string;
+      es_operativo: boolean;
+    };
+  };
 }

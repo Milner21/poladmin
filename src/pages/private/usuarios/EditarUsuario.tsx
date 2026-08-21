@@ -128,6 +128,16 @@ const EditarUsuario: FC = () => {
     }
   }, [usuarioAEditar, usuarioActual, navigate]);
 
+  // Precargar barrio desde el simpatizante asociado
+  useEffect(() => {
+    if (estadoSimpatizante?.barrio) {
+      setValues((prev) => ({
+        ...prev,
+        barrio: estadoSimpatizante.barrio ?? "",
+      }));
+    }
+  }, [estadoSimpatizante]);
+
   // Filtrado de perfiles (usando los datos cargados)
   const perfilesFiltrados = useMemo(() => {
     if (!perfiles) return [];
@@ -199,6 +209,7 @@ const EditarUsuario: FC = () => {
       nombre: values.nombre.trim(),
       apellido: values.apellido.trim(),
       telefono: values.telefono.trim() || undefined,
+      barrio: values.barrio.trim() || undefined,
       perfil_id: values.perfil_id,
       // Mandamos los permisos solo si el tipo actual es operativo
       permisos_ids:

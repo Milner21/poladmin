@@ -7,6 +7,7 @@ import type {
   UpdateUsuarioDto,
   CandidatoSuperior,
   EstadisticasUsuarios,
+  VerificarUsuarioPorCiResponse,
 } from "@dto/usuario.types";
 
 export const usuariosService = {
@@ -102,6 +103,15 @@ export const usuariosService = {
     const response = await axiosInstance.post(`/usuarios/${id}/activar-modo`, {
       activo,
     });
+    return response.data;
+  },
+
+  verificarPorCi: async (
+    ci: string,
+  ): Promise<VerificarUsuarioPorCiResponse> => {
+    const response = await axiosInstance.get(
+      `/usuarios/verificar-por-ci/${encodeURIComponent(ci)}`,
+    );
     return response.data;
   },
 };

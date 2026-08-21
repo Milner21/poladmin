@@ -1,4 +1,4 @@
-const SW_VERSION = '1.6.6';
+const SW_VERSION = '1.6.7';
 const CACHE_NAME = `poladmin-cache-${SW_VERSION}`;
 
 const urlsToCache = [

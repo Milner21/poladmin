@@ -1,3 +1,5 @@
+// src/pages/private/usuarios/CrearUsuario.tsx
+
 import { PageHeader } from "@components";
 import { usePermisos } from "@hooks/usePermisos";
 import { useCampanaSeleccionada } from "@hooks/useCampanaSeleccionada";
@@ -12,6 +14,8 @@ import { useCandidatosSuperiores } from "./hooks/useCandidatosSuperiores";
 import toast from "react-hot-toast";
 import { useBuscarPadron } from "../simpatizantes/hooks/useBuscarPadron";
 import { BusquedaCIPadron } from "./crear/components/BusquedaCIPadron";
+import { usuariosService } from "@services/usuarios.service";
+import { AlertTriangle, CheckCircle, X } from "lucide-react";
 
 interface FormValues {
   nombre: string;
@@ -57,18 +61,17 @@ const CrearUsuario: FC = () => {
 
   const [buscandoPadron, setBuscandoPadron] = useState(true);
   const [ciBusqueda, setCiBusqueda] = useState("");
+  const [verificandoCi, setVerificandoCi] = useState(false);
   const [datosPadronEncontrados, setDatosPadronEncontrados] = useState<{
     nombre: string;
     apellido: string;
   } | null>(null);
 
-  const { buscar, buscando } = useBuscarPadron();
-
   // Estados del formulario
   const [values, setValues] = useState<FormValues>(initialValues);
   const [errors, setErrors] = useState<FormErrors>({});
 
-  // Estados nuevos para la lógica Operativa
+  // Estados para la logica Operativa
   const [tipoUsuario, setTipoUsuario] = useState<"politico" | "operativo">(
     "politico",
   );
@@ -76,24 +79,27 @@ const CrearUsuario: FC = () => {
     [],
   );
 
+  // Estados para activacion de usuario existente inactivo
+  const [modalActivarOpen, setModalActivarOpen] = useState(false);
+  const [usuarioInactivoId, setUsuarioInactivoId] = useState<string | null>(null);
+  const [modoInactivo, setModoInactivo] = useState<string>("");
+  const [activandoCargando, setActivandoCargando] = useState(false);
+
   // Hooks de datos
+  const { buscar, buscando } = useBuscarPadron();
   const { esRoot, getNivelOrden, obtenerTodosLosPermisos } = usePermisos();
   const { data: perfiles } = usePerfiles();
   const { campanaSeleccionada } = useCampanaSeleccionada();
   const { data: todosLosPermisosDb } = useListaPermisos();
 
-  // Obtener el nivel del perfil seleccionado para saber si necesita candidato superior
   const perfilSeleccionado = perfiles?.find((p) => p.id === values.perfil_id);
   const nivelOrdenSeleccionado = perfilSeleccionado?.nivel?.orden ?? 0;
 
-  // Hook para obtener candidatos superiores (solo si ROOT y nivel > 1)
   const { data: candidatosSuperiores, isLoading: isLoadingCandidatos } =
     useCandidatosSuperiores(campanaSeleccionada, nivelOrdenSeleccionado);
 
   const crearMutation = useCrearUsuario();
 
-  // Filtrado mágico de perfiles dependiendo de lo que tocó el usuario (Politico u Operativo)
-  // Filtrado mágico de perfiles con información de disponibilidad
   const perfilesConDisponibilidad = useMemo(() => {
     if (!perfiles) return [];
     const nivelActual = getNivelOrden();
@@ -110,43 +116,35 @@ const CrearUsuario: FC = () => {
       let disponible = false;
       let razon = "";
 
-      // Si estamos en la tab "Operativo"
       if (tipoUsuario === "operativo") {
         if (!tienePermisoCrearOperativo) {
-          razon = "No tenés permiso para crear usuarios operativos";
+          razon = "No tenes permiso para crear usuarios operativos";
         } else if (!perfil.es_operativo) {
-          razon = "Este perfil es político, no operativo";
+          razon = "Este perfil es politico, no operativo";
         } else {
           disponible = true;
         }
       }
 
-      // Si estamos en la tab "Político"
       if (tipoUsuario === "politico") {
         if (perfil.es_operativo) {
-          razon = "Este perfil es operativo, no político";
+          razon = "Este perfil es operativo, no politico";
         } else if (esRoot && perfil.nombre === "ROOT") {
           razon = "No se puede crear otro ROOT";
         } else if (!tienePermisoCrearPolitico) {
-          razon = "No tenés permiso para crear usuarios políticos";
+          razon = "No tenes permiso para crear usuarios politicos";
         } else if (!esRoot && perfil.nivel?.exclusivo_root) {
           razon = "Solo ROOT puede crear este nivel (facturable)";
         } else if (!perfil.nivel) {
           razon = "Perfil sin nivel asignado";
         } else {
-          // Validación jerárquica: el perfil debe ser de nivel INFERIOR
-          // Si soy ROOT, cualquier nivel es válido
-          // Si soy político, comparo mi nivel
-          // Si soy operativo con permiso, comparo el nivel de mi candidato superior
-
           if (esRoot) {
             disponible = true;
           } else {
-            // Determinar el nivel de referencia para comparar
             const nivelReferencia = nivelActual;
 
             if (perfil.nivel.orden <= nivelReferencia) {
-              razon = "Solo podés crear usuarios de nivel inferior";
+              razon = "Solo podes crear usuarios de nivel inferior";
             } else {
               disponible = true;
             }
@@ -162,29 +160,86 @@ const CrearUsuario: FC = () => {
     (p) => p.disponible,
   );
 
-  // Filtrado mágico de permisos: Solo le mostramos los que él mismo tiene
   const permisosParaAsignar = useMemo(() => {
     if (!todosLosPermisosDb) return [];
 
-    // Si es ROOT, puede asignar cualquier permiso de la base de datos
     if (esRoot) return todosLosPermisosDb;
 
-    // Si no es ROOT, obtenemos el array de nombres de permisos que posee
     const misPermisosNombres = obtenerTodosLosPermisos();
 
-    // Y filtramos los objetos Permiso que coincidan con esos nombres
     return todosLosPermisosDb.filter((p) =>
       misPermisosNombres.includes(p.nombre),
     );
   }, [todosLosPermisosDb, esRoot, obtenerTodosLosPermisos]);
 
   const handleBuscarPadron = async () => {
-    if (!ciBusqueda.trim()) {
-      toast.error("Ingresá una cédula para buscar");
+    const ciLimpia = ciBusqueda.trim();
+    if (!ciLimpia) {
+      toast.error("Ingresa una cedula para buscar");
       return;
     }
 
-    const resultado = await buscar(ciBusqueda.trim());
+    setVerificandoCi(true);
+
+    try {
+      const verificacion = await usuariosService.verificarPorCi(ciLimpia);
+
+      if (verificacion.existe) {
+        if (verificacion.pertenece_otra_campana) {
+          toast.error(
+            "Ya existe un usuario con este documento registrado en otra campana",
+          );
+          setVerificandoCi(false);
+          return;
+        }
+
+        if (verificacion.eliminado) {
+          toast(
+            "Este usuario fue eliminado anteriormente. Completa el formulario para reactivarlo.",
+            { icon: "i" },
+          );
+          setValues((prev) => ({
+            ...prev,
+            documento: ciLimpia,
+            nombre: verificacion.usuario?.nombre ?? "",
+            apellido: verificacion.usuario?.apellido ?? "",
+          }));
+          setBuscandoPadron(false);
+          setVerificandoCi(false);
+          return;
+        }
+
+        if (verificacion.activo_en_modo_actual) {
+          toast.error(
+            "Ya existe un usuario activo con esta cedula en la campana actual",
+          );
+          setVerificandoCi(false);
+          return;
+        }
+
+        // Usuario existente inactivo en este modo electoral -> Abrir modal
+        if (verificacion.usuario) {
+          setUsuarioInactivoId(verificacion.usuario.id);
+          setModoInactivo(verificacion.modo_eleccion ?? "GENERALES");
+          setValues((prev) => ({
+            ...prev,
+            documento: verificacion.usuario!.documento,
+            nombre: verificacion.usuario!.nombre,
+            apellido: verificacion.usuario!.apellido,
+          }));
+          setModalActivarOpen(true);
+          setVerificandoCi(false);
+          return;
+        }
+      }
+    } catch {
+      // Si falla la verificacion por red/error imprevisto, se intenta continuar con padron
+    } finally {
+      setVerificandoCi(false);
+    }
+
+    // Si no existe como usuario en la base de datos, buscar en padron electoral
+    const resultado = await buscar(ciLimpia);
 
     if (!resultado) return;
 
@@ -198,19 +253,19 @@ const CrearUsuario: FC = () => {
       });
       setValues((prev) => ({
         ...prev,
-        documento: ciBusqueda.trim(),
+        documento: ciLimpia,
         nombre: resultado.datos?.nombre ?? "",
         apellido: resultado.datos?.apellido ?? "",
       }));
-      toast.success("Datos cargados desde el padrón");
+      toast.success("Datos cargados desde el padron");
       setBuscandoPadron(false);
     } else {
       setValues((prev) => ({
         ...prev,
-        documento: ciBusqueda.trim(),
+        documento: ciLimpia,
       }));
-      toast("No encontrado en padrón. Completá manualmente.", {
-        icon: "ℹ️",
+      toast("No encontrado en padron. Completa manualmente.", {
+        icon: "i",
       });
       setBuscandoPadron(false);
     }
@@ -220,7 +275,6 @@ const CrearUsuario: FC = () => {
     setBuscandoPadron(false);
   };
 
-  // Validaciones
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
 
@@ -236,20 +290,20 @@ const CrearUsuario: FC = () => {
     }
 
     if (!values.password) {
-      newErrors.password = "La contraseña es requerida";
+      newErrors.password = "La contrasena es requerida";
     } else if (values.password.length < 6) {
-      newErrors.password = "La contraseña debe tener al menos 6 caracteres";
+      newErrors.password = "La contrasena debe tener al menos 6 caracteres";
     }
 
     if (!values.confirmarPassword) {
-      newErrors.confirmarPassword = "Confirmá la contraseña";
+      newErrors.confirmarPassword = "Confirma la contrasena";
     } else if (values.password !== values.confirmarPassword) {
-      newErrors.confirmarPassword = "Las contraseñas no coinciden";
+      newErrors.confirmarPassword = "Las contrasenas no coinciden";
     }
 
     if (esRoot && tipoUsuario === "politico" && nivelOrdenSeleccionado > 1) {
       if (!values.candidato_superior_id) {
-        newErrors.perfil_id = "Debés seleccionar el candidato superior";
+        newErrors.perfil_id = "Debes seleccionar el candidato superior";
       }
     }
 
@@ -257,14 +311,12 @@ const CrearUsuario: FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handlers
   const handleChange = (field: keyof FormValues, value: string) => {
     setValues((prev) => ({ ...prev, [field]: value }));
     if (errors[field as keyof FormErrors]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
 
-    // Si cambia el perfil, limpiar candidato superior porque la lista cambiará
     if (field === "perfil_id") {
       setValues((prev) => ({
         ...prev,
@@ -276,9 +328,7 @@ const CrearUsuario: FC = () => {
 
   const handleTipoUsuarioChange = (tipo: "politico" | "operativo") => {
     setTipoUsuario(tipo);
-    // Limpiamos el perfil elegido porque la lista cambió
     setValues((prev) => ({ ...prev, perfil_id: "" }));
-    // Limpiamos permisos por si acaso
     setPermisosSeleccionados([]);
   };
 
@@ -290,7 +340,21 @@ const CrearUsuario: FC = () => {
     );
   };
 
-  // Submit final
+  const handleConfirmarActivacion = async () => {
+    if (!usuarioInactivoId) return;
+    setActivandoCargando(true);
+    try {
+      await usuariosService.activarParaModo(usuarioInactivoId, true);
+      toast.success("Usuario activado correctamente. Completa sus datos.");
+      navigate(`${RoutesConfig.usuarios}/editar/${usuarioInactivoId}`);
+    } catch {
+      toast.error("Error al activar el usuario");
+    } finally {
+      setActivandoCargando(false);
+      setModalActivarOpen(false);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
@@ -326,7 +390,7 @@ const CrearUsuario: FC = () => {
     <div className="py-4 px-6">
       <PageHeader
         title="Nuevo Usuario"
-        subtitle="Completá los datos del nuevo usuario para tu red"
+        subtitle="Completa los datos del nuevo usuario para tu red"
         showDivider
       />
 
@@ -337,7 +401,7 @@ const CrearUsuario: FC = () => {
               value={ciBusqueda}
               onChange={setCiBusqueda}
               onBuscar={handleBuscarPadron}
-              isLoading={buscando}
+              isLoading={buscando || verificandoCi}
             />
 
             <div className="text-center">
@@ -346,7 +410,7 @@ const CrearUsuario: FC = () => {
                 onClick={handleOmitirBusqueda}
                 className="text-sm text-text-tertiary hover:text-text-primary underline"
               >
-                Omitir búsqueda y llenar manualmente
+                Omitir busqueda y llenar manualmente
               </button>
             </div>
           </>
@@ -355,7 +419,7 @@ const CrearUsuario: FC = () => {
             {datosPadronEncontrados && (
               <div className="mb-6 p-4 bg-success/10 border border-success/30 rounded-lg">
                 <p className="text-sm text-success font-medium">
-                  ✅ Datos cargados desde el padrón
+                  Datos cargados desde el padron
                 </p>
                 <p className="text-xs text-text-tertiary mt-1">
                   {datosPadronEncontrados.nombre}{" "}
@@ -369,10 +433,10 @@ const CrearUsuario: FC = () => {
               nivelOrdenSeleccionado > 1 && (
                 <div className="mb-6 p-4 bg-warning/5 border border-warning/30 rounded-lg">
                   <label className="block text-sm font-medium text-text-primary mb-2">
-                    👆 Candidato Superior <span className="text-danger">*</span>
+                    Candidato Superior <span className="text-danger">*</span>
                   </label>
                   <p className="text-xs text-text-tertiary mb-3">
-                    Seleccioná quién será el jefe directo de este{" "}
+                    Selecciona quien sera el jefe directo de este{" "}
                     {perfilSeleccionado?.nivel?.nombre || "usuario"}
                   </p>
 
@@ -408,7 +472,6 @@ const CrearUsuario: FC = () => {
                     <div className="space-y-3">
                       <div className="p-4 bg-danger/10 border border-danger/30 rounded-lg">
                         <div className="flex items-start gap-3">
-                          <span className="text-2xl">⚠️</span>
                           <div>
                             <p className="text-danger font-semibold text-sm mb-1">
                               No hay candidatos superiores disponibles
@@ -418,8 +481,8 @@ const CrearUsuario: FC = () => {
                               <strong>
                                 {perfilSeleccionado?.nivel?.nombre}
                               </strong>
-                              , primero necesitás crear un usuario de nivel
-                              superior en esta campaña.
+                              , primero necesitas crear un usuario de nivel
+                              superior en esta campana.
                             </p>
                           </div>
                         </div>
@@ -427,13 +490,13 @@ const CrearUsuario: FC = () => {
 
                       <div className="p-3 bg-info/10 border border-info/30 rounded-lg">
                         <p className="text-xs text-text-primary">
-                          <strong>💡 Sugerencia:</strong> Creá primero un{" "}
+                          Sugerencia: Crea primero un{" "}
                           {nivelOrdenSeleccionado === 2
                             ? "Intendente"
                             : nivelOrdenSeleccionado === 3
                               ? "Intendente o Concejal"
                               : "usuario de nivel superior"}{" "}
-                          para esta campaña.
+                          para esta campana.
                         </p>
                       </div>
 
@@ -444,7 +507,7 @@ const CrearUsuario: FC = () => {
                         }}
                         className="w-full px-4 py-2 bg-bg-base border border-border rounded-lg text-text-primary hover:bg-bg-hover transition-colors text-sm"
                       >
-                        ← Elegir otro perfil
+                        Elegir otro perfil
                       </button>
                     </div>
                   )}
@@ -479,6 +542,70 @@ const CrearUsuario: FC = () => {
           </div>
         )}
       </div>
+
+      {/* Modal de Activacion de Usuario Existente Inactivo */}
+      {modalActivarOpen && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-40" />
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-bg-content border border-border rounded-xl shadow-xl w-full max-w-md z-50 p-6">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 bg-warning/10 rounded-full flex items-center justify-center">
+                <AlertTriangle className="w-8 h-8 text-warning" />
+              </div>
+            </div>
+
+            <div className="text-center mb-4">
+              <h3 className="text-lg font-semibold text-text-primary mb-2">
+                Usuario existente inactivo
+              </h3>
+              <p className="text-sm text-text-secondary">
+                Esta persona ya tiene un usuario en el sistema pero no esta activa en la etapa actual de la campana (<strong>{modoInactivo}</strong>).
+              </p>
+              <p className="text-sm text-text-secondary mt-2">
+                Deseas activarla ahora y pasar a completar sus datos (barrio, telefono, etc.)?
+              </p>
+            </div>
+
+            <div className="bg-bg-base border border-border rounded-lg p-4 mb-6 space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-text-secondary">Nombre</span>
+                <span className="text-text-primary font-medium">
+                  {values.nombre} {values.apellido}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-text-secondary">CI</span>
+                <span className="text-text-primary font-medium">{values.documento}</span>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={handleConfirmarActivacion}
+                disabled={activandoCargando}
+                className="flex-1 px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors flex items-center justify-center gap-2 font-medium"
+              >
+                {activandoCargando ? (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <CheckCircle className="w-4 h-4" />
+                )}
+                Si, activar y editar
+              </button>
+              <button
+                type="button"
+                onClick={() => setModalActivarOpen(false)}
+                disabled={activandoCargando}
+                className="flex-1 px-4 py-3 border border-border text-text-primary rounded-lg hover:bg-bg-hover disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+              >
+                <X className="w-4 h-4" />
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
