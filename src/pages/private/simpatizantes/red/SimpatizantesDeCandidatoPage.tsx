@@ -5,6 +5,7 @@ import { CTable } from "@components/CTable/CTable";
 import type { ColumnDef } from "@components/CTable/CTable.types";
 import type { Simpatizante } from "@dto/simpatizante.types";
 import { usePermisos } from "@hooks/usePermisos";
+import { formatearTelefono } from "@utils/telefono";
 import {
   ArrowLeft,
   Loader2,
@@ -16,13 +17,7 @@ import {
   UserX,
   X,
 } from "lucide-react";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type FC,
-} from "react";
+import { useCallback, useEffect, useMemo, useState, type FC } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEliminarSimpatizante } from "../hooks/useEliminarSimpatizante";
 import { useSimpatizantesPorCandidato } from "../hooks/useSimpatizantesPorCandidato";
@@ -35,7 +30,9 @@ const SimpatizantesDeCandidatoPage: FC = () => {
   const navigate = useNavigate();
   const { tienePermiso } = usePermisos();
 
-  const { data, isLoading, refetch } = useSimpatizantesPorCandidato(candidatoId ?? null);
+  const { data, isLoading, refetch } = useSimpatizantesPorCandidato(
+    candidatoId ?? null,
+  );
   const eliminarMutation = useEliminarSimpatizante();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -146,10 +143,10 @@ const SimpatizantesDeCandidatoPage: FC = () => {
                     className="text-primary hover:underline flex items-center gap-1 text-sm"
                   >
                     <Phone size={12} />
-                    {record.telefono}
+                    {formatearTelefono(record.telefono)}
                   </a>
                 ) : (
-                  <span className="text-text-tertiary text-sm">-</span>
+                  <span className="text-text-tertiary text-xs">-</span>
                 ),
             },
             {
@@ -300,7 +297,9 @@ const SimpatizantesDeCandidatoPage: FC = () => {
             <p className="text-xs text-text-tertiary mb-1">
               Total simpatizantes
             </p>
-            <p className="text-2xl font-bold text-primary">{data?.total ?? 0}</p>
+            <p className="text-2xl font-bold text-primary">
+              {data?.total ?? 0}
+            </p>
           </div>
 
           {puedeRegistrarEnRed && (
@@ -388,10 +387,7 @@ const SimpatizantesDeCandidatoPage: FC = () => {
         {/* Contenido scrolleable */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-4">
-            <CrearSimpatizante
-              embebido
-              candidatoId={candidatoId}
-            />
+            <CrearSimpatizante embebido candidatoId={candidatoId} />
           </div>
         </div>
       </div>

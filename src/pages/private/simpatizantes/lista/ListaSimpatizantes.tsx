@@ -7,6 +7,7 @@ import type {
 import { useAuth } from "@hooks/useAuth";
 import { useCampanaSeleccionada } from "@hooks/useCampanaSeleccionada";
 import { usePermisos } from "@hooks/usePermisos";
+import { formatearTelefono } from "@utils/telefono";
 import {
   CheckCircle,
   ChevronDown,
@@ -59,16 +60,16 @@ const ListaSimpatizantes: FC = () => {
   >(null);
   const [simpatizanteAEditar, setSimpatizanteAEditar] =
     useState<Simpatizante | null>(null);
-    const [simpatizanteAVerId, setSimpatizanteAVerId] = useState<string | null>(null);
+  const [simpatizanteAVerId, setSimpatizanteAVerId] = useState<string | null>(
+    null,
+  );
   const puedeEditarIntencion = tienePermiso("actualizar_intencion_voto");
   const puedeGestionarDuplicados = tienePermiso(
     "gestionar_duplicados_simpatizantes",
   );
   const puedeEditar = tienePermiso("editar_simpatizante");
   const usuarioId = usuario?.id ?? "";
-  const [pestanaActiva, setPestanaActiva] = useState<"propios" | "red">(
-    "red",
-  );
+  const [pestanaActiva, setPestanaActiva] = useState<"propios" | "red">("red");
   const puedeVerRed = tienePermiso("ver_lista_simpatizantes");
   const { data: simpatizantes, isLoading } = useSimpatizantes(
     pestanaActiva === "propios",
@@ -174,10 +175,10 @@ const ListaSimpatizantes: FC = () => {
                     className="text-primary hover:underline flex items-center gap-1 text-sm"
                   >
                     <Phone size={12} />
-                    {record.telefono}
+                    {formatearTelefono(record.telefono)}
                   </a>
                 ) : (
-                  <span className="text-text-tertiary text-sm">-</span>
+                  <span className="text-text-tertiary text-xs">-</span>
                 ),
             },
           ]
@@ -234,7 +235,7 @@ const ListaSimpatizantes: FC = () => {
             </span>
           ),
       },
-            {
+      {
         key: "acciones",
         title: "Acciones",
         width: "120px",
