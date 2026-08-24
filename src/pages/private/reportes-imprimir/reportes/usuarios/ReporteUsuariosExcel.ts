@@ -1,6 +1,9 @@
+// src/pages/private/reportes-imprimir/reportes/usuarios/ReporteUsuariosExcel.ts
+
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import type { UsuarioReporte, ColumnaReporte } from "@dto/reportes.types";
+import { formatearTelefono } from "@utils/telefono";
 
 interface GenerarExcelUsuariosParams {
   datos: {
@@ -41,7 +44,7 @@ export const generarExcelUsuarios = ({
       case "documento":
         return usuario.documento;
       case "telefono":
-        return usuario.telefono || "";
+        return formatearTelefono(usuario.telefono);
       case "perfil":
         return usuario.perfil;
       case "nivel":

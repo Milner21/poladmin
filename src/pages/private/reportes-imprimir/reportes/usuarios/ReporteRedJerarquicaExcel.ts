@@ -1,3 +1,5 @@
+// src/pages/private/reportes-imprimir/reportes/usuarios/ReporteRedJerarquicaExcel.ts
+
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import type {

@@ -1,151 +1,10 @@
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
-import type { SimpatizanteReporte, ColumnaReporte } from "@dto/reportes.types";
+// src/pages/private/reportes-imprimir/reportes/simpatizantes/ReporteSimpatizantesPDF.tsx
 
-const styles = StyleSheet.create({
-  page: {
-    fontSize: 10,
-    padding: 30,
-    backgroundColor: "#ffffff",
-  },
-  header: {
-    marginBottom: 20,
-    paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e2e8f0",
-  },
-  logoContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  logoText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#1e293b",
-  },
-  subtitle: {
-    fontSize: 12,
-    color: "#64748b",
-    marginLeft: 5,
-  },
-  reportTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#1e293b",
-    marginTop: 10,
-  },
-  infoRow: {
-    flexDirection: "row",
-    marginTop: 3,
-  },
-  infoLabel: {
-    fontSize: 9,
-    color: "#64748b",
-    width: 80,
-  },
-  infoValue: {
-    fontSize: 9,
-    color: "#1e293b",
-  },
-  table: {
-    marginTop: 20,
-    border: 1,
-    borderColor: "#e2e8f0",
-  },
-  tableHeader: {
-    flexDirection: "row",
-    backgroundColor: "#f8fafc",
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-    borderBottomWidth: 1.5,
-    borderBottomColor: "#cbd5e1",
-  },
-  tableRow: {
-    flexDirection: "row",
-    paddingVertical: 6,
-    paddingHorizontal: 4,
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#e2e8f0",
-    minHeight: 20,
-  },
-  tableRowOdd: {
-    backgroundColor: "#fafafa",
-  },
-  cellHeader: {
-    fontSize: 7,
-    fontWeight: "bold",
-    color: "#374151",
-    flex: 1,
-    textAlign: "left",
-    paddingRight: 3,
-  },
-  cellHeaderWithBorder: {
-    fontSize: 7,
-    fontWeight: "bold",
-    color: "#374151",
-    flex: 1,
-    textAlign: "left",
-    paddingRight: 3,
-    borderRightWidth: 0.5,
-    borderRightColor: "#cbd5e1",
-  },
-  cell: {
-    fontSize: 7,
-    color: "#1e293b",
-    flex: 1,
-    textAlign: "left",
-    paddingRight: 3,
-    paddingVertical: 1,
-  },
-  cellWithBorder: {
-    fontSize: 7,
-    color: "#1e293b",
-    flex: 1,
-    textAlign: "left",
-    paddingRight: 3,
-    paddingVertical: 1,
-    borderRightWidth: 0.25,
-    borderRightColor: "#e2e8f0",
-  },
-  footer: {
-    position: "absolute",
-    bottom: 30,
-    left: 30,
-    right: 30,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
-  },
-  footerText: {
-    fontSize: 8,
-    color: "#64748b",
-  },
-  totalRow: {
-    marginTop: 10,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
-  },
-  totalText: {
-    fontSize: 10,
-    fontWeight: "bold",
-    color: "#1e293b",
-    textAlign: "right",
-  },
-  groupHeader: {
-    backgroundColor: "#e2e8f0",
-    paddingVertical: 8,
-    paddingHorizontal: 6,
-    marginTop: 5,
-  },
-  groupTitle: {
-    fontSize: 9,
-    fontWeight: "bold",
-    color: "#1e293b",
-  },
-});
+import { Document, Page, Text, View } from "@react-pdf/renderer";
+import type { SimpatizanteReporte, ColumnaReporte } from "@dto/reportes.types";
+import { formatearTelefono } from "@utils/telefono";
+import { pdfStyles } from "../../styles/pdfStyles";
+import { formatearFiltrosAplicados } from "../../utils/filtrosReporte";
 
 interface ReporteSimpatizantesPDFProps {
   datos: {
@@ -163,7 +22,6 @@ interface ReporteSimpatizantesPDFProps {
   };
 }
 
-// Mapas de traducción fuera de la función
 const INTENCIONES_MAP: Record<string, string> = {
   SEGURO: "Seguro",
   PROBABLE: "Probable",
@@ -190,10 +48,8 @@ export const ReporteSimpatizantesPDF = ({
     minute: "2-digit",
   });
 
-  // Filtrar solo las columnas habilitadas
   const columnasVisibles = columnas.filter((col) => col.enabled);
 
-  // Función para obtener el valor de una celda
   const getCellValue = (
     simpatizante: SimpatizanteReporte,
     columnaKey: string,
@@ -209,7 +65,7 @@ export const ReporteSimpatizantesPDF = ({
       case "documento":
         return simpatizante.documento;
       case "telefono":
-        return simpatizante.telefono || "-";
+        return formatearTelefono(simpatizante.telefono);
       case "departamento":
         return simpatizante.departamento || "-";
       case "distrito":
@@ -257,12 +113,7 @@ export const ReporteSimpatizantesPDF = ({
     }
   };
 
-  // Generar filtros aplicados como texto
-  const filtrosTexto =
-    Object.entries(datos.filtros_aplicados)
-      .filter(([, valor]) => valor)
-      .map(([clave, valor]) => `${clave}: ${valor}`)
-      .join(", ") || "Sin filtros aplicados";
+  const filtrosTexto = formatearFiltrosAplicados(datos.filtros_aplicados);
 
   // Agrupar por candidato si está habilitado
   const simpatizantesOrganizados = configuracion.agruparPorCandidato
@@ -279,48 +130,48 @@ export const ReporteSimpatizantesPDF = ({
 
   return (
     <Document>
-      <Page size="A4" orientation="landscape" style={styles.page}>
+      <Page size="A4" orientation="landscape" style={pdfStyles.page}>
         {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.logoContainer}>
-            <Text style={styles.logoText}>POLADMIN</Text>
-            <Text style={styles.subtitle}>Sistema de Gestión Política</Text>
+        <View style={pdfStyles.header}>
+          <View style={pdfStyles.logoContainer}>
+            <Text style={pdfStyles.logoText}>POLADMIN</Text>
+            <Text style={pdfStyles.subtitle}>Sistema de Gestión Política</Text>
           </View>
 
-          <Text style={styles.reportTitle}>Reporte de Simpatizantes</Text>
+          <Text style={pdfStyles.reportTitle}>Reporte de Simpatizantes</Text>
 
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Campaña:</Text>
-            <Text style={styles.infoValue}>{configuracion.campana}</Text>
+          <View style={pdfStyles.infoRow}>
+            <Text style={pdfStyles.infoLabel}>Campaña:</Text>
+            <Text style={pdfStyles.infoValue}>{configuracion.campana}</Text>
           </View>
 
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Generado por:</Text>
-            <Text style={styles.infoValue}>{configuracion.generadoPor}</Text>
+          <View style={pdfStyles.infoRow}>
+            <Text style={pdfStyles.infoLabel}>Generado por:</Text>
+            <Text style={pdfStyles.infoValue}>{configuracion.generadoPor}</Text>
           </View>
 
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Fecha:</Text>
-            <Text style={styles.infoValue}>{fechaActual}</Text>
+          <View style={pdfStyles.infoRow}>
+            <Text style={pdfStyles.infoLabel}>Fecha:</Text>
+            <Text style={pdfStyles.infoValue}>{fechaActual}</Text>
           </View>
 
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Filtros:</Text>
-            <Text style={styles.infoValue}>{filtrosTexto}</Text>
+          <View style={pdfStyles.infoRow}>
+            <Text style={pdfStyles.infoLabel}>Filtros:</Text>
+            <Text style={pdfStyles.infoValue}>{filtrosTexto}</Text>
           </View>
         </View>
 
         {/* Tabla */}
-        <View style={styles.table}>
+        <View style={pdfStyles.table}>
           {/* Header de la tabla */}
-          <View style={styles.tableHeader}>
+          <View style={pdfStyles.tableHeader}>
             {columnasVisibles.map((columna, index) => (
               <Text
                 key={columna.key}
                 style={
                   index < columnasVisibles.length - 1
-                    ? styles.cellHeaderWithBorder
-                    : styles.cellHeader
+                    ? pdfStyles.cellHeaderWithBorder
+                    : pdfStyles.cellHeader
                 }
               >
                 {columna.label}
@@ -334,8 +185,8 @@ export const ReporteSimpatizantesPDF = ({
               <View key={grupo}>
                 {/* Header del grupo si está agrupado */}
                 {configuracion.agruparPorCandidato && (
-                  <View style={styles.groupHeader}>
-                    <Text style={styles.groupTitle}>
+                  <View style={pdfStyles.groupHeader}>
+                    <Text style={pdfStyles.groupTitle}>
                       {grupo} ({simpatizantes.length} simpatizantes)
                     </Text>
                   </View>
@@ -347,8 +198,8 @@ export const ReporteSimpatizantesPDF = ({
                     key={simpatizante.id}
                     style={
                       index % 2 === 1
-                        ? [styles.tableRow, styles.tableRowOdd]
-                        : styles.tableRow
+                        ? [pdfStyles.tableRow, pdfStyles.tableRowOdd]
+                        : pdfStyles.tableRow
                     }
                   >
                     {columnasVisibles.map((columna, colIndex) => (
@@ -356,8 +207,8 @@ export const ReporteSimpatizantesPDF = ({
                         key={columna.key}
                         style={
                           colIndex < columnasVisibles.length - 1
-                            ? styles.cellWithBorder
-                            : styles.cell
+                            ? pdfStyles.cellWithBorder
+                            : pdfStyles.cell
                         }
                       >
                         {getCellValue(simpatizante, columna.key, index)}
@@ -371,18 +222,18 @@ export const ReporteSimpatizantesPDF = ({
         </View>
 
         {/* Total */}
-        <View style={styles.totalRow}>
-          <Text style={styles.totalText}>
+        <View style={pdfStyles.totalRow}>
+          <Text style={pdfStyles.totalText}>
             Total: {datos.total} simpatizantes
           </Text>
         </View>
 
         {/* Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            Página {/* se agrega automáticamente */}
+        <View style={pdfStyles.footer}>
+          <Text style={pdfStyles.footerText}>
+            Documento emitido por PolAdmin
           </Text>
-          <Text style={styles.footerText}>poladmin.com.py</Text>
+          <Text style={pdfStyles.footerText}>poladmin.com.py</Text>
         </View>
       </Page>
     </Document>

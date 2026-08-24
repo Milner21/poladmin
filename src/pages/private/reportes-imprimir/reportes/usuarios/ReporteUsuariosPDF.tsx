@@ -1,203 +1,10 @@
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
-import type { UsuarioReporte, ColumnaReporte } from "@dto/reportes.types";
+// src/pages/private/reportes-imprimir/reportes/usuarios/ReporteUsuariosPDF.tsx
 
-const styles = StyleSheet.create({
-  page: {
-    fontSize: 10,
-    padding: 40,
-    backgroundColor: "#ffffff",
-  },
-  header: {
-    marginBottom: 20,
-    paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e2e8f0",
-  },
-  logoContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  logoText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#1e293b",
-  },
-  subtitle: {
-    fontSize: 12,
-    color: "#64748b",
-    marginLeft: 5,
-  },
-  reportTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#1e293b",
-    marginTop: 10,
-  },
-  infoRow: {
-    flexDirection: "row",
-    marginTop: 3,
-  },
-  infoLabel: {
-    fontSize: 9,
-    color: "#64748b",
-    width: 80,
-  },
-  infoValue: {
-    fontSize: 9,
-    color: "#1e293b",
-  },
-  // Estilos para página de estadísticas
-  statsPage: {
-    fontSize: 10,
-    padding: 40,
-    backgroundColor: "#ffffff",
-  },
-  statsTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#1e293b",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  statsSection: {
-    marginBottom: 25,
-  },
-  statsSectionTitle: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "#374151",
-    marginBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e2e8f0",
-    paddingBottom: 5,
-  },
-  statsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#f1f5f9",
-  },
-  statsRowOdd: {
-    backgroundColor: "#f8fafc",
-  },
-  statsLabel: {
-    fontSize: 9,
-    color: "#374151",
-  },
-  statsValue: {
-    fontSize: 9,
-    fontWeight: "bold",
-    color: "#1e293b",
-  },
-  // Estilos para tabla principal
-  table: {
-    marginTop: 20,
-    border: 1,
-    borderColor: "#e2e8f0",
-  },
-  tableHeader: {
-    flexDirection: "row",
-    backgroundColor: "#f8fafc",
-    paddingVertical: 10,
-    paddingHorizontal: 6,
-    borderBottomWidth: 1.5,
-    borderBottomColor: "#cbd5e1",
-  },
-  tableRow: {
-    flexDirection: "row",
-    paddingVertical: 8,
-    paddingHorizontal: 6,
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#e2e8f0",
-    minHeight: 24,
-  },
-  tableRowOdd: {
-    backgroundColor: "#fafafa",
-  },
-  cellHeader: {
-    fontSize: 8,
-    fontWeight: "bold",
-    color: "#374151",
-    flex: 1,
-    textAlign: "left",
-    paddingRight: 4,
-  },
-  cellHeaderWithBorder: {
-    fontSize: 8,
-    fontWeight: "bold",
-    color: "#374151",
-    flex: 1,
-    textAlign: "left",
-    paddingRight: 4,
-    borderRightWidth: 0.5,
-    borderRightColor: "#cbd5e1",
-  },
-  cell: {
-    fontSize: 8,
-    color: "#1e293b",
-    flex: 1,
-    textAlign: "left",
-    paddingRight: 4,
-    paddingVertical: 2,
-  },
-  cellWithBorder: {
-    fontSize: 8,
-    color: "#1e293b",
-    flex: 1,
-    textAlign: "left",
-    paddingRight: 4,
-    paddingVertical: 2,
-    borderRightWidth: 0.25,
-    borderRightColor: "#e2e8f0",
-  },
-  // Estilos para agrupación por nivel
-  groupHeader: {
-    backgroundColor: "#e2e8f0",
-    paddingVertical: 8,
-    paddingHorizontal: 6,
-    marginTop: 5,
-  },
-  groupTitle: {
-    fontSize: 10,
-    fontWeight: "bold",
-    color: "#1e293b",
-  },
-  groupSubtitle: {
-    fontSize: 8,
-    color: "#64748b",
-    marginTop: 2,
-  },
-  footer: {
-    position: "absolute",
-    bottom: 30,
-    left: 40,
-    right: 40,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
-  },
-  footerText: {
-    fontSize: 8,
-    color: "#64748b",
-  },
-  totalRow: {
-    marginTop: 10,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
-  },
-  totalText: {
-    fontSize: 10,
-    fontWeight: "bold",
-    color: "#1e293b",
-    textAlign: "right",
-  },
-});
+import { Document, Page, Text, View } from "@react-pdf/renderer";
+import type { UsuarioReporte, ColumnaReporte } from "@dto/reportes.types";
+import { formatearTelefono } from "@utils/telefono";
+import { pdfStyles } from "../../styles/pdfStyles";
+import { formatearFiltrosAplicados } from "../../utils/filtrosReporte";
 
 interface ReporteUsuariosPDFProps {
   datos: {
@@ -228,6 +35,7 @@ export const ReporteUsuariosPDF = ({
   });
 
   const columnasVisibles = columnas.filter((col) => col.enabled);
+  const esHorizontal = columnasVisibles.length > 6;
 
   const getCellValue = (
     usuario: UsuarioReporte,
@@ -246,7 +54,7 @@ export const ReporteUsuariosPDF = ({
       case "documento":
         return usuario.documento;
       case "telefono":
-        return usuario.telefono || "-";
+        return formatearTelefono(usuario.telefono);
       case "perfil":
         return usuario.perfil;
       case "nivel":
@@ -266,11 +74,7 @@ export const ReporteUsuariosPDF = ({
     }
   };
 
-  const filtrosTexto =
-    Object.entries(datos.filtros_aplicados)
-      .filter(([, valor]) => valor)
-      .map(([clave, valor]) => `${clave}: ${valor}`)
-      .join(", ") || "Sin filtros aplicados";
+  const filtrosTexto = formatearFiltrosAplicados(datos.filtros_aplicados);
 
   // Generar estadísticas
   const estadisticas = {
@@ -321,48 +125,48 @@ export const ReporteUsuariosPDF = ({
     <Document>
       {/* Página de estadísticas (opcional) */}
       {configuracion.incluirEstadisticas && (
-        <Page size="A4" style={styles.statsPage}>
-          <Text style={styles.statsTitle}>Estadísticas de Usuarios</Text>
+        <Page size="A4" style={pdfStyles.statsPage}>
+          <Text style={pdfStyles.statsTitle}>Estadísticas de Usuarios</Text>
 
           {/* Info del reporte */}
-          <View style={styles.statsSection}>
-            <Text style={styles.statsSectionTitle}>
+          <View style={pdfStyles.statsSection}>
+            <Text style={pdfStyles.statsSectionTitle}>
               Información del Reporte
             </Text>
-            <View style={styles.statsRow}>
-              <Text style={styles.statsLabel}>Campaña:</Text>
-              <Text style={styles.statsValue}>{configuracion.campana}</Text>
+            <View style={pdfStyles.statsRow}>
+              <Text style={pdfStyles.statsLabel}>Campaña:</Text>
+              <Text style={pdfStyles.statsValue}>{configuracion.campana}</Text>
             </View>
-            <View style={[styles.statsRow, styles.statsRowOdd]}>
-              <Text style={styles.statsLabel}>Generado por:</Text>
-              <Text style={styles.statsValue}>{configuracion.generadoPor}</Text>
+            <View style={[pdfStyles.statsRow, pdfStyles.statsRowOdd]}>
+              <Text style={pdfStyles.statsLabel}>Generado por:</Text>
+              <Text style={pdfStyles.statsValue}>{configuracion.generadoPor}</Text>
             </View>
-            <View style={styles.statsRow}>
-              <Text style={styles.statsLabel}>Fecha:</Text>
-              <Text style={styles.statsValue}>{fechaActual}</Text>
+            <View style={pdfStyles.statsRow}>
+              <Text style={pdfStyles.statsLabel}>Fecha:</Text>
+              <Text style={pdfStyles.statsValue}>{fechaActual}</Text>
             </View>
           </View>
 
           {/* Resumen general */}
-          <View style={styles.statsSection}>
-            <Text style={styles.statsSectionTitle}>Resumen General</Text>
-            <View style={styles.statsRow}>
-              <Text style={styles.statsLabel}>Total de usuarios:</Text>
-              <Text style={styles.statsValue}>{estadisticas.total}</Text>
+          <View style={pdfStyles.statsSection}>
+            <Text style={pdfStyles.statsSectionTitle}>Resumen General</Text>
+            <View style={pdfStyles.statsRow}>
+              <Text style={pdfStyles.statsLabel}>Total de usuarios:</Text>
+              <Text style={pdfStyles.statsValue}>{estadisticas.total}</Text>
             </View>
-            <View style={[styles.statsRow, styles.statsRowOdd]}>
-              <Text style={styles.statsLabel}>Usuarios activos:</Text>
-              <Text style={styles.statsValue}>{estadisticas.activos}</Text>
+            <View style={[pdfStyles.statsRow, pdfStyles.statsRowOdd]}>
+              <Text style={pdfStyles.statsLabel}>Usuarios activos:</Text>
+              <Text style={pdfStyles.statsValue}>{estadisticas.activos}</Text>
             </View>
-            <View style={styles.statsRow}>
-              <Text style={styles.statsLabel}>Usuarios inactivos:</Text>
-              <Text style={styles.statsValue}>{estadisticas.inactivos}</Text>
+            <View style={pdfStyles.statsRow}>
+              <Text style={pdfStyles.statsLabel}>Usuarios inactivos:</Text>
+              <Text style={pdfStyles.statsValue}>{estadisticas.inactivos}</Text>
             </View>
           </View>
 
           {/* Por nivel */}
-          <View style={styles.statsSection}>
-            <Text style={styles.statsSectionTitle}>Distribución por Nivel</Text>
+          <View style={pdfStyles.statsSection}>
+            <Text style={pdfStyles.statsSectionTitle}>Distribución por Nivel</Text>
             {Object.entries(estadisticas.porNivel)
               .sort(([a], [b]) => a.localeCompare(b))
               .map(([nivel, cantidad], index) => (
@@ -370,19 +174,19 @@ export const ReporteUsuariosPDF = ({
                   key={nivel}
                   style={
                     index % 2 === 1
-                      ? [styles.statsRow, styles.statsRowOdd]
-                      : styles.statsRow
+                      ? [pdfStyles.statsRow, pdfStyles.statsRowOdd]
+                      : pdfStyles.statsRow
                   }
                 >
-                  <Text style={styles.statsLabel}>{nivel}:</Text>
-                  <Text style={styles.statsValue}>{cantidad}</Text>
+                  <Text style={pdfStyles.statsLabel}>{nivel}:</Text>
+                  <Text style={pdfStyles.statsValue}>{cantidad}</Text>
                 </View>
               ))}
           </View>
 
           {/* Por perfil */}
-          <View style={styles.statsSection}>
-            <Text style={styles.statsSectionTitle}>
+          <View style={pdfStyles.statsSection}>
+            <Text style={pdfStyles.statsSectionTitle}>
               Distribución por Perfil
             </Text>
             {Object.entries(estadisticas.porPerfil)
@@ -392,12 +196,12 @@ export const ReporteUsuariosPDF = ({
                   key={perfil}
                   style={
                     index % 2 === 1
-                      ? [styles.statsRow, styles.statsRowOdd]
-                      : styles.statsRow
+                      ? [pdfStyles.statsRow, pdfStyles.statsRowOdd]
+                      : pdfStyles.statsRow
                   }
                 >
-                  <Text style={styles.statsLabel}>{perfil}:</Text>
-                  <Text style={styles.statsValue}>{cantidad}</Text>
+                  <Text style={pdfStyles.statsLabel}>{perfil}:</Text>
+                  <Text style={pdfStyles.statsValue}>{cantidad}</Text>
                 </View>
               ))}
           </View>
@@ -407,50 +211,50 @@ export const ReporteUsuariosPDF = ({
       {/* Página principal con datos */}
       <Page
         size="A4"
-        orientation={columnasVisibles.length > 6 ? "landscape" : "portrait"}
-        style={styles.page}
+        orientation={esHorizontal ? "landscape" : "portrait"}
+        style={esHorizontal ? pdfStyles.page : pdfStyles.pagePortrait}
       >
         {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.logoContainer}>
-            <Text style={styles.logoText}>POLADMIN</Text>
-            <Text style={styles.subtitle}>Sistema de Gestión Política</Text>
+        <View style={pdfStyles.header}>
+          <View style={pdfStyles.logoContainer}>
+            <Text style={pdfStyles.logoText}>POLADMIN</Text>
+            <Text style={pdfStyles.subtitle}>Sistema de Gestión Política</Text>
           </View>
 
-          <Text style={styles.reportTitle}>Reporte de Usuarios</Text>
+          <Text style={pdfStyles.reportTitle}>Reporte de Usuarios</Text>
 
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Campaña:</Text>
-            <Text style={styles.infoValue}>{configuracion.campana}</Text>
+          <View style={pdfStyles.infoRow}>
+            <Text style={pdfStyles.infoLabel}>Campaña:</Text>
+            <Text style={pdfStyles.infoValue}>{configuracion.campana}</Text>
           </View>
 
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Generado por:</Text>
-            <Text style={styles.infoValue}>{configuracion.generadoPor}</Text>
+          <View style={pdfStyles.infoRow}>
+            <Text style={pdfStyles.infoLabel}>Generado por:</Text>
+            <Text style={pdfStyles.infoValue}>{configuracion.generadoPor}</Text>
           </View>
 
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Fecha:</Text>
-            <Text style={styles.infoValue}>{fechaActual}</Text>
+          <View style={pdfStyles.infoRow}>
+            <Text style={pdfStyles.infoLabel}>Fecha:</Text>
+            <Text style={pdfStyles.infoValue}>{fechaActual}</Text>
           </View>
 
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Filtros:</Text>
-            <Text style={styles.infoValue}>{filtrosTexto}</Text>
+          <View style={pdfStyles.infoRow}>
+            <Text style={pdfStyles.infoLabel}>Filtros:</Text>
+            <Text style={pdfStyles.infoValue}>{filtrosTexto}</Text>
           </View>
         </View>
 
         {/* Tabla */}
-        <View style={styles.table}>
+        <View style={pdfStyles.table}>
           {/* Header de tabla */}
-          <View style={styles.tableHeader}>
+          <View style={pdfStyles.tableHeader}>
             {columnasVisibles.map((columna, index) => (
               <Text
                 key={columna.key}
                 style={
                   index < columnasVisibles.length - 1
-                    ? styles.cellHeaderWithBorder
-                    : styles.cellHeader
+                    ? pdfStyles.cellHeaderWithBorder
+                    : pdfStyles.cellHeader
                 }
               >
                 {columna.label}
@@ -463,9 +267,9 @@ export const ReporteUsuariosPDF = ({
             <View key={key}>
               {/* Header del grupo */}
               {configuracion.agruparPorNivel && grupo.nivel !== "Todos" && (
-                <View style={styles.groupHeader}>
-                  <Text style={styles.groupTitle}>{grupo.nivel}</Text>
-                  <Text style={styles.groupSubtitle}>
+                <View style={pdfStyles.groupHeader}>
+                  <Text style={pdfStyles.groupTitle}>{grupo.nivel}</Text>
+                  <Text style={pdfStyles.groupSubtitle}>
                     {grupo.usuarios.length} usuario
                     {grupo.usuarios.length !== 1 ? "s" : ""}
                   </Text>
@@ -478,8 +282,8 @@ export const ReporteUsuariosPDF = ({
                   key={usuario.id}
                   style={
                     index % 2 === 1
-                      ? [styles.tableRow, styles.tableRowOdd]
-                      : styles.tableRow
+                      ? [pdfStyles.tableRow, pdfStyles.tableRowOdd]
+                      : pdfStyles.tableRow
                   }
                 >
                   {columnasVisibles.map((columna, colIndex) => (
@@ -487,8 +291,8 @@ export const ReporteUsuariosPDF = ({
                       key={columna.key}
                       style={
                         colIndex < columnasVisibles.length - 1
-                          ? styles.cellWithBorder
-                          : styles.cell
+                          ? pdfStyles.cellWithBorder
+                          : pdfStyles.cell
                       }
                     >
                       {getCellValue(usuario, columna.key, index)}
@@ -501,16 +305,16 @@ export const ReporteUsuariosPDF = ({
         </View>
 
         {/* Total */}
-        <View style={styles.totalRow}>
-          <Text style={styles.totalText}>Total: {datos.total} usuarios</Text>
+        <View style={pdfStyles.totalRow}>
+          <Text style={pdfStyles.totalText}>Total: {datos.total} usuarios</Text>
         </View>
 
         {/* Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            Página {/* se agrega automáticamente */}
+        <View style={esHorizontal ? pdfStyles.footer : pdfStyles.footerPortrait}>
+          <Text style={pdfStyles.footerText}>
+            Documento emitido por PolAdmin
           </Text>
-          <Text style={styles.footerText}>poladmin.com.py</Text>
+          <Text style={pdfStyles.footerText}>poladmin.com.py</Text>
         </View>
       </Page>
     </Document>

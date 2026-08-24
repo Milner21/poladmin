@@ -1,6 +1,9 @@
+// src/pages/private/reportes-imprimir/reportes/simpatizantes/ReporteSimpatizantesExcel.ts
+
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import type { SimpatizanteReporte, ColumnaReporte } from "@dto/reportes.types";
+import { formatearTelefono } from "@utils/telefono";
 
 interface GenerarExcelSimpatizantesParams {
   datos: {
@@ -56,7 +59,7 @@ export const generarExcelSimpatizantes = ({
       case "documento":
         return simpatizante.documento;
       case "telefono":
-        return simpatizante.telefono || "";
+        return formatearTelefono(simpatizante.telefono);
       case "departamento":
         return simpatizante.departamento || "";
       case "distrito":

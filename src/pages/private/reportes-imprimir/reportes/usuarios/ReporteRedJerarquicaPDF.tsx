@@ -1,3 +1,5 @@
+// src/pages/private/reportes-imprimir/reportes/usuarios/ReporteRedJerarquicaPDF.tsx
+
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import type {
   ColumnaReporte,
@@ -5,137 +7,10 @@ import type {
   UsuarioJerarquico,
 } from "@dto/reportes.types";
 import type { ReactElement } from "react";
+import { pdfStyles } from "../../styles/pdfStyles";
 
-const styles = StyleSheet.create({
-  page: {
-    fontSize: 10,
-    padding: 40,
-    backgroundColor: "#ffffff",
-  },
-  header: {
-    marginBottom: 20,
-    paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e2e8f0",
-  },
-  logoContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  logoText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#1e293b",
-  },
-  subtitle: {
-    fontSize: 12,
-    color: "#64748b",
-    marginLeft: 5,
-  },
-  reportTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#1e293b",
-    marginTop: 10,
-  },
-  infoRow: {
-    flexDirection: "row",
-    marginTop: 3,
-  },
-  infoLabel: {
-    fontSize: 9,
-    color: "#64748b",
-    width: 100,
-  },
-  infoValue: {
-    fontSize: 9,
-    color: "#1e293b",
-  },
-  statsPage: {
-    fontSize: 10,
-    padding: 40,
-    backgroundColor: "#ffffff",
-  },
-  statsTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#1e293b",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  statsSection: {
-    marginBottom: 25,
-  },
-  statsSectionTitle: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "#374151",
-    marginBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e2e8f0",
-    paddingBottom: 5,
-  },
-  statsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#f1f5f9",
-  },
-  statsRowOdd: {
-    backgroundColor: "#f8fafc",
-  },
-  statsLabel: {
-    fontSize: 9,
-    color: "#374151",
-  },
-  statsValue: {
-    fontSize: 9,
-    fontWeight: "bold",
-    color: "#1e293b",
-  },
-  table: {
-    marginTop: 20,
-    border: 1,
-    borderColor: "#e2e8f0",
-  },
-  tableHeader: {
-    flexDirection: "row",
-    backgroundColor: "#f8fafc",
-    paddingVertical: 10,
-    paddingHorizontal: 6,
-    borderBottomWidth: 1.5,
-    borderBottomColor: "#cbd5e1",
-  },
-  tableRow: {
-    flexDirection: "row",
-    paddingVertical: 8,
-    paddingHorizontal: 6,
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#e2e8f0",
-    minHeight: 24,
-  },
-  tableRowOdd: {
-    backgroundColor: "#fafafa",
-  },
-  cellHeader: {
-    fontSize: 8,
-    fontWeight: "bold",
-    color: "#374151",
-    flex: 1,
-    textAlign: "left",
-    paddingRight: 4,
-  },
-  cell: {
-    fontSize: 8,
-    color: "#1e293b",
-    flex: 1,
-    textAlign: "left",
-    paddingRight: 4,
-    paddingVertical: 2,
-  },
+// Estilos locales exclusivos para el renderizado del árbol jerárquico
+const treeStyles = StyleSheet.create({
   treeContainer: {
     marginTop: 20,
   },
@@ -201,6 +76,7 @@ const styles = StyleSheet.create({
     paddingVertical: 1,
     borderRadius: 2,
     marginTop: 2,
+    alignSelf: "flex-start",
   },
   treeNodeInactive: {
     fontSize: 7,
@@ -210,33 +86,7 @@ const styles = StyleSheet.create({
     paddingVertical: 1,
     borderRadius: 2,
     marginTop: 2,
-  },
-  footer: {
-    position: "absolute",
-    bottom: 30,
-    left: 40,
-    right: 40,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
-  },
-  footerText: {
-    fontSize: 8,
-    color: "#64748b",
-  },
-  totalRow: {
-    marginTop: 10,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
-  },
-  totalText: {
-    fontSize: 10,
-    fontWeight: "bold",
-    color: "#1e293b",
-    textAlign: "right",
+    alignSelf: "flex-start",
   },
 });
 
@@ -267,6 +117,7 @@ export const ReporteRedJerarquicaPDF = ({
   });
 
   const columnasVisibles = columnas.filter((col) => col.enabled);
+  const esHorizontal = configuracion.tipoVisualizacion === "tabla" && columnasVisibles.length > 6;
 
   const contarSubordinadosRecursivo = (usuario: UsuarioJerarquico): number => {
     if (
@@ -333,35 +184,35 @@ export const ReporteRedJerarquicaPDF = ({
     const totalSubordinados = contarSubordinadosRecursivo(usuario);
 
     const getStylePorNivel = () => {
-      if (nivel === 0) return styles.treeNodeLevel0;
-      if (nivel === 1) return styles.treeNodeLevel1;
-      if (nivel === 2) return styles.treeNodeLevel2;
-      if (nivel === 3) return styles.treeNodeLevel3;
-      return styles.treeNodeDeep;
+      if (nivel === 0) return treeStyles.treeNodeLevel0;
+      if (nivel === 1) return treeStyles.treeNodeLevel1;
+      if (nivel === 2) return treeStyles.treeNodeLevel2;
+      if (nivel === 3) return treeStyles.treeNodeLevel3;
+      return treeStyles.treeNodeDeep;
     };
 
     return (
-      <View key={usuario.id} style={styles.treeNode}>
+      <View key={usuario.id} style={treeStyles.treeNode}>
         <View style={getStylePorNivel()}>
-          <Text style={styles.treeNodeName}>
+          <Text style={treeStyles.treeNodeName}>
             {usuario.nombre} {usuario.apellido} (@{usuario.username})
           </Text>
 
           {configuracion.nivelDetalle !== "basico" && (
             <>
-              <Text style={styles.treeNodeInfo}>
+              <Text style={treeStyles.treeNodeInfo}>
                 {usuario.perfil.nombre} • {usuario.nivel?.nombre || "Sin nivel"}
               </Text>
 
               {configuracion.nivelDetalle === "completo" && (
                 <>
                   {usuario.candidato_superior && (
-                    <Text style={styles.treeNodeInfo}>
+                    <Text style={treeStyles.treeNodeInfo}>
                       Superior: {usuario.candidato_superior.nombre}{" "}
                       {usuario.candidato_superior.apellido}
                     </Text>
                   )}
-                  <Text style={styles.treeNodeInfo}>
+                  <Text style={treeStyles.treeNodeInfo}>
                     Subordinados: {totalSubordinados}
                   </Text>
                 </>
@@ -370,9 +221,9 @@ export const ReporteRedJerarquicaPDF = ({
           )}
 
           {usuario.estado ? (
-            <Text style={styles.treeNodeBadge}>Activo</Text>
+            <Text style={treeStyles.treeNodeBadge}>Activo</Text>
           ) : (
-            <Text style={styles.treeNodeInactive}>Inactivo</Text>
+            <Text style={treeStyles.treeNodeInactive}>Inactivo</Text>
           )}
         </View>
 
@@ -390,29 +241,30 @@ export const ReporteRedJerarquicaPDF = ({
 
   return (
     <Document>
+      {/* Página de Estadísticas */}
       {configuracion.incluirEstadisticas && (
-        <Page size="A4" style={styles.statsPage}>
-          <Text style={styles.statsTitle}>Estadísticas de Red Jerárquica</Text>
+        <Page size="A4" style={pdfStyles.statsPage}>
+          <Text style={pdfStyles.statsTitle}>Estadísticas de Red Jerárquica</Text>
 
-          <View style={styles.statsSection}>
-            <Text style={styles.statsSectionTitle}>
+          <View style={pdfStyles.statsSection}>
+            <Text style={pdfStyles.statsSectionTitle}>
               Información del Reporte
             </Text>
-            <View style={styles.statsRow}>
-              <Text style={styles.statsLabel}>Campaña:</Text>
-              <Text style={styles.statsValue}>{configuracion.campana}</Text>
+            <View style={pdfStyles.statsRow}>
+              <Text style={pdfStyles.statsLabel}>Campaña:</Text>
+              <Text style={pdfStyles.statsValue}>{configuracion.campana}</Text>
             </View>
-            <View style={[styles.statsRow, styles.statsRowOdd]}>
-              <Text style={styles.statsLabel}>Generado por:</Text>
-              <Text style={styles.statsValue}>{configuracion.generadoPor}</Text>
+            <View style={[pdfStyles.statsRow, pdfStyles.statsRowOdd]}>
+              <Text style={pdfStyles.statsLabel}>Generado por:</Text>
+              <Text style={pdfStyles.statsValue}>{configuracion.generadoPor}</Text>
             </View>
-            <View style={styles.statsRow}>
-              <Text style={styles.statsLabel}>Fecha:</Text>
-              <Text style={styles.statsValue}>{fechaActual}</Text>
+            <View style={pdfStyles.statsRow}>
+              <Text style={pdfStyles.statsLabel}>Fecha:</Text>
+              <Text style={pdfStyles.statsValue}>{fechaActual}</Text>
             </View>
-            <View style={[styles.statsRow, styles.statsRowOdd]}>
-              <Text style={styles.statsLabel}>Tipo de visualización:</Text>
-              <Text style={styles.statsValue}>
+            <View style={[pdfStyles.statsRow, pdfStyles.statsRowOdd]}>
+              <Text style={pdfStyles.statsLabel}>Tipo de visualización:</Text>
+              <Text style={pdfStyles.statsValue}>
                 {configuracion.tipoVisualizacion === "arbol"
                   ? "Árbol jerárquico"
                   : configuracion.tipoVisualizacion === "tabla"
@@ -422,31 +274,31 @@ export const ReporteRedJerarquicaPDF = ({
             </View>
           </View>
 
-          <View style={styles.statsSection}>
-            <Text style={styles.statsSectionTitle}>Resumen General</Text>
-            <View style={styles.statsRow}>
-              <Text style={styles.statsLabel}>Total de usuarios:</Text>
-              <Text style={styles.statsValue}>{datos.total_usuarios}</Text>
+          <View style={pdfStyles.statsSection}>
+            <Text style={pdfStyles.statsSectionTitle}>Resumen General</Text>
+            <View style={pdfStyles.statsRow}>
+              <Text style={pdfStyles.statsLabel}>Total de usuarios:</Text>
+              <Text style={pdfStyles.statsValue}>{datos.total_usuarios}</Text>
             </View>
-            <View style={[styles.statsRow, styles.statsRowOdd]}>
-              <Text style={styles.statsLabel}>Total de niveles:</Text>
-              <Text style={styles.statsValue}>{datos.total_niveles}</Text>
+            <View style={[pdfStyles.statsRow, pdfStyles.statsRowOdd]}>
+              <Text style={pdfStyles.statsLabel}>Total de niveles:</Text>
+              <Text style={pdfStyles.statsValue}>{datos.total_niveles}</Text>
             </View>
           </View>
 
-          <View style={styles.statsSection}>
-            <Text style={styles.statsSectionTitle}>Distribución por Nivel</Text>
+          <View style={pdfStyles.statsSection}>
+            <Text style={pdfStyles.statsSectionTitle}>Distribución por Nivel</Text>
             {datos.estadisticas_por_nivel.map((stat, index) => (
               <View
                 key={stat.nivel}
                 style={
                   index % 2 === 1
-                    ? [styles.statsRow, styles.statsRowOdd]
-                    : styles.statsRow
+                    ? [pdfStyles.statsRow, pdfStyles.statsRowOdd]
+                    : pdfStyles.statsRow
                 }
               >
-                <Text style={styles.statsLabel}>{stat.nivel}:</Text>
-                <Text style={styles.statsValue}>
+                <Text style={pdfStyles.statsLabel}>{stat.nivel}:</Text>
+                <Text style={pdfStyles.statsValue}>
                   {stat.total} ({stat.activos} activos, {stat.inactivos}{" "}
                   inactivos)
                 </Text>
@@ -456,56 +308,59 @@ export const ReporteRedJerarquicaPDF = ({
         </Page>
       )}
 
+      {/* Página de Estructura de Datos */}
       {configuracion.tipoVisualizacion !== "estadisticas" && (
         <Page
           size="A4"
-          orientation={
-            configuracion.tipoVisualizacion === "tabla" &&
-            columnasVisibles.length > 6
-              ? "landscape"
-              : "portrait"
-          }
-          style={styles.page}
+          orientation={esHorizontal ? "landscape" : "portrait"}
+          style={esHorizontal ? pdfStyles.page : pdfStyles.pagePortrait}
         >
-          <View style={styles.header}>
-            <View style={styles.logoContainer}>
-              <Text style={styles.logoText}>POLADMIN</Text>
-              <Text style={styles.subtitle}>Sistema de Gestión Política</Text>
+          <View style={pdfStyles.header}>
+            <View style={pdfStyles.logoContainer}>
+              <Text style={pdfStyles.logoText}>POLADMIN</Text>
+              <Text style={pdfStyles.subtitle}>Sistema de Gestión Política</Text>
             </View>
 
-            <Text style={styles.reportTitle}>
+            <Text style={pdfStyles.reportTitle}>
               {configuracion.tipoVisualizacion === "arbol"
                 ? "Red Jerárquica - Vista de Árbol"
                 : "Red Jerárquica - Vista de Tabla"}
             </Text>
 
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Campaña:</Text>
-              <Text style={styles.infoValue}>{configuracion.campana}</Text>
+            <View style={pdfStyles.infoRow}>
+              <Text style={pdfStyles.infoLabel}>Campaña:</Text>
+              <Text style={pdfStyles.infoValue}>{configuracion.campana}</Text>
             </View>
 
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Generado por:</Text>
-              <Text style={styles.infoValue}>{configuracion.generadoPor}</Text>
+            <View style={pdfStyles.infoRow}>
+              <Text style={pdfStyles.infoLabel}>Generado por:</Text>
+              <Text style={pdfStyles.infoValue}>{configuracion.generadoPor}</Text>
             </View>
 
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Fecha:</Text>
-              <Text style={styles.infoValue}>{fechaActual}</Text>
+            <View style={pdfStyles.infoRow}>
+              <Text style={pdfStyles.infoLabel}>Fecha:</Text>
+              <Text style={pdfStyles.infoValue}>{fechaActual}</Text>
             </View>
           </View>
 
           {configuracion.tipoVisualizacion === "arbol" ? (
-            <View style={styles.treeContainer}>
+            <View style={treeStyles.treeContainer}>
               {datos.arbol_jerarquico.map((usuario) =>
                 renderNodoArbol(usuario, 0),
               )}
             </View>
           ) : (
-            <View style={styles.table}>
-              <View style={styles.tableHeader}>
-                {columnasVisibles.map((columna) => (
-                  <Text key={columna.key} style={styles.cellHeader}>
+            <View style={pdfStyles.table}>
+              <View style={pdfStyles.tableHeader}>
+                {columnasVisibles.map((columna, index) => (
+                  <Text
+                    key={columna.key}
+                    style={
+                      index < columnasVisibles.length - 1
+                        ? pdfStyles.cellHeaderWithBorder
+                        : pdfStyles.cellHeader
+                    }
+                  >
                     {columna.label}
                   </Text>
                 ))}
@@ -516,12 +371,19 @@ export const ReporteRedJerarquicaPDF = ({
                   key={usuario.id}
                   style={
                     index % 2 === 1
-                      ? [styles.tableRow, styles.tableRowOdd]
-                      : styles.tableRow
+                      ? [pdfStyles.tableRow, pdfStyles.tableRowOdd]
+                      : pdfStyles.tableRow
                   }
                 >
-                  {columnasVisibles.map((columna) => (
-                    <Text key={columna.key} style={styles.cell}>
+                  {columnasVisibles.map((columna, colIndex) => (
+                    <Text
+                      key={columna.key}
+                      style={
+                        colIndex < columnasVisibles.length - 1
+                          ? pdfStyles.cellWithBorder
+                          : pdfStyles.cell
+                      }
+                    >
                       {getCellValue(usuario, columna.key)}
                     </Text>
                   ))}
@@ -530,15 +392,18 @@ export const ReporteRedJerarquicaPDF = ({
             </View>
           )}
 
-          <View style={styles.totalRow}>
-            <Text style={styles.totalText}>
+          <View style={pdfStyles.totalRow}>
+            <Text style={pdfStyles.totalText}>
               Total: {datos.total_usuarios} usuarios en {datos.total_niveles}{" "}
               niveles
             </Text>
           </View>
 
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>poladmin.com.py</Text>
+          <View style={esHorizontal ? pdfStyles.footer : pdfStyles.footerPortrait}>
+            <Text style={pdfStyles.footerText}>
+              Documento emitido por PolAdmin
+            </Text>
+            <Text style={pdfStyles.footerText}>poladmin.com.py</Text>
           </View>
         </Page>
       )}
