@@ -89,6 +89,8 @@ export interface DatosBusquedaInteligente {
   ci: string;
   nombre: string;
   apellido: string;
+  telefono?: string | null;
+  barrio?: string | null;
   fecha_nacimiento: string | null;
   departamento: string | null;
   distrito: string | null;

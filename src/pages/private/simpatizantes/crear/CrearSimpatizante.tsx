@@ -195,7 +195,17 @@ const CrearSimpatizante: FC<CrearSimpatizanteProps> = ({
 
   const handleConfirmarPadron = () => {
     if (!modalActivo || modalActivo.tipo !== "CONFIRMAR_PADRON") return;
-    setDatosConfirmados(modalActivo.resultado);
+    const res = modalActivo.resultado;
+    setDatosConfirmados(res);
+
+    if (res.datos) {
+      setFormData((prev) => ({
+        ...prev,
+        telefono: res.datos?.telefono ?? prev.telefono,
+        barrio: res.datos?.barrio ?? prev.barrio,
+      }));
+    }
+
     setModalActivo(null);
   };
 
@@ -290,11 +300,11 @@ const CrearSimpatizante: FC<CrearSimpatizanteProps> = ({
       nombre: datos.nombre,
       apellido: datos.apellido,
       documento: datos.ci,
-      telefono: formData.telefono || undefined,
+      telefono: formData.telefono || datos.telefono || undefined,
       fecha_nacimiento: datos.fecha_nacimiento || undefined,
       departamento: datos.departamento || undefined,
       distrito: datos.distrito || undefined,
-      barrio: formData.barrio || undefined,
+      barrio: formData.barrio || datos.barrio || undefined,
       es_afiliado: datos.padron_interno !== null,
       observaciones: formData.observaciones || undefined,
       necesita_transporte: formData.necesita_transporte,
