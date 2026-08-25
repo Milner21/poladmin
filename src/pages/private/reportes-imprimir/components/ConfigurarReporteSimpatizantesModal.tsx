@@ -1,34 +1,31 @@
-//src/pages/private/reportes-imprimir/components/ConfigurarReporteSimpatizantesModal.tsx
+// src/pages/private/reportes-imprimir/components/ConfigurarReporteSimpatizantesModal.tsx
 
-import { useState, useEffect, useMemo, useCallback, type FC } from "react";
+import type { ColumnaReporte, FiltrosReporte } from "@dto/reportes.types";
+import { useAuth } from "@hooks/useAuth";
+import { useCampanaSeleccionada } from "@hooks/useCampanaSeleccionada";
+import { useUsuarios } from "@pages/private/usuarios/hooks/useUsuarios";
+import { pdf } from "@react-pdf/renderer";
 import {
-  X,
+  Calendar,
+  ChevronDown,
+  Columns,
   FileDown,
   FileSpreadsheet,
   Filter,
-  Columns,
-  Calendar,
-  ChevronDown,
-  Search,
+  X,
 } from "lucide-react";
-import { useCampanaSeleccionada } from "@hooks/useCampanaSeleccionada";
-import { useUsuarios } from "@pages/private/usuarios/hooks/useUsuarios";
+import { useCallback, useEffect, useMemo, useState, type FC } from "react";
 import { useReporteSimpatizantes } from "../hooks/useReporteSimpatizantes";
-import { pdf } from "@react-pdf/renderer";
-import { useAuth } from "@hooks/useAuth";
-import { ReporteSimpatizantesPDF } from "../reportes/simpatizantes/ReporteSimpatizantesPDF";
-import { generarExcelSimpatizantes } from "../reportes/simpatizantes/ReporteSimpatizantesExcel";
 import {
+  COLUMNAS_VOTACION_KEYS,
   columnasSimpatizantes,
-  intencionesVoto,
-  origenes,
+  CONFIG_VOTACION_INICIAL,
   opcionesAfiliacion,
   opcionesTransporte,
-  CONFIG_VOTACION_INICIAL,
-  COLUMNAS_VOTACION_KEYS,
   type ConfigVotacion,
 } from "../reportes/simpatizantes/ReporteSimpatizantesConfig";
-import type { ColumnaReporte, FiltrosReporte } from "@dto/reportes.types";
+import { generarExcelSimpatizantes } from "../reportes/simpatizantes/ReporteSimpatizantesExcel";
+import { ReporteSimpatizantesPDF } from "../reportes/simpatizantes/ReporteSimpatizantesPDF";
 
 interface ConfigurarReporteSimpatizantesModalProps {
   visible: boolean;
@@ -59,6 +56,7 @@ export const ConfigurarReporteSimpatizantesModal: FC<
     fecha_desde: fechaDesde,
     fecha_hasta: fechaHasta,
     candidato_id: undefined,
+    registrado_por_id: undefined,
     departamento: undefined,
     distrito: undefined,
     barrio: undefined,
@@ -82,6 +80,8 @@ export const ConfigurarReporteSimpatizantesModal: FC<
     orden_votacion: true,
   });
   const [generando, setGenerando] = useState(false);
+
+  // Estados de Candidato
   const [searchCandidato, setSearchCandidato] = useState("");
   const [dropdownCandidatoAbierto, setDropdownCandidatoAbierto] =
     useState(false);
@@ -90,10 +90,20 @@ export const ConfigurarReporteSimpatizantesModal: FC<
     nombre: string;
   } | null>(null);
 
+  // Estados de Registrador / Creador
+  const [searchRegistrador, setSearchRegistrador] = useState("");
+  const [dropdownRegistradorAbierto, setDropdownRegistradorAbierto] =
+    useState(false);
+  const [registradorSeleccionado, setRegistradorSeleccionado] = useState<{
+    id: string;
+    nombre: string;
+  } | null>(null);
+
   // Actualizar campana_id cuando cambie
   useEffect(() => {
     setFiltros((prev) => ({ ...prev, campana_id: campanaSeleccionada }));
     setCandidatoSeleccionado(null);
+    setRegistradorSeleccionado(null);
   }, [campanaSeleccionada]);
 
   // Hook para obtener datos
@@ -124,10 +134,33 @@ export const ConfigurarReporteSimpatizantesModal: FC<
     );
   }, [candidatos, searchCandidato]);
 
-  // Columnas base + columnas de votacion inyectadas dinamicamente
+  // Registradores disponibles para filtrar (incluye administradores y operativos)
+  const registradores = useMemo(() => {
+    const todosLosUsuarios = usuarios?.filter((u) => u.estado) || [];
+    return todosLosUsuarios
+      .map((u) => ({
+        id: u.id,
+        nombre: `${u.nombre} ${u.apellido}`,
+        perfil: u.perfil.nombre,
+        username: u.username,
+      }))
+      .sort((a, b) => a.nombre.localeCompare(b.nombre));
+  }, [usuarios]);
+
+  const registradoresFiltrados = useMemo(() => {
+    if (!searchRegistrador.trim()) return registradores;
+    return registradores.filter(
+      (r) =>
+        r.nombre.toLowerCase().includes(searchRegistrador.toLowerCase()) ||
+        r.perfil.toLowerCase().includes(searchRegistrador.toLowerCase()) ||
+        r.username.toLowerCase().includes(searchRegistrador.toLowerCase()),
+    );
+  }, [registradores, searchRegistrador]);
+
+  // Columnas base + columnas de votación inyectadas dinámicamente
   const columnasConVotacion = useMemo((): ColumnaReporte[] => {
     const base = [...columnas];
-    
+
     if (!configVotacion.incluir) return base;
 
     if (configVotacion.local) {
@@ -177,6 +210,19 @@ export const ConfigurarReporteSimpatizantesModal: FC<
     [],
   );
 
+  const handleSeleccionarRegistrador = useCallback(
+    (registrador: { id: string; nombre: string } | null) => {
+      setRegistradorSeleccionado(registrador);
+      setFiltros((prev) => ({
+        ...prev,
+        registrado_por_id: registrador?.id ?? undefined,
+      }));
+      setDropdownRegistradorAbierto(false);
+      setSearchRegistrador("");
+    },
+    [],
+  );
+
   const handleFiltroChange = useCallback(
     (campo: keyof FiltrosReporte, valor: string) => {
       setFiltros((prev) => ({
@@ -195,16 +241,16 @@ export const ConfigurarReporteSimpatizantesModal: FC<
   );
 
   const handleColumnaToggle = useCallback((key: string) => {
-    // Si es una columna de votacion
-    if (key === COLUMNAS_VOTACION_KEYS.local || 
-        key === COLUMNAS_VOTACION_KEYS.mesa || 
-        key === COLUMNAS_VOTACION_KEYS.orden) {
+    if (
+      key === COLUMNAS_VOTACION_KEYS.local ||
+      key === COLUMNAS_VOTACION_KEYS.mesa ||
+      key === COLUMNAS_VOTACION_KEYS.orden
+    ) {
       setColumnasVotacionEnabled((prev) => ({
         ...prev,
         [key]: !prev[key as keyof typeof prev],
       }));
     } else {
-      // Es una columna base
       setColumnas((prev) =>
         prev.map((col) =>
           col.key === key ? { ...col, enabled: !col.enabled } : col,
@@ -258,8 +304,6 @@ export const ConfigurarReporteSimpatizantesModal: FC<
       const blob = await asPdf.toBlob();
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
-
-      //onClose();
     } catch (error) {
       console.error("Error generando PDF:", error);
       alert("Error generando PDF de simpatizantes");
@@ -274,7 +318,6 @@ export const ConfigurarReporteSimpatizantesModal: FC<
     incluirUbicacion,
     configVotacion,
     columnasConVotacion,
-    //onClose,
   ]);
 
   const handleGenerarExcel = useCallback(async () => {
@@ -297,8 +340,6 @@ export const ConfigurarReporteSimpatizantesModal: FC<
         columnas: columnasParaReporte,
         configuracion: configuracionReporte,
       });
-
-      //onClose();
     } catch (error) {
       console.error("Error generando Excel:", error);
       alert("Error generando Excel de simpatizantes");
@@ -313,10 +354,9 @@ export const ConfigurarReporteSimpatizantesModal: FC<
     incluirUbicacion,
     configVotacion,
     columnasConVotacion,
-    //onClose,
   ]);
 
-  // Return condicional SIEMPRE despues de todos los hooks
+  // Return condicional SIEMPRE después de todos los hooks
   if (!visible) return null;
 
   return (
@@ -340,6 +380,7 @@ export const ConfigurarReporteSimpatizantesModal: FC<
             </p>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="text-text-tertiary hover:text-text-primary transition-colors"
           >
@@ -357,18 +398,19 @@ export const ConfigurarReporteSimpatizantesModal: FC<
             </h4>
 
             {/* Primera fila de filtros */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              {/* Candidato/Registrador con búsqueda */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              {/* Selector de Candidato Político */}
               <div className="relative">
                 <label className="block text-sm font-medium text-text-primary mb-1">
-                  Candidato/Registrador
+                  Candidato Político
                 </label>
                 <div className="relative">
                   <button
                     type="button"
-                    onClick={() =>
-                      setDropdownCandidatoAbierto(!dropdownCandidatoAbierto)
-                    }
+                    onClick={() => {
+                      setDropdownCandidatoAbierto(!dropdownCandidatoAbierto);
+                      setDropdownRegistradorAbierto(false);
+                    }}
                     className="w-full px-3 py-2 text-left border border-border rounded-lg bg-bg-content text-text-primary focus:outline-none focus:ring-2 focus:ring-primary flex items-center justify-between"
                   >
                     <span className="truncate">
@@ -378,39 +420,26 @@ export const ConfigurarReporteSimpatizantesModal: FC<
                     </span>
                     <ChevronDown
                       size={16}
-                      className={`text-text-tertiary transition-transform ${dropdownCandidatoAbierto ? "rotate-180" : ""}`}
+                      className={`text-text-tertiary transition-transform ${
+                        dropdownCandidatoAbierto ? "rotate-180" : ""
+                      }`}
                     />
                   </button>
 
                   {dropdownCandidatoAbierto && (
                     <div className="absolute z-50 w-full mt-1 bg-bg-content border border-border rounded-lg shadow-lg max-h-60 overflow-hidden">
-                      <div className="p-3 border-b border-border">
-                        <div className="relative">
-                          <Search
-                            size={16}
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary"
-                          />
-                          <input
-                            type="text"
-                            value={searchCandidato}
-                            onChange={(e) => setSearchCandidato(e.target.value)}
-                            placeholder="Buscar candidato..."
-                            className="w-full pl-9 pr-8 py-2 border border-border rounded bg-bg-base text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary"
-                            autoFocus
-                          />
-                          {searchCandidato && (
-                            <button
-                              onClick={() => setSearchCandidato("")}
-                              className="absolute right-2 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary"
-                            >
-                              <X size={14} />
-                            </button>
-                          )}
-                        </div>
+                      <div className="p-2 border-b border-border">
+                        <input
+                          type="text"
+                          value={searchCandidato}
+                          onChange={(e) => setSearchCandidato(e.target.value)}
+                          placeholder="Buscar candidato..."
+                          className="w-full px-3 py-1.5 text-sm border border-border rounded-md bg-bg-base text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
                       </div>
-
                       <div className="max-h-48 overflow-y-auto">
                         <button
+                          type="button"
                           onClick={() => handleSeleccionarCandidato(null)}
                           className={`w-full px-3 py-2 text-left hover:bg-bg-base transition-colors ${
                             !candidatoSeleccionado
@@ -418,96 +447,122 @@ export const ConfigurarReporteSimpatizantesModal: FC<
                               : "text-text-primary"
                           }`}
                         >
-                          <div>
-                            <div className="font-medium">
-                              Todos los candidatos
-                            </div>
-                            <div className="text-xs text-text-tertiary">
-                              Sin filtro por candidato
-                            </div>
+                          <div className="font-medium text-sm">
+                            Todos los candidatos
                           </div>
                         </button>
-
-                        {candidatosFiltrados.length > 0 ? (
-                          candidatosFiltrados.map((candidato) => (
-                            <button
-                              key={candidato.id}
-                              onClick={() =>
-                                handleSeleccionarCandidato({
-                                  id: candidato.id,
-                                  nombre: candidato.nombre,
-                                })
-                              }
-                              className={`w-full px-3 py-2 text-left hover:bg-bg-base transition-colors ${
-                                candidatoSeleccionado?.id === candidato.id
-                                  ? "bg-primary/10 text-primary"
-                                  : "text-text-primary"
-                              }`}
-                            >
-                              <div>
-                                <div className="font-medium">
-                                  {candidato.nombre}
-                                </div>
-                                <div className="text-xs text-text-tertiary">
-                                  {candidato.perfil} • @{candidato.username}
-                                </div>
-                              </div>
-                            </button>
-                          ))
-                        ) : (
-                          <div className="px-3 py-4 text-center text-text-tertiary text-sm">
-                            No se encontraron candidatos
-                          </div>
-                        )}
+                        {candidatosFiltrados.map((c) => (
+                          <button
+                            key={c.id}
+                            type="button"
+                            onClick={() =>
+                              handleSeleccionarCandidato({
+                                id: c.id,
+                                nombre: c.nombre,
+                              })
+                            }
+                            className={`w-full px-3 py-2 text-left hover:bg-bg-base transition-colors ${
+                              candidatoSeleccionado?.id === c.id
+                                ? "bg-primary/10 text-primary"
+                                : "text-text-primary"
+                            }`}
+                          >
+                            <div className="font-medium text-sm">
+                              {c.nombre}
+                            </div>
+                            <div className="text-xs text-text-tertiary">
+                              {c.perfil} • @{c.username}
+                            </div>
+                          </button>
+                        ))}
                       </div>
                     </div>
                   )}
                 </div>
-
-                {dropdownCandidatoAbierto && (
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setDropdownCandidatoAbierto(false)}
-                  />
-                )}
               </div>
 
-              <div>
+              {/* Selector de Registrado Por / Creador */}
+              <div className="relative">
                 <label className="block text-sm font-medium text-text-primary mb-1">
-                  Intención de Voto
+                  Registrado Por (Administrador/Operativo)
                 </label>
-                <select
-                  value={filtros.intencion_voto || "todos"}
-                  onChange={(e) =>
-                    handleFiltroChange("intencion_voto", e.target.value)
-                  }
-                  className="w-full px-3 py-2 border border-border rounded-lg bg-bg-content text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  {intencionesVoto.map((intencion) => (
-                    <option key={intencion.key} value={intencion.key}>
-                      {intencion.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDropdownRegistradorAbierto(
+                        !dropdownRegistradorAbierto,
+                      );
+                      setDropdownCandidatoAbierto(false);
+                    }}
+                    className="w-full px-3 py-2 text-left border border-border rounded-lg bg-bg-content text-text-primary focus:outline-none focus:ring-2 focus:ring-primary flex items-center justify-between"
+                  >
+                    <span className="truncate">
+                      {registradorSeleccionado
+                        ? registradorSeleccionado.nombre
+                        : "Todos los registradores"}
+                    </span>
+                    <ChevronDown
+                      size={16}
+                      className={`text-text-tertiary transition-transform ${
+                        dropdownRegistradorAbierto ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
 
-              <div>
-                <label className="block text-sm font-medium text-text-primary mb-1">
-                  Origen de Registro
-                </label>
-                <select
-                  value={filtros.origen_registro || "todos"}
-                  onChange={(e) =>
-                    handleFiltroChange("origen_registro", e.target.value)
-                  }
-                  className="w-full px-3 py-2 border border-border rounded-lg bg-bg-content text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  {origenes.map((origen) => (
-                    <option key={origen.key} value={origen.key}>
-                      {origen.label}
-                    </option>
-                  ))}
-                </select>
+                  {dropdownRegistradorAbierto && (
+                    <div className="absolute z-50 w-full mt-1 bg-bg-content border border-border rounded-lg shadow-lg max-h-60 overflow-hidden">
+                      <div className="p-2 border-b border-border">
+                        <input
+                          type="text"
+                          value={searchRegistrador}
+                          onChange={(e) => setSearchRegistrador(e.target.value)}
+                          placeholder="Buscar usuario o administrador..."
+                          className="w-full px-3 py-1.5 text-sm border border-border rounded-md bg-bg-base text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
+                      <div className="max-h-48 overflow-y-auto">
+                        <button
+                          type="button"
+                          onClick={() => handleSeleccionarRegistrador(null)}
+                          className={`w-full px-3 py-2 text-left hover:bg-bg-base transition-colors ${
+                            !registradorSeleccionado
+                              ? "bg-primary/10 text-primary"
+                              : "text-text-primary"
+                          }`}
+                        >
+                          <div className="font-medium text-sm">
+                            Todos los registradores
+                          </div>
+                        </button>
+                        {registradoresFiltrados.map((r) => (
+                          <button
+                            key={r.id}
+                            type="button"
+                            onClick={() =>
+                              handleSeleccionarRegistrador({
+                                id: r.id,
+                                nombre: r.nombre,
+                              })
+                            }
+                            className={`w-full px-3 py-2 text-left hover:bg-bg-base transition-colors ${
+                              registradorSeleccionado?.id === r.id
+                                ? "bg-primary/10 text-primary"
+                                : "text-text-primary"
+                            }`}
+                          >
+                            <div className="font-medium text-sm">
+                              {r.nombre}
+                            </div>
+                            <div className="text-xs text-text-tertiary">
+                              {r.perfil} • @{r.username}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -665,12 +720,14 @@ export const ConfigurarReporteSimpatizantesModal: FC<
               </h4>
               <div className="flex gap-2">
                 <button
+                  type="button"
                   onClick={handleSeleccionarTodasColumnas}
                   className="text-xs text-primary hover:text-primary-hover transition-colors"
                 >
                   Seleccionar todas
                 </button>
                 <button
+                  type="button"
                   onClick={handleDeseleccionarTodasColumnas}
                   className="text-xs text-text-tertiary hover:text-text-primary transition-colors"
                 >
@@ -891,6 +948,11 @@ export const ConfigurarReporteSimpatizantesModal: FC<
                     Candidato: {candidatoSeleccionado?.nombre}
                   </p>
                 )}
+                {filtros.registrado_por_id && (
+                  <p className="m-0">
+                    Registrado Por: {registradorSeleccionado?.nombre}
+                  </p>
+                )}
               </div>
             </div>
           ) : (
@@ -912,6 +974,7 @@ export const ConfigurarReporteSimpatizantesModal: FC<
         <div className="border-t border-border p-6">
           <div className="flex justify-end gap-3">
             <button
+              type="button"
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium rounded-lg border border-border text-text-primary hover:bg-bg-base transition-colors"
             >
@@ -919,6 +982,7 @@ export const ConfigurarReporteSimpatizantesModal: FC<
             </button>
 
             <button
+              type="button"
               onClick={handleGenerarExcel}
               disabled={generando || !hayDatos || columnasSeleccionadas === 0}
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-success hover:bg-success/80 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
@@ -932,6 +996,7 @@ export const ConfigurarReporteSimpatizantesModal: FC<
             </button>
 
             <button
+              type="button"
               onClick={handleGenerarPDF}
               disabled={generando || !hayDatos || columnasSeleccionadas === 0}
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-primary hover:bg-primary-hover text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"

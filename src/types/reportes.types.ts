@@ -162,6 +162,7 @@ export interface ReporteSimpatizantesResponse {
   total: number;
   filtros_aplicados: {
     candidato?: string;
+    registrado_por?: string;
     departamento?: string;
     distrito?: string;
     barrio?: string;
@@ -183,6 +184,7 @@ export interface FiltrosReporte {
   distrito?: string;
   barrio?: string;
   candidato_id?: string;
+  registrado_por_id?: string;
   lider_id?: string;
   agrupacion?: "dia" | "semana" | "mes";
   // Campos para usuarios

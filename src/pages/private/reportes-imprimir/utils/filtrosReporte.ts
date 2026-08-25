@@ -3,6 +3,8 @@
 const ETIQUETAS_FILTROS: Record<string, string> = {
   candidato: "Candidato",
   candidato_id: "Candidato",
+  registrado_por: "Registrado por",
+  registrado_por_id: "Registrado por",
   departamento: "Departamento",
   distrito: "Distrito",
   barrio: "Barrio",
@@ -43,7 +45,8 @@ const VALORES_ORIGEN: Record<string, string> = {
   MANUAL: "Manual",
 };
 
-const REGEX_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const REGEX_UUID =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function formatearFiltrosAplicados(
   filtrosAplicados?: Record<string, unknown>,
