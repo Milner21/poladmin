@@ -43,6 +43,7 @@ export const ConfigurarReporteUsuariosModal: FC<
     fecha_registro_hasta: undefined,
     tiene_telefono: undefined,
     tiene_nivel: undefined,
+    barrio: undefined,
   });
   const { usuario } = useAuth();
   const [columnas, setColumnas] = useState<ColumnaReporte[]>(columnasUsuarios);
@@ -57,8 +58,6 @@ export const ConfigurarReporteUsuariosModal: FC<
 
   // Hook para obtener datos
   const { data: datosUsuarios, isLoading } = useReporteUsuarios(filtros);
-
- 
 
   const handleFiltroChange = (campo: keyof FiltrosReporte, valor: string) => {
     setFiltros((prev) => ({
@@ -251,8 +250,8 @@ export const ConfigurarReporteUsuariosModal: FC<
               </div>
             </div>
 
-            {/* Segunda fila - Candidato Superior */}
-            <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-4">
+            {/* Segunda fila - Candidato Superior y Barrio */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-sm font-medium text-text-primary mb-1">
                   Candidato Superior
@@ -286,6 +285,20 @@ export const ConfigurarReporteUsuariosModal: FC<
                       </option>
                     ))}
                 </select>
+              </div>
+
+              {/* Pegar aquí - Campo Barrio */}
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-1">
+                  Barrio Cobertura
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej. San Pablo"
+                  value={filtros.barrio || ""}
+                  onChange={(e) => handleFiltroChange("barrio", e.target.value)}
+                  className="w-full px-3 py-2 border border-border rounded-lg bg-bg-content text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+                />
               </div>
             </div>
 

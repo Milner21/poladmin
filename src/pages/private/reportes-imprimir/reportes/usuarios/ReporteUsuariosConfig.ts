@@ -1,3 +1,4 @@
+//src/pages/private/reportes-imprimir/reportes/usuarios/ReporteUsuariosConfig.ts
 import type { ColumnaReporte } from '@dto/reportes.types';
 
 export const columnasUsuarios: ColumnaReporte[] = [
@@ -7,6 +8,7 @@ export const columnasUsuarios: ColumnaReporte[] = [
   { key: 'username', label: 'Username', enabled: true },
   { key: 'documento', label: 'Documento', enabled: true },
   { key: 'telefono', label: 'Teléfono', enabled: false },
+  { key: 'barrios', label: 'Barrios Cobertura', enabled: true },
   { key: 'perfil', label: 'Perfil', enabled: true },
   { key: 'nivel', label: 'Nivel', enabled: true },
   { key: 'candidato_superior', label: 'Candidato Superior', enabled: false },

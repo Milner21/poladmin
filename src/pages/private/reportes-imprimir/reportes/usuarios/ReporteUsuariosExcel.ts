@@ -59,6 +59,8 @@ export const generarExcelUsuarios = ({
         return usuario.total_simpatizantes ?? 0;
       case "total_simpatizantes_red":
         return usuario.total_simpatizantes_red ?? 0;
+      case "barrios":
+        return usuario.barrios || "Sin registros";
       default:
         return "";
     }

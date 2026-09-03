@@ -69,6 +69,8 @@ export const ReporteUsuariosPDF = ({
         return String(usuario.total_simpatizantes ?? 0);
       case "total_simpatizantes_red":
         return String(usuario.total_simpatizantes_red ?? 0);
+      case "barrios":
+        return usuario.barrios || "-";
       default:
         return "-";
     }
@@ -139,7 +141,9 @@ export const ReporteUsuariosPDF = ({
             </View>
             <View style={[pdfStyles.statsRow, pdfStyles.statsRowOdd]}>
               <Text style={pdfStyles.statsLabel}>Generado por:</Text>
-              <Text style={pdfStyles.statsValue}>{configuracion.generadoPor}</Text>
+              <Text style={pdfStyles.statsValue}>
+                {configuracion.generadoPor}
+              </Text>
             </View>
             <View style={pdfStyles.statsRow}>
               <Text style={pdfStyles.statsLabel}>Fecha:</Text>
@@ -166,7 +170,9 @@ export const ReporteUsuariosPDF = ({
 
           {/* Por nivel */}
           <View style={pdfStyles.statsSection}>
-            <Text style={pdfStyles.statsSectionTitle}>Distribución por Nivel</Text>
+            <Text style={pdfStyles.statsSectionTitle}>
+              Distribución por Nivel
+            </Text>
             {Object.entries(estadisticas.porNivel)
               .sort(([a], [b]) => a.localeCompare(b))
               .map(([nivel, cantidad], index) => (
@@ -310,7 +316,9 @@ export const ReporteUsuariosPDF = ({
         </View>
 
         {/* Footer */}
-        <View style={esHorizontal ? pdfStyles.footer : pdfStyles.footerPortrait}>
+        <View
+          style={esHorizontal ? pdfStyles.footer : pdfStyles.footerPortrait}
+        >
           <Text style={pdfStyles.footerText}>
             Documento emitido por PolAdmin
           </Text>

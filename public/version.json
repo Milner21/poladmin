@@ -1,7 +1,7 @@
 {
-  "version": "1.6.9",
-  "fecha": "2026-08-24",
+  "version": "1.7.1",
+  "fecha": "2026-09-03",
   "cambios": [
-    "Correccion de Reportes Gral."
+    "Correccion de Reportes usuarios"
   ]
 }

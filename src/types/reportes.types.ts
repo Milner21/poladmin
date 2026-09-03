@@ -97,6 +97,7 @@ export interface UsuarioReporte {
   fecha_registro: string;
   total_simpatizantes: number;
   total_simpatizantes_red: number;
+  barrios: string;
 }
 
 export interface ReporteUsuariosResponse {
@@ -107,6 +108,7 @@ export interface ReporteUsuariosResponse {
     nivel?: string;
     estado?: boolean | string;
     candidato_superior?: string;
+    barrio?: string;
   };
 }
 
@@ -116,6 +118,7 @@ export interface FiltrosReporteUsuarios {
   nivel_id?: string;
   estado?: boolean | string;
   candidato_superior_id?: string;
+  barrio?: string;
 }
 
 export interface ColumnaReporte {
