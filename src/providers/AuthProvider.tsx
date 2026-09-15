@@ -1,3 +1,5 @@
+//src/providers/AuthProvider.tsx
+
 import { useEffect, useState, type JSX, type ReactNode } from "react";
 import { AuthContext } from "@context/AuthContext";
 import { type Usuario } from "@dto/auth.types";
@@ -52,7 +54,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     // Usar storage en lugar de localStorage directamente
     storage.setUser(usuario);
     storage.setToken(access_token);
-    
+
     // Guardar refresh_token si viene (está en cookie, pero por si acaso)
     if (refresh_token) {
       storage.setRefreshToken(refresh_token);
@@ -89,6 +91,18 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       };
     });
   };
+
+  useEffect(() => {
+    const handleForceLogout = () => {
+      cerrarSesion();
+      window.location.href = "/login";
+    };
+
+    window.addEventListener("auth-logout", handleForceLogout);
+    return () => {
+      window.removeEventListener("auth-logout", handleForceLogout);
+    };
+  }, []);
 
   return (
     <AuthContext.Provider

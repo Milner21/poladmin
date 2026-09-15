@@ -1,6 +1,5 @@
-//src/api/axios.config.ts
+// src/api/axios.config.ts
 
-import { RoutesConfig } from "@routes/RoutesConfig";
 import { API_BASE_URL, ENDPOINTS } from "@utils/constants";
 import { storage } from "@utils/storage";
 import { tokenEventBus } from "@utils/tokenEventBus";
@@ -18,6 +17,24 @@ const axiosInstance = axios.create({
   },
   withCredentials: true,
 });
+
+// Control de peticiones de refresco concurrentes
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (token: string) => void;
+  reject: (error: unknown) => void;
+}> = [];
+
+const processQueue = (error: unknown, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token!);
+    }
+  });
+  failedQueue = [];
+};
 
 // Request interceptor
 axiosInstance.interceptors.request.use(
@@ -67,31 +84,54 @@ axiosInstance.interceptors.response.use(
       !originalRequest._retry &&
       storage.getToken()
     ) {
-      originalRequest._retry = true;
-
-      try {
-        const response = await axiosInstance.post(
-          `${API_BASE_URL}${ENDPOINTS.AUTH.REFRESH}`,
-          {},
-          { withCredentials: true },
-        );
-
-        const { access_token } = response.data as { access_token: string };
-
-        storage.setToken(access_token);
-        tokenEventBus.emit(access_token);
-
-        if (!originalRequest.headers) {
-          originalRequest.headers = new AxiosHeaders();
-        }
-        originalRequest.headers.set("Authorization", `Bearer ${access_token}`);
-
-        return axiosInstance(originalRequest);
-      } catch (refreshError) {
-        storage.clearAuth();
-        window.location.href = RoutesConfig.login;
-        return Promise.reject(refreshError);
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            if (!originalRequest.headers) {
+              originalRequest.headers = new AxiosHeaders();
+            }
+            originalRequest.headers.set("Authorization", `Bearer ${token}`);
+            return axiosInstance(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
       }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      return new Promise((resolve, reject) => {
+        axiosInstance
+          .post(
+            `${API_BASE_URL}${ENDPOINTS.AUTH.REFRESH}`,
+            {},
+            { withCredentials: true }
+          )
+          .then(({ data }) => {
+            const { access_token } = data as { access_token: string };
+            storage.setToken(access_token);
+            tokenEventBus.emit(access_token);
+            processQueue(null, access_token);
+
+            if (!originalRequest.headers) {
+              originalRequest.headers = new AxiosHeaders();
+            }
+            originalRequest.headers.set("Authorization", `Bearer ${access_token}`);
+            resolve(axiosInstance(originalRequest));
+          })
+          .catch((refreshError) => {
+            processQueue(refreshError, null);
+            // Despachar evento para sincronizar con AuthProvider
+            window.dispatchEvent(new Event("auth-logout"));
+            reject(refreshError);
+          })
+          .finally(() => {
+            isRefreshing = false;
+          });
+      });
     }
 
     return Promise.reject(error);

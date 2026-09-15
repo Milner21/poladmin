@@ -1,3 +1,5 @@
+//src/utils/tokenEventBus.ts
+
 type TokenRefreshHandler = (nuevoAccessToken: string) => void;
 
 let handler: TokenRefreshHandler | null = null;
