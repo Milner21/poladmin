@@ -71,6 +71,8 @@ export const ReporteUsuariosPDF = ({
         return String(usuario.total_simpatizantes_red ?? 0);
       case "barrios":
         return usuario.barrios || "-";
+      case "barrio_personal":
+        return usuario.barrio_personal || "-";
       default:
         return "-";
     }

@@ -8,6 +8,7 @@ export const columnasUsuarios: ColumnaReporte[] = [
   { key: 'username', label: 'Username', enabled: true },
   { key: 'documento', label: 'Documento', enabled: true },
   { key: 'telefono', label: 'Teléfono', enabled: false },
+  { key: 'barrio_personal', label: 'Barrio Residencia', enabled: true }, 
   { key: 'barrios', label: 'Barrios Cobertura', enabled: true },
   { key: 'perfil', label: 'Perfil', enabled: true },
   { key: 'nivel', label: 'Nivel', enabled: true },

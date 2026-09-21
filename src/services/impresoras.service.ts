@@ -115,10 +115,14 @@ export const impresorasService = {
 
   getEstadisticasImpresiones: async (
     fechaDesde?: string,
+    modoEleccion?: string, // <-- Añadido
   ): Promise<EstadisticasImpresionesDto> => {
-    const params = fechaDesde ? { fecha_desde: fechaDesde } : {};
+    const params: Record<string, string> = {};
+    if (fechaDesde) params.fecha_desde = fechaDesde;
+    if (modoEleccion) params.modo_eleccion = modoEleccion;
+
     const response = await axiosInstance.get(
-      "/dashboard/estadisticas-impresiones",
+      "/impresoras/estadisticas", // <-- Unificado con el endpoint del controlador de impresoras
       { params },
     );
     return response.data.data || response.data;
@@ -126,8 +130,12 @@ export const impresorasService = {
 
   getReporteUsuarios: async (
     fechaDesde?: string,
+    modoEleccion?: string, // <-- Añadido
   ): Promise<ReporteUsuarioImpresion[]> => {
-    const params = fechaDesde ? { fecha_desde: fechaDesde } : {};
+    const params: Record<string, string> = {};
+    if (fechaDesde) params.fecha_desde = fechaDesde;
+    if (modoEleccion) params.modo_eleccion = modoEleccion;
+
     const response = await axiosInstance.get("/impresoras/reporte-usuarios", {
       params,
     });

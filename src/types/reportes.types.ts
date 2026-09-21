@@ -98,6 +98,7 @@ export interface UsuarioReporte {
   total_simpatizantes: number;
   total_simpatizantes_red: number;
   barrios: string;
+  barrio_personal: string; 
 }
 
 export interface ReporteUsuariosResponse {

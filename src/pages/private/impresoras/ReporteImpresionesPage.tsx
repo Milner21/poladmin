@@ -30,7 +30,9 @@ interface StatCardSimple {
 const StatCardSimple: FC<StatCardSimple> = ({ title, value, icon, color }) => (
   <div className="bg-bg-content border border-border rounded-xl p-5">
     <div className="flex items-center gap-3">
-      <div className={`w-12 h-12 ${color} rounded-lg flex items-center justify-center`}>
+      <div
+        className={`w-12 h-12 ${color} rounded-lg flex items-center justify-center`}
+      >
         {icon}
       </div>
       <div>
@@ -46,6 +48,7 @@ const ReporteImpresionesPage: FC = () => {
   const { campanaActual } = useCampanaSeleccionada();
   const { tienePermiso } = usePermisos();
   const [fechaDesde, setFechaDesde] = useState<string>("");
+  const [modoEleccion, setModoEleccion] = useState<string>("");
 
   const puedeVerReportes = tienePermiso("ver_reportes_impresion");
 
@@ -54,10 +57,11 @@ const ReporteImpresionesPage: FC = () => {
     isLoading: loadingEstadisticas,
     refetch: refetchEstadisticas,
   } = useQuery<EstadisticasImpresionesDto>({
-    queryKey: ["impresiones", "estadisticas", fechaDesde],
+    queryKey: ["impresiones", "estadisticas", fechaDesde, modoEleccion],
     queryFn: () =>
       impresorasService.getEstadisticasImpresiones(
-        fechaDesde || undefined
+        fechaDesde || undefined,
+        modoEleccion || undefined,
       ),
     enabled: puedeVerReportes,
     staleTime: 5 * 60 * 1000,
@@ -68,9 +72,12 @@ const ReporteImpresionesPage: FC = () => {
     isLoading: loadingReporte,
     refetch: refetchReporte,
   } = useQuery<ReporteUsuarioImpresion[]>({
-    queryKey: ["impresiones", "reporte-usuarios", fechaDesde],
+    queryKey: ["impresiones", "reporte-usuarios", fechaDesde, modoEleccion],
     queryFn: () =>
-      impresorasService.getReporteUsuarios(fechaDesde || undefined),
+      impresorasService.getReporteUsuarios(
+        fechaDesde || undefined,
+        modoEleccion || undefined,
+      ),
     enabled: puedeVerReportes,
     staleTime: 5 * 60 * 1000,
   });
@@ -82,6 +89,7 @@ const ReporteImpresionesPage: FC = () => {
 
   const handleLimpiar = () => {
     setFechaDesde("");
+    setModoEleccion("");
   };
 
   const columnas: ColumnDef<ReporteUsuarioImpresion>[] = [
@@ -206,6 +214,22 @@ const ReporteImpresionesPage: FC = () => {
             />
           </div>
 
+          <div className="flex items-center gap-2">
+            <Printer size={16} className="text-text-tertiary" />
+            <label className="text-sm font-medium text-text-secondary">
+              Etapa / Modo:
+            </label>
+            <select
+              value={modoEleccion}
+              onChange={(e) => setModoEleccion(e.target.value)}
+              className="input w-auto bg-bg-content border-border text-text-primary rounded-lg"
+            >
+              <option value="">Por defecto de campaña</option>
+              <option value="INTERNAS">Internas</option>
+              <option value="GENERALES">Generales</option>
+            </select>
+          </div>
+
           <button
             onClick={handleBuscar}
             className="btn btn-primary flex items-center gap-2"
@@ -225,10 +249,7 @@ const ReporteImpresionesPage: FC = () => {
           </button>
 
           {fechaDesde && (
-            <button
-              onClick={handleLimpiar}
-              className="btn btn-outline"
-            >
+            <button onClick={handleLimpiar} className="btn btn-outline">
               Limpiar filtro
             </button>
           )}
