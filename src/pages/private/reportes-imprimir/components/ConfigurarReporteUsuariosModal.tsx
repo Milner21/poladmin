@@ -28,7 +28,7 @@ interface ConfigurarReporteUsuariosModalProps {
 export const ConfigurarReporteUsuariosModal: FC<
   ConfigurarReporteUsuariosModalProps
 > = ({ visible, onClose }) => {
-  const { campanaSeleccionada } = useCampanaSeleccionada();
+  const { campanaSeleccionada, campanaActual } = useCampanaSeleccionada();
   const { data: perfiles } = usePerfiles();
   const { data: niveles } = useNiveles();
 
@@ -88,10 +88,10 @@ export const ConfigurarReporteUsuariosModal: FC<
     setGenerando(true);
     try {
       const configuracion = {
-        campana: campanaSeleccionada || "Sin campaña",
+        campana: campanaActual?.nombre || "Sin campaña",
         generadoPor: `${usuario?.nombre} ${usuario?.apellido} (@${usuario?.username})`,
         agruparPorNivel,
-        incluirEstadisticas, // ← AGREGAR ESTA LÍNEA
+        incluirEstadisticas,
       };
 
       const columnasSeleccionadas = columnas.filter((c) => c.enabled);
@@ -124,10 +124,10 @@ export const ConfigurarReporteUsuariosModal: FC<
     setGenerando(true);
     try {
       const configuracion = {
-        campana: campanaSeleccionada || "Sin campaña",
+        campana: campanaActual?.nombre || "Sin campaña",
         generadoPor: `${usuario?.nombre} ${usuario?.apellido} (@${usuario?.username})`,
         agruparPorNivel,
-        incluirEstadisticas, // ← AGREGAR ESTA LÍNEA
+        incluirEstadisticas,
       };
 
       const columnasSeleccionadas = columnas.filter((c) => c.enabled);
