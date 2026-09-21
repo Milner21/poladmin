@@ -1,3 +1,5 @@
+// src/pages/private/usuarios/EditarUsuario.tsx
+
 import { PageHeader } from "@components";
 import { useAuth } from "@hooks/useAuth";
 import RoutesConfig from "@routes/RoutesConfig";
@@ -5,33 +7,13 @@ import { useEffect, useMemo, useState, type FC } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { usePerfiles } from "../perfiles/hooks/usePerfiles";
 import { usePermisos as useListaPermisos } from "../permisos/hooks/usePermisos";
-import { UsuarioForm } from "./components/UsuarioForm";
+import { UsuarioForm, type FormValues, type FormErrors } from "./components/UsuarioForm"; // <-- CORREGIDO: Importación unificada
 import { useActualizarUsuario } from "./hooks/useActualizarUsuario";
 import { useUsuario } from "./hooks/useUsuario";
 import toast from "react-hot-toast";
 import type { UpdateUsuarioDto } from "@dto/usuario.types";
 import { SimpatizanteStatusCard } from "./components/SimpatizanteStatusCard";
 import { useSimpatizanteStatus } from "./hooks/useSimpatizanteStatus";
-
-interface FormValues {
-  nombre: string;
-  apellido: string;
-  documento: string;
-  telefono: string;
-  barrio: string;
-  password: string;
-  confirmarPassword: string;
-  perfil_id: string;
-  username: string;
-}
-
-interface FormErrors {
-  nombre?: string;
-  apellido?: string;
-  documento?: string;
-  perfil_id?: string;
-  username?: string;
-}
 
 const EditarUsuario: FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -43,6 +25,7 @@ const EditarUsuario: FC = () => {
     reactivarSimpatizante,
     reactivandoSimpatizante,
   } = useSimpatizanteStatus(id);
+
   // Estados del formulario
   const [values, setValues] = useState<FormValues>({
     nombre: "",
@@ -53,6 +36,7 @@ const EditarUsuario: FC = () => {
     password: "",
     confirmarPassword: "",
     perfil_id: "",
+    candidato_superior_id: "", // <-- CORREGIDO: Añadido campo obligatorio
     username: "",
   });
   const [errors, setErrors] = useState<FormErrors>({});
@@ -75,7 +59,6 @@ const EditarUsuario: FC = () => {
       return true;
     }
 
-    // Verificar si tiene el permiso específico
     const todosLosPermisos = [
       ...(usuarioActual.perfil?.permisos?.map((p) => p.permiso.nombre) || []),
       ...(usuarioActual.permisos_personalizados?.map((p) => p.permiso.nombre) ||
@@ -113,6 +96,7 @@ const EditarUsuario: FC = () => {
         password: "",
         confirmarPassword: "",
         perfil_id: usuarioAEditar.perfil.id,
+        candidato_superior_id: usuarioAEditar.candidato_superior_id ?? "", // <-- CORREGIDO: Cargar superior si existe
         username: usuarioAEditar.username,
       });
 
@@ -152,7 +136,7 @@ const EditarUsuario: FC = () => {
         if (usuarioActual?.perfil?.nombre === "ROOT")
           return perfil.nombre !== "ROOT";
         if (!perfil.nivel) return false;
-        return true; // Simplificado para edición
+        return true;
       }
       return false;
     });
@@ -204,19 +188,16 @@ const EditarUsuario: FC = () => {
     e.preventDefault();
     if (!validate() || !id) return;
 
-    // Preparar datos para actualizar
     const dataToUpdate: UpdateUsuarioDto = {
       nombre: values.nombre.trim(),
       apellido: values.apellido.trim(),
       telefono: values.telefono.trim() || undefined,
       barrio: values.barrio.trim() || undefined,
       perfil_id: values.perfil_id,
-      // Mandamos los permisos solo si el tipo actual es operativo
       permisos_ids:
         tipoUsuario === "operativo" ? permisosSeleccionados : undefined,
     };
 
-    // Incluir username solo si cambió y tiene permiso
     if (puedeEditarUsername && values.username !== usuarioAEditar?.username) {
       dataToUpdate.username = values.username.trim();
     }

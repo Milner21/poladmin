@@ -1,9 +1,22 @@
+// src/pages/private/usuarios/components/UsuarioForm.tsx
+
 import type { Perfil } from "@dto/perfil.types";
 import type { Permiso } from "@dto/permiso.types";
-import type { FC } from "react";
+import { type FC } from "react"; // <-- Importamos useMemo
 import { PermisosOperativoPanel } from "./PermisosOperativoPanel";
 
-interface FormValues {
+interface CandidatoSuperiorOption {
+  id: string;
+  nombre: string;
+  apellido: string;
+  nivel: {
+    id: string;
+    nombre: string;
+    orden: number;
+  };
+}
+
+export interface FormValues {
   nombre: string;
   apellido: string;
   documento: string;
@@ -12,10 +25,11 @@ interface FormValues {
   password: string;
   confirmarPassword: string;
   perfil_id: string;
+  candidato_superior_id: string;
   username: string;
 }
 
-interface FormErrors {
+export interface FormErrors {
   nombre?: string;
   apellido?: string;
   documento?: string;
@@ -43,6 +57,9 @@ interface UsuarioFormProps {
   onChange: (field: keyof FormValues, value: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
+  mostrarSelectorSuperior?: boolean;
+  candidatosSuperiores?: CandidatoSuperiorOption[]; 
+  isLoadingCandidatos?: boolean;
 }
 
 export const UsuarioForm: FC<UsuarioFormProps> = ({
@@ -61,6 +78,9 @@ export const UsuarioForm: FC<UsuarioFormProps> = ({
   onChange,
   onSubmit,
   onCancel,
+  mostrarSelectorSuperior = false,
+  candidatosSuperiores = [],
+  isLoadingCandidatos = false,
 }) => {
   const todosLosPerfiles = perfilesConInfo ?? perfiles;
   const perfilSeleccionado = todosLosPerfiles.find(
@@ -299,6 +319,79 @@ export const UsuarioForm: FC<UsuarioFormProps> = ({
           )}
         </div>
 
+        {/* REUBICACIÓN: Candidato Superior justo debajo de Perfil */}
+        {mostrarSelectorSuperior && (
+          <div className="p-4 bg-warning/5 border border-warning/30 rounded-lg">
+            <label className="block text-sm font-medium text-text-primary mb-2">
+              Candidato Superior <span className="text-danger">*</span>
+            </label>
+            <p className="text-xs text-text-tertiary mb-3">
+              Selecciona quien sera el jefe directo de este{" "}
+              {perfilSeleccionado?.nombre || "usuario"}
+            </p>
+
+            {isLoadingCandidatos ? (
+              <div className="flex items-center gap-2 text-text-tertiary">
+                <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                Cargando candidatos...
+              </div>
+            ) : candidatosSuperiores && candidatosSuperiores.length > 0 ? (
+              <select
+                value={values.candidato_superior_id}
+                onChange={(e) =>
+                  onChange("candidato_superior_id", e.target.value)
+                }
+                className={`
+                  w-full px-4 py-2 rounded-lg border bg-bg-content
+                  text-text-primary focus:outline-none focus:ring-2 focus:ring-primary transition-all
+                  ${errors.perfil_id && !values.candidato_superior_id ? "border-danger ring-2 ring-danger/20" : "border-border"}
+                `}
+              >
+                <option value="">Seleccionar candidato superior...</option>
+                {candidatosSuperiores.map((candidato) => (
+                  <option key={candidato.id} value={candidato.id}>
+                    {candidato.nombre} {candidato.apellido} —{" "}
+                    {candidato.nivel?.nombre || "Candidato"}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className="space-y-3">
+                <div className="p-4 bg-danger/10 border border-danger/30 rounded-lg">
+                  <p className="text-danger font-semibold text-sm mb-1">
+                    No hay candidatos superiores disponibles
+                  </p>
+                  <p className="text-text-secondary text-xs">
+                    Para crear un{" "}
+                    <strong>
+                      {perfilSeleccionado?.nivel?.nombre || "usuario"}
+                    </strong>
+                    , primero necesitas crear un usuario de nivel superior en
+                    esta campana.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChange("perfil_id", "");
+                  }}
+                  className="w-full px-4 py-2 bg-bg-base border border-border rounded-lg text-text-primary hover:bg-bg-hover transition-colors text-sm"
+                >
+                  Elegir otro perfil
+                </button>
+              </div>
+            )}
+
+            {errors.perfil_id &&
+              !values.candidato_superior_id &&
+              candidatosSuperiores &&
+              candidatosSuperiores.length > 0 && (
+                <p className="text-danger text-xs mt-2">{errors.perfil_id}</p>
+              )}
+          </div>
+        )}
+
         {/* Username manual - solo si el perfil lo requiere y es creacion */}
         {!isEditing && usernameEsManual && (
           <div>
@@ -362,30 +455,6 @@ export const UsuarioForm: FC<UsuarioFormProps> = ({
         )}
       </div>
 
-      {/* Username manual - solo si el perfil lo requiere y es creacion */}
-      {!isEditing && usernameEsManual && (
-        <div>
-          <label className="block text-sm font-medium text-text-primary mb-1">
-            Usuario <span className="text-danger">*</span>
-          </label>
-          <input
-            type="text"
-            value={values.username}
-            onChange={(e) => onChange("username", e.target.value)}
-            className={`
-                w-full px-4 py-2 rounded-lg border bg-bg-content
-                text-text-primary placeholder:text-text-tertiary
-                focus:outline-none focus:ring-2 focus:ring-primary
-                transition-all
-                ${errors.username ? "border-danger ring-2 ring-danger/20" : "border-border"}
-              `}
-          />
-          {errors.username && (
-            <p className="text-danger text-xs mt-1">{errors.username}</p>
-          )}
-        </div>
-      )}
-
       {/* Username en edición - solo si tiene permiso */}
       {isEditing && (
         <div>
@@ -413,7 +482,7 @@ export const UsuarioForm: FC<UsuarioFormProps> = ({
           />
           {!puedeEditarUsername && (
             <p className="text-text-tertiary text-xs mt-1">
-              No tenés permiso para editar el username
+              No tenes permiso para editar el username
             </p>
           )}
           {puedeEditarUsername && (

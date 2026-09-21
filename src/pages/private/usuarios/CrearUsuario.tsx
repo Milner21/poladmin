@@ -81,7 +81,9 @@ const CrearUsuario: FC = () => {
 
   // Estados para activacion de usuario existente inactivo
   const [modalActivarOpen, setModalActivarOpen] = useState(false);
-  const [usuarioInactivoId, setUsuarioInactivoId] = useState<string | null>(null);
+  const [usuarioInactivoId, setUsuarioInactivoId] = useState<string | null>(
+    null,
+  );
   const [modoInactivo, setModoInactivo] = useState<string>("");
   const [activandoCargando, setActivandoCargando] = useState(false);
 
@@ -93,7 +95,22 @@ const CrearUsuario: FC = () => {
   const { data: todosLosPermisosDb } = useListaPermisos();
 
   const perfilSeleccionado = perfiles?.find((p) => p.id === values.perfil_id);
-  const nivelOrdenSeleccionado = perfilSeleccionado?.nivel?.orden ?? 0;
+
+  const nivelOrdenSeleccionado = useMemo(() => {
+    if (tipoUsuario === "operativo") {
+      return 99;
+    }
+    return perfilSeleccionado?.nivel?.orden ?? 0;
+  }, [tipoUsuario, perfilSeleccionado]);
+
+  const mostrarSelectorSuperior = useMemo(() => {
+    return (
+      esRoot &&
+      !!values.perfil_id &&
+      (tipoUsuario === "operativo" ||
+        (tipoUsuario === "politico" && nivelOrdenSeleccionado > 1))
+    );
+  }, [esRoot, values.perfil_id, tipoUsuario, nivelOrdenSeleccionado]);
 
   const { data: candidatosSuperiores, isLoading: isLoadingCandidatos } =
     useCandidatosSuperiores(campanaSeleccionada, nivelOrdenSeleccionado);
@@ -243,28 +260,41 @@ const CrearUsuario: FC = () => {
 
     if (!resultado) return;
 
+    const origen = resultado.encontrado_en;
+
     if (
-      resultado.encontrado_en === "PADRON_INTERNO" ||
-      resultado.encontrado_en === "PADRON_GENERAL"
+      origen === "SIMPATIZANTE" ||
+      origen === "PADRON_INTERNO" ||
+      origen === "PADRON_GENERAL"
     ) {
+      const esSimpatizante = origen === "SIMPATIZANTE";
+
       setDatosPadronEncontrados({
         nombre: resultado.datos?.nombre ?? "",
         apellido: resultado.datos?.apellido ?? "",
       });
+
       setValues((prev) => ({
         ...prev,
         documento: ciLimpia,
         nombre: resultado.datos?.nombre ?? "",
         apellido: resultado.datos?.apellido ?? "",
+        telefono: resultado.datos?.telefono ?? "",
+        barrio: resultado.datos?.barrio ?? "",
       }));
-      toast.success("Datos cargados desde el padron");
+
+      if (esSimpatizante) {
+        toast.success("Datos migrados desde simpatizantes de la campaña");
+      } else {
+        toast.success("Datos cargados desde el padrón electoral");
+      }
       setBuscandoPadron(false);
     } else {
       setValues((prev) => ({
         ...prev,
         documento: ciLimpia,
       }));
-      toast("No encontrado en padron. Completa manualmente.", {
+      toast("No encontrado en padrón ni simpatizantes. Completa manualmente.", {
         icon: "i",
       });
       setBuscandoPadron(false);
@@ -301,7 +331,8 @@ const CrearUsuario: FC = () => {
       newErrors.confirmarPassword = "Las contrasenas no coinciden";
     }
 
-    if (esRoot && tipoUsuario === "politico" && nivelOrdenSeleccionado > 1) {
+    // CORREGIDO: Validación basada en el flag dinámico para ambos tipos
+    if (mostrarSelectorSuperior) {
       if (!values.candidato_superior_id) {
         newErrors.perfil_id = "Debes seleccionar el candidato superior";
       }
@@ -371,10 +402,10 @@ const CrearUsuario: FC = () => {
         campana_id: esRoot ? campanaSeleccionada : undefined,
         permisos_ids:
           tipoUsuario === "operativo" ? permisosSeleccionados : undefined,
-        candidato_superior_id:
-          esRoot && tipoUsuario === "politico" && nivelOrdenSeleccionado > 1
-            ? values.candidato_superior_id
-            : undefined,
+        // CORREGIDO: Mapeo dinámico del superior para ambos flujos
+        candidato_superior_id: mostrarSelectorSuperior
+          ? values.candidato_superior_id
+          : undefined,
         username:
           perfilSeleccionado?.username_manual && values.username.trim()
             ? values.username.trim()
@@ -428,101 +459,6 @@ const CrearUsuario: FC = () => {
               </div>
             )}
 
-            {esRoot &&
-              tipoUsuario === "politico" &&
-              nivelOrdenSeleccionado > 1 && (
-                <div className="mb-6 p-4 bg-warning/5 border border-warning/30 rounded-lg">
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Candidato Superior <span className="text-danger">*</span>
-                  </label>
-                  <p className="text-xs text-text-tertiary mb-3">
-                    Selecciona quien sera el jefe directo de este{" "}
-                    {perfilSeleccionado?.nivel?.nombre || "usuario"}
-                  </p>
-
-                  {isLoadingCandidatos ? (
-                    <div className="flex items-center gap-2 text-text-tertiary">
-                      <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                      Cargando candidatos...
-                    </div>
-                  ) : candidatosSuperiores &&
-                    candidatosSuperiores.length > 0 ? (
-                    <select
-                      value={values.candidato_superior_id}
-                      onChange={(e) =>
-                        handleChange("candidato_superior_id", e.target.value)
-                      }
-                      className={`
-          w-full px-4 py-2 rounded-lg border bg-bg-content
-          text-text-primary focus:outline-none focus:ring-2 focus:ring-primary transition-all
-          ${errors.perfil_id && !values.candidato_superior_id ? "border-danger ring-2 ring-danger/20" : "border-border"}
-        `}
-                    >
-                      <option value="">
-                        Seleccionar candidato superior...
-                      </option>
-                      {candidatosSuperiores.map((candidato) => (
-                        <option key={candidato.id} value={candidato.id}>
-                          {candidato.nombre} {candidato.apellido} —{" "}
-                          {candidato.nivel.nombre}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <div className="space-y-3">
-                      <div className="p-4 bg-danger/10 border border-danger/30 rounded-lg">
-                        <div className="flex items-start gap-3">
-                          <div>
-                            <p className="text-danger font-semibold text-sm mb-1">
-                              No hay candidatos superiores disponibles
-                            </p>
-                            <p className="text-text-secondary text-xs">
-                              Para crear un{" "}
-                              <strong>
-                                {perfilSeleccionado?.nivel?.nombre}
-                              </strong>
-                              , primero necesitas crear un usuario de nivel
-                              superior en esta campana.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="p-3 bg-info/10 border border-info/30 rounded-lg">
-                        <p className="text-xs text-text-primary">
-                          Sugerencia: Crea primero un{" "}
-                          {nivelOrdenSeleccionado === 2
-                            ? "Intendente"
-                            : nivelOrdenSeleccionado === 3
-                              ? "Intendente o Concejal"
-                              : "usuario de nivel superior"}{" "}
-                          para esta campana.
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          handleChange("perfil_id", "");
-                        }}
-                        className="w-full px-4 py-2 bg-bg-base border border-border rounded-lg text-text-primary hover:bg-bg-hover transition-colors text-sm"
-                      >
-                        Elegir otro perfil
-                      </button>
-                    </div>
-                  )}
-
-                  {errors.perfil_id &&
-                    !values.candidato_superior_id &&
-                    candidatosSuperiores &&
-                    candidatosSuperiores.length > 0 && (
-                      <p className="text-danger text-xs mt-2">
-                        {errors.perfil_id}
-                      </p>
-                    )}
-                </div>
-              )}
-
             <UsuarioForm
               values={values}
               errors={errors}
@@ -538,6 +474,9 @@ const CrearUsuario: FC = () => {
               onChange={handleChange}
               onSubmit={handleSubmit}
               onCancel={() => navigate(RoutesConfig.usuarios)}
+              mostrarSelectorSuperior={mostrarSelectorSuperior}
+              candidatosSuperiores={candidatosSuperiores}
+              isLoadingCandidatos={isLoadingCandidatos}
             />
           </div>
         )}
@@ -559,10 +498,13 @@ const CrearUsuario: FC = () => {
                 Usuario existente inactivo
               </h3>
               <p className="text-sm text-text-secondary">
-                Esta persona ya tiene un usuario en el sistema pero no esta activa en la etapa actual de la campana (<strong>{modoInactivo}</strong>).
+                Esta persona ya tiene un usuario en el sistema pero no esta
+                activa en la etapa actual de la campana (
+                <strong>{modoInactivo}</strong>).
               </p>
               <p className="text-sm text-text-secondary mt-2">
-                Deseas activarla ahora y pasar a completar sus datos (barrio, telefono, etc.)?
+                Deseas activarla ahora y pasar a completar sus datos (barrio,
+                telefono, etc.)?
               </p>
             </div>
 
@@ -575,7 +517,9 @@ const CrearUsuario: FC = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-text-secondary">CI</span>
-                <span className="text-text-primary font-medium">{values.documento}</span>
+                <span className="text-text-primary font-medium">
+                  {values.documento}
+                </span>
               </div>
             </div>
 
