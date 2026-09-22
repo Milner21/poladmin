@@ -261,16 +261,17 @@ export const ReporteSimpatizantesPDF = ({
         {/* Total */}
         <View style={pdfStyles.totalRow}>
           <Text style={pdfStyles.totalText}>
-            Total: {datos.total} simpatizantes
+            Total: {datos.total ?? datos.simpatizantes?.length ?? 0}{" "}
+            simpatizantes
           </Text>
         </View>
 
         {/* Footer */}
         <View style={pdfStyles.footer}>
           <Text style={pdfStyles.footerText}>
-            Documento emitido por PolAdmin
+            Documento emitido por Poladmin
           </Text>
-          <Text style={pdfStyles.footerText}>poladmin.com.py</Text>
+          <Text style={pdfStyles.footerText}>www.poladmin.es</Text>
         </View>
       </Page>
     </Document>

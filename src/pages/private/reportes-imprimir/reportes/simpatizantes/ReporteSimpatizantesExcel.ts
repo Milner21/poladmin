@@ -146,7 +146,10 @@ export const generarExcelSimpatizantes = ({
     );
 
     resumenData.push([]);
-    resumenData.push(["Total General:", datos.total]);
+    resumenData.push([
+      "Total General:",
+      datos.total ?? datos.simpatizantes?.length ?? 0,
+    ]);
 
     const resumenWs = XLSX.utils.aoa_to_sheet(resumenData);
     resumenWs["!cols"] = [{ width: 30 }, { width: 20 }];
@@ -231,7 +234,9 @@ export const generarExcelSimpatizantes = ({
 
     // Fila de total
     wsData.push([]);
-    wsData.push([`Total: ${datos.total} simpatizantes`]);
+    wsData.push([
+      `Total: ${datos.total ?? datos.simpatizantes?.length ?? 0} simpatizantes`,
+    ]);
 
     // Crear worksheet
     const worksheet = XLSX.utils.aoa_to_sheet(wsData);
