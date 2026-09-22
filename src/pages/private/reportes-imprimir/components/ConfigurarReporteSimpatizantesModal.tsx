@@ -39,22 +39,11 @@ export const ConfigurarReporteSimpatizantesModal: FC<
   const { usuario } = useAuth();
   const { data: usuarios } = useUsuarios(campanaSeleccionada);
 
-  // Fechas por defecto (últimos 30 días)
-  const { fechaDesde, fechaHasta } = useMemo(() => {
-    const hasta = new Date().toISOString().split("T")[0];
-    const desde = new Date();
-    desde.setDate(desde.getDate() - 30);
-    return {
-      fechaDesde: desde.toISOString().split("T")[0],
-      fechaHasta: hasta,
-    };
-  }, []);
-
   // Estados del modal
   const [filtros, setFiltros] = useState<FiltrosReporte>({
     campana_id: campanaSeleccionada,
-    fecha_desde: fechaDesde,
-    fecha_hasta: fechaHasta,
+    fecha_desde: undefined,
+    fecha_hasta: undefined,
     candidato_id: undefined,
     registrado_por_id: undefined,
     departamento: undefined,
@@ -316,6 +305,8 @@ export const ConfigurarReporteSimpatizantesModal: FC<
     datosSimpatizantes,
     campanaActual,
     usuario,
+    candidatoSeleccionado,
+    registradorSeleccionado,
     agruparPorCandidato,
     incluirUbicacion,
     configVotacion,
@@ -354,6 +345,8 @@ export const ConfigurarReporteSimpatizantesModal: FC<
     datosSimpatizantes,
     campanaActual,
     usuario,
+    candidatoSeleccionado,
+    registradorSeleccionado,
     agruparPorCandidato,
     incluirUbicacion,
     configVotacion,

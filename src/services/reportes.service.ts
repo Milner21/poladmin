@@ -29,7 +29,6 @@ export const reportesService = {
     if (filtros.lider_id) params.append("lider_id", filtros.lider_id);
     if (filtros.agrupacion) params.append("agrupacion", filtros.agrupacion);
 
-    
     const response = await axiosInstance.get(
       `/reportes/captacion?${params.toString()}`,
     );
@@ -86,6 +85,7 @@ export const reportesService = {
       params.append("tiene_telefono", String(filtros.tiene_telefono));
     if (filtros.tiene_nivel !== undefined)
       params.append("tiene_nivel", String(filtros.tiene_nivel));
+    if (filtros.barrio) params.append("barrio", filtros.barrio); // <-- AGREGADO
 
     const response = await axiosInstance.get(
       `/reportes/usuarios?${params.toString()}`,
@@ -101,6 +101,9 @@ export const reportesService = {
     if (filtros.campana_id) params.append("campana_id", filtros.campana_id);
     if (filtros.candidato_id)
       params.append("candidato_id", filtros.candidato_id);
+    if (filtros.registrado_por_id)
+      params.append("registrado_por_id", filtros.registrado_por_id); // <-- ¡AQUÍ ESTABA EL ERROR! AGREGADO
+
     if (filtros.departamento)
       params.append("departamento", filtros.departamento);
     if (filtros.distrito) params.append("distrito", filtros.distrito);
