@@ -16,6 +16,8 @@ interface ReporteSimpatizantesPDFProps {
   configuracion: {
     campana: string;
     generadoPor: string;
+    candidatoNombre?: string;
+    registradorNombre?: string;
     agruparPorCandidato?: boolean;
     incluirUbicacion?: boolean;
     tipoVotacion?: "interna" | "general";
@@ -145,6 +147,24 @@ export const ReporteSimpatizantesPDF = ({
             <Text style={pdfStyles.infoValue}>{configuracion.campana}</Text>
           </View>
 
+          {configuracion.candidatoNombre && (
+            <View style={pdfStyles.infoRow}>
+              <Text style={pdfStyles.infoLabel}>Usuario:</Text>
+              <Text style={pdfStyles.infoValue}>
+                {configuracion.candidatoNombre}
+              </Text>
+            </View>
+          )}
+
+          {configuracion.registradorNombre && (
+            <View style={pdfStyles.infoRow}>
+              <Text style={pdfStyles.infoLabel}>Registrado por:</Text>
+              <Text style={pdfStyles.infoValue}>
+                {configuracion.registradorNombre}
+              </Text>
+            </View>
+          )}
+
           <View style={pdfStyles.infoRow}>
             <Text style={pdfStyles.infoLabel}>Generado por:</Text>
             <Text style={pdfStyles.infoValue}>{configuracion.generadoPor}</Text>
@@ -160,6 +180,23 @@ export const ReporteSimpatizantesPDF = ({
             <Text style={pdfStyles.infoValue}>{filtrosTexto}</Text>
           </View>
         </View>
+
+        {(configuracion.candidatoNombre || configuracion.registradorNombre) && (
+          <View
+            style={{
+              marginBottom: 6,
+              paddingVertical: 4,
+              paddingHorizontal: 6,
+              backgroundColor: "#f3f4f6",
+              borderRadius: 3,
+            }}
+          >
+            <Text style={{ fontSize: 9, fontWeight: "bold", color: "#1f2937" }}>
+              Registros de:{" "}
+              {configuracion.candidatoNombre || configuracion.registradorNombre}
+            </Text>
+          </View>
+        )}
 
         {/* Tabla */}
         <View style={pdfStyles.table}>

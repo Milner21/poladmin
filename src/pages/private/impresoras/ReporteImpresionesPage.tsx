@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useState, type FC } from "react";
 import { useNavigate } from "react-router-dom";
+import { ModalImpresionMasiva } from "./components/ModalImpresionMasiva";
 
 interface StatCardSimple {
   title: string;
@@ -49,7 +50,7 @@ const ReporteImpresionesPage: FC = () => {
   const { tienePermiso } = usePermisos();
   const [fechaDesde, setFechaDesde] = useState<string>("");
   const [modoEleccion, setModoEleccion] = useState<string>("");
-
+  const [modalMasivaOpen, setModalMasivaOpen] = useState(false);
   const puedeVerReportes = tienePermiso("ver_reportes_impresion");
 
   const {
@@ -196,6 +197,13 @@ const ReporteImpresionesPage: FC = () => {
           <ArrowLeft size={16} />
           Volver
         </button>
+        <button
+          onClick={() => setModalMasivaOpen(true)}
+          className="btn btn-primary flex items-center gap-2"
+        >
+          <Printer size={16} />
+          Impresión Masiva por Candidato
+        </button>
       </div>
 
       {/* Filtros */}
@@ -319,6 +327,14 @@ const ReporteImpresionesPage: FC = () => {
           defaultPageSize={20}
         />
       </div>
+      <ModalImpresionMasiva
+        isOpen={modalMasivaOpen}
+        onClose={() => setModalMasivaOpen(false)}
+        onImpresionCompletada={() => {
+          refetchEstadisticas();
+          refetchReporte();
+        }}
+      />
     </div>
   );
 };

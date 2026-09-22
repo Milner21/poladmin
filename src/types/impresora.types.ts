@@ -104,3 +104,39 @@ export interface ReporteUsuarioImpresion extends Record<string, unknown> {
   total_impresiones: number;
   ultima_impresion: string | null;
 }
+
+export interface ImprimirLoteFiltros {
+  candidato_id?: string;
+  lider_id?: string;
+  registrado_por_id?: string;
+  barrio?: string;
+  local_votacion?: string;
+  solo_pendientes?: boolean;
+  modo_eleccion?: 'INTERNAS' | 'GENERALES';
+}
+
+export interface SimpatizantePreviewLote {
+  id: string;
+  nombre: string;
+  apellido: string;
+  documento: string;
+  barrio: string | null;
+  local_votacion: string | null;
+  mesa: string | null;
+  orden: string | null;
+  ticket_impreso: boolean;
+  candidato: string | null;
+}
+
+export interface LotePreviewResponse {
+  total: number;
+  modo_eleccion: 'INTERNAS' | 'GENERALES';
+  simpatizantes: SimpatizantePreviewLote[];
+}
+
+export interface ImprimirLoteResponse {
+  total: number;
+  exitosos: number;
+  fallidos: number;
+  mensaje: string;
+}

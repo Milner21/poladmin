@@ -15,6 +15,8 @@ interface GenerarExcelSimpatizantesParams {
   configuracion: {
     campana: string;
     generadoPor: string;
+    candidatoNombre?: string;
+    registradorNombre?: string;
     agruparPorCandidato?: boolean;
     incluirUbicacion?: boolean;
     tipoVotacion?: "interna" | "general";
@@ -129,10 +131,13 @@ export const generarExcelSimpatizantes = ({
     resumenData.push(["Resumen de Simpatizantes por Candidato"]);
     resumenData.push([]);
     resumenData.push(["Campaña:", configuracion.campana]);
+    if (configuracion.candidatoNombre) {
+      resumenData.push(["Usuario:", configuracion.candidatoNombre]);
+    }
+    if (configuracion.registradorNombre) {
+      resumenData.push(["Registrado por:", configuracion.registradorNombre]);
+    }
     resumenData.push(["Generado por:", configuracion.generadoPor]);
-    resumenData.push(["Fecha:", new Date().toLocaleDateString("es-PY")]);
-    resumenData.push([]);
-    resumenData.push(["Candidato", "Cantidad de Simpatizantes"]);
 
     Object.entries(simpatizantesPorCandidato).forEach(
       ([candidato, simpatizantes]) => {
@@ -195,17 +200,13 @@ export const generarExcelSimpatizantes = ({
     wsData.push(["Reporte de Simpatizantes"]);
     wsData.push([]);
     wsData.push(["Campaña:", configuracion.campana]);
+    if (configuracion.candidatoNombre) {
+      wsData.push(["Usuario:", configuracion.candidatoNombre]);
+    }
+    if (configuracion.registradorNombre) {
+      wsData.push(["Registrado por:", configuracion.registradorNombre]);
+    }
     wsData.push(["Generado por:", configuracion.generadoPor]);
-    wsData.push([
-      "Fecha:",
-      new Date().toLocaleDateString("es-PY", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    ]);
 
     // Filtros aplicados
     const filtrosTexto =

@@ -7,6 +7,9 @@ import type {
   CrearTrabajoDto,
   EstadisticasImpresionesDto,
   ReporteUsuarioImpresion,
+  ImprimirLoteFiltros,
+  LotePreviewResponse,
+  ImprimirLoteResponse,
 } from "@dto/impresora.types";
 
 export const impresorasService = {
@@ -139,6 +142,26 @@ export const impresorasService = {
     const response = await axiosInstance.get("/impresoras/reporte-usuarios", {
       params,
     });
+    return response.data.data || response.data;
+  },
+
+  previewLote: async (
+    filtros: ImprimirLoteFiltros,
+  ): Promise<LotePreviewResponse> => {
+    const response = await axiosInstance.post(
+      "/impresoras/lote-preview",
+      filtros,
+    );
+    return response.data.data || response.data;
+  },
+
+  imprimirLote: async (
+    filtros: ImprimirLoteFiltros,
+  ): Promise<ImprimirLoteResponse> => {
+    const response = await axiosInstance.post(
+      "/impresoras/imprimir-lote",
+      filtros,
+    );
     return response.data.data || response.data;
   },
 };

@@ -285,6 +285,8 @@ export const ConfigurarReporteSimpatizantesModal: FC<
       const configuracionReporte = {
         campana: campanaActual?.nombre || "Sin campaña",
         generadoPor: `${usuario?.nombre} ${usuario?.apellido} (@${usuario?.username})`,
+        candidatoNombre: candidatoSeleccionado?.nombre,
+        registradorNombre: registradorSeleccionado?.nombre,
         agruparPorCandidato,
         incluirUbicacion,
         tipoVotacion: configVotacion.incluir ? configVotacion.tipo : undefined,
@@ -328,6 +330,8 @@ export const ConfigurarReporteSimpatizantesModal: FC<
       const configuracionReporte = {
         campana: campanaActual?.nombre || "Sin campaña",
         generadoPor: `${usuario?.nombre} ${usuario?.apellido} (@${usuario?.username})`,
+        candidatoNombre: candidatoSeleccionado?.nombre,
+        registradorNombre: registradorSeleccionado?.nombre,
         agruparPorCandidato,
         incluirUbicacion,
         tipoVotacion: configVotacion.incluir ? configVotacion.tipo : undefined,
