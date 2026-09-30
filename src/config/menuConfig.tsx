@@ -46,6 +46,7 @@ export const menuConfig: MenuItemConfig[] = [
     icon: <LayoutDashboard size={18} />,
     label: "Dashboard",
     path: RoutesConfig.dashboard,
+    permisoEspecifico: "ver_dashboard",
   },
 
   // ==========================================

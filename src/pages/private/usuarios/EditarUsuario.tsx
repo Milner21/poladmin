@@ -2,14 +2,17 @@
 
 import { PageHeader } from "@components";
 import { useAuth } from "@hooks/useAuth";
+import { useCampanaSeleccionada } from "@hooks/useCampanaSeleccionada";
+import { usePermisos } from "@hooks/usePermisos";
 import RoutesConfig from "@routes/RoutesConfig";
 import { useEffect, useMemo, useState, type FC } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { usePerfiles } from "../perfiles/hooks/usePerfiles";
 import { usePermisos as useListaPermisos } from "../permisos/hooks/usePermisos";
-import { UsuarioForm, type FormValues, type FormErrors } from "./components/UsuarioForm"; // <-- CORREGIDO: Importación unificada
+import { UsuarioForm, type FormValues, type FormErrors } from "./components/UsuarioForm";
 import { useActualizarUsuario } from "./hooks/useActualizarUsuario";
 import { useUsuario } from "./hooks/useUsuario";
+import { useCandidatosSuperiores } from "./hooks/useCandidatosSuperiores";
 import toast from "react-hot-toast";
 import type { UpdateUsuarioDto } from "@dto/usuario.types";
 import { SimpatizanteStatusCard } from "./components/SimpatizanteStatusCard";
@@ -19,6 +22,9 @@ const EditarUsuario: FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { usuario: usuarioActual } = useAuth();
+  const { esRoot } = usePermisos();
+  const { campanaSeleccionada } = useCampanaSeleccionada();
+
   const {
     estadoSimpatizante,
     cargandoEstado,
@@ -36,7 +42,7 @@ const EditarUsuario: FC = () => {
     password: "",
     confirmarPassword: "",
     perfil_id: "",
-    candidato_superior_id: "", // <-- CORREGIDO: Añadido campo obligatorio
+    candidato_superior_id: "",
     username: "",
   });
   const [errors, setErrors] = useState<FormErrors>({});
@@ -49,32 +55,52 @@ const EditarUsuario: FC = () => {
     [],
   );
 
-  // Calcular si puede editar username
-  const puedeEditarUsername = useMemo(() => {
-    if (!usuarioActual) {
-      return false;
-    }
-
-    if (usuarioActual.perfil?.nombre === "ROOT") {
-      return true;
-    }
-
-    const todosLosPermisos = [
-      ...(usuarioActual.perfil?.permisos?.map((p) => p.permiso.nombre) || []),
-      ...(usuarioActual.permisos_personalizados?.map((p) => p.permiso.nombre) ||
-        []),
-    ];
-
-    const tienePermiso = todosLosPermisos.includes("editar_username_usuario");
-
-    return tienePermiso;
-  }, [usuarioActual]);
-
   // Hooks de datos
   const { data: usuarioAEditar, isLoading: isLoadingUsuario } = useUsuario(id);
   const { data: perfiles } = usePerfiles();
   const { data: todosLosPermisosDb } = useListaPermisos();
   const actualizarMutation = useActualizarUsuario();
+
+  // Mapeo del perfil seleccionado y nivel de orden
+  const perfilSeleccionado = useMemo(() => {
+    if (!perfiles || !values.perfil_id) return undefined;
+    return perfiles.find((p) => p.id === values.perfil_id);
+  }, [perfiles, values.perfil_id]);
+
+  const nivelOrdenSeleccionado = useMemo(() => {
+    if (tipoUsuario === "operativo") {
+      return 99; // Retorna la lista completa de candidatos políticos
+    }
+    return perfilSeleccionado?.nivel?.orden ?? 0;
+  }, [tipoUsuario, perfilSeleccionado]);
+
+  // Mostrar el selector de candidato superior cuando sea ROOT
+  const mostrarSelectorSuperior = useMemo(() => {
+    return (
+      esRoot &&
+      !!values.perfil_id &&
+      (tipoUsuario === "operativo" || (tipoUsuario === "politico" && nivelOrdenSeleccionado > 1))
+    );
+  }, [esRoot, values.perfil_id, tipoUsuario, nivelOrdenSeleccionado]);
+
+  const { data: candidatosSuperiores, isLoading: isLoadingCandidatos } =
+    useCandidatosSuperiores(
+      usuarioAEditar?.campana_id ?? campanaSeleccionada,
+      nivelOrdenSeleccionado,
+    );
+
+  // Calcular si puede editar username
+  const puedeEditarUsername = useMemo(() => {
+    if (!usuarioActual) return false;
+    if (usuarioActual.perfil?.nombre === "ROOT") return true;
+
+    const todosLosPermisos = [
+      ...(usuarioActual.perfil?.permisos?.map((p) => p.permiso.nombre) || []),
+      ...(usuarioActual.permisos_personalizados?.map((p) => p.permiso.nombre) || []),
+    ];
+
+    return todosLosPermisos.includes("editar_username_usuario");
+  }, [usuarioActual]);
 
   // Cargar datos del usuario a editar
   useEffect(() => {
@@ -87,6 +113,9 @@ const EditarUsuario: FC = () => {
     }
 
     if (usuarioAEditar) {
+      const esOperativoEdicion = usuarioAEditar.perfil.es_operativo;
+      setTipoUsuario(esOperativoEdicion ? "operativo" : "politico");
+
       setValues({
         nombre: usuarioAEditar.nombre,
         apellido: usuarioAEditar.apellido,
@@ -96,12 +125,9 @@ const EditarUsuario: FC = () => {
         password: "",
         confirmarPassword: "",
         perfil_id: usuarioAEditar.perfil.id,
-        candidato_superior_id: usuarioAEditar.candidato_superior_id ?? "", // <-- CORREGIDO: Cargar superior si existe
+        candidato_superior_id: usuarioAEditar.candidato_superior_id ?? "",
         username: usuarioAEditar.username,
       });
-
-      const esOperativoEdicion = usuarioAEditar.perfil.es_operativo;
-      setTipoUsuario(esOperativoEdicion ? "operativo" : "politico");
 
       if (esOperativoEdicion && usuarioAEditar.permisos_personalizados) {
         const permisosPreviosIds = usuarioAEditar.permisos_personalizados.map(
@@ -122,7 +148,7 @@ const EditarUsuario: FC = () => {
     }
   }, [estadoSimpatizante]);
 
-  // Filtrado de perfiles (usando los datos cargados)
+  // Filtrado de perfiles
   const perfilesFiltrados = useMemo(() => {
     if (!perfiles) return [];
 
@@ -133,8 +159,7 @@ const EditarUsuario: FC = () => {
 
       if (tipoUsuario === "politico") {
         if (perfil.es_operativo) return false;
-        if (usuarioActual?.perfil?.nombre === "ROOT")
-          return perfil.nombre !== "ROOT";
+        if (usuarioActual?.perfil?.nombre === "ROOT") return perfil.nombre !== "ROOT";
         if (!perfil.nivel) return false;
         return true;
       }
@@ -142,7 +167,7 @@ const EditarUsuario: FC = () => {
     });
   }, [perfiles, tipoUsuario, usuarioActual]);
 
-  // Filtrado de permisos (usando los datos cargados)
+  // Filtrado de permisos
   const permisosParaAsignar = useMemo(() => {
     if (!todosLosPermisosDb) return [];
     if (usuarioActual?.perfil?.nombre === "ROOT") return todosLosPermisosDb;
@@ -162,9 +187,13 @@ const EditarUsuario: FC = () => {
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
     if (!values.nombre.trim()) newErrors.nombre = "El nombre es requerido";
-    if (!values.apellido.trim())
-      newErrors.apellido = "El apellido es requerido";
+    if (!values.apellido.trim()) newErrors.apellido = "El apellido es requerido";
     if (!values.perfil_id) newErrors.perfil_id = "El perfil es requerido";
+
+    if (mostrarSelectorSuperior && !values.candidato_superior_id) {
+      newErrors.perfil_id = "Debes seleccionar el candidato superior";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -194,6 +223,9 @@ const EditarUsuario: FC = () => {
       telefono: values.telefono.trim() || undefined,
       barrio: values.barrio.trim() || undefined,
       perfil_id: values.perfil_id,
+      candidato_superior_id: mostrarSelectorSuperior
+        ? values.candidato_superior_id || undefined
+        : undefined,
       permisos_ids:
         tipoUsuario === "operativo" ? permisosSeleccionados : undefined,
     };
@@ -252,6 +284,9 @@ const EditarUsuario: FC = () => {
             onChange={handleChange}
             onSubmit={handleSubmit}
             onCancel={() => navigate(RoutesConfig.usuarios)}
+            mostrarSelectorSuperior={mostrarSelectorSuperior}
+            candidatosSuperiores={candidatosSuperiores}
+            isLoadingCandidatos={isLoadingCandidatos}
           />
         </div>
       </div>

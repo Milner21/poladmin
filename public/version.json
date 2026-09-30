@@ -1,8 +1,7 @@
 {
-  "version": "1.7.6",
+  "version": "1.7.7",
   "fecha": "2026-09-30",
   "cambios": [
-    "Correciones menores",
-    "Actualización de Reportes"
+    "Usuario: agregado de candidato superior"
   ]
 }

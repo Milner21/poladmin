@@ -1,9 +1,13 @@
 //src/pages/private/dashboard/Dashboard.tsx
 
 import { CFooter, PageHeader } from "@components";
+import { useAuth } from "@hooks/useAuth";
 import { useCampanaSeleccionada } from "@hooks/useCampanaSeleccionada";
+import { useEstadisticasDiaD } from "@hooks/useEstadisticasDiaD";
 import { usePermisos } from "@hooks/usePermisos";
 import { useEstadisticasUsuarios } from "@pages/private/usuarios/hooks/useEstadisticasUsuarios";
+import RoutesConfig from "@routes/RoutesConfig";
+import { resolverRutaPostLogin } from "@utils/redireccion";
 import {
   Activity,
   ArrowLeftRight,
@@ -22,6 +26,11 @@ import {
   UsersRound,
 } from "lucide-react";
 import { useState, type FC } from "react";
+import { Navigate } from "react-router-dom";
+import ComparativaModos from "./components/ComparativaModos";
+import { FunnelDiaD } from "./components/diad/FunnelDiaD";
+import { ResumenOrganicos } from "./components/diad/ResumenOrganicos";
+import { TablaPuestosDiaD } from "./components/diad/TablaPuestosDiaD";
 import { EstadisticasUsuarios } from "./components/EstadisticasUsuarios";
 import { IntencionVotoChart } from "./components/IntencionVotoChart";
 import { LogsAuditoria } from "./components/LogsAuditoria";
@@ -31,11 +40,6 @@ import { StatCard } from "./components/statCard/StatCard";
 import { TopRegistradoresChart } from "./components/TopRegistradoresChart";
 import { useDashboard } from "./hooks/useDashboard";
 import { useEstadisticasImpresiones } from "./hooks/useEstadisticasImpresiones";
-import { FunnelDiaD } from "./components/diad/FunnelDiaD";
-import { ResumenOrganicos } from "./components/diad/ResumenOrganicos";
-import { TablaPuestosDiaD } from "./components/diad/TablaPuestosDiaD";
-import { useEstadisticasDiaD } from "@hooks/useEstadisticasDiaD";
-import ComparativaModos from "./components/ComparativaModos";
 
 const Dashboard: FC = () => {
   const isMobile = window.innerWidth < 768;
@@ -46,11 +50,12 @@ const Dashboard: FC = () => {
   >("simpatizantes");
 
   const { campanaSeleccionada, campanaActual } = useCampanaSeleccionada();
-
+  const { usuario } = useAuth();
   const { tienePermiso } = usePermisos();
 
   const { data: statsImpresiones } = useEstadisticasImpresiones();
   const { data: statsDiaD } = useEstadisticasDiaD();
+  const puedeVerDashboard = tienePermiso("ver_dashboard");
   const puedeVerEquipo = tienePermiso("ver_equipo_dashboard");
   const puedeVerDiaD = tienePermiso("ver_estadisticas_especiales");
   const puedeVerOrganicos = tienePermiso("ver_detalle_organicos");
@@ -79,6 +84,33 @@ const Dashboard: FC = () => {
   } = useDashboard();
 
   const { data: statsUsuarios } = useEstadisticasUsuarios(campanaSeleccionada);
+
+  // Redirección automática si no tiene permiso de ver el Dashboard
+  if (!puedeVerDashboard && usuario) {
+    const rutaDestino = resolverRutaPostLogin(usuario);
+
+    // Si la ruta resuelta es diferente al dashboard, redirige de inmediato
+    if (rutaDestino !== RoutesConfig.dashboard) {
+      return <Navigate to={rutaDestino} replace />;
+    }
+
+    // Si el usuario no tiene ninguna ruta asignada en absoluto, muestra el aviso
+    return (
+      <div className="py-12 px-6 flex justify-center items-center min-h-[60vh]">
+        <div className="bg-warning/10 border border-warning/20 rounded-xl p-8 text-center max-w-md w-full shadow-sm">
+          <div className="w-12 h-12 bg-warning/20 text-warning rounded-full flex items-center justify-center mx-auto mb-4">
+            <UsersRound size={24} />
+          </div>
+          <h3 className="text-lg font-bold text-text-primary mb-2">
+            Acceso restringido
+          </h3>
+          <p className="text-sm text-text-secondary m-0">
+            Tu usuario no posee rutas o permisos de navegación autorizados.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const obtenerValorPorFiltro = (filtro: string) => {
     switch (filtro) {
