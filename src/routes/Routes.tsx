@@ -71,6 +71,8 @@ import ConfiguracionListaPage from "@pages/private/campanas/ConfiguracionListaPa
 import TemplateEditorPage from "@pages/private/templates/TemplateEditorPage";
 import TemplatesListaPage from "@pages/private/templates/TemplatesListaPage";
 import SimpatizantesDeCandidatoPage from "@pages/private/simpatizantes/red/SimpatizantesDeCandidatoPage";
+import ImpresionMasivaPage from "@pages/private/impresoras/ImpresionMasivaPage";
+import { OperativaLocalesPage } from "@pages/private/simpatizantes/operativa-locales/OperativaLocalesPage";
 
 const AppRoutes = () => {
   return (
@@ -230,6 +232,10 @@ const AppRoutes = () => {
                 path={RoutesConfig.simpatizantesDashboardVotacion}
                 element={<DashboardVotacionPage />}
               />
+              <Route
+                path={RoutesConfig.simpatizantesOperativaLocales}
+                element={<OperativaLocalesPage />}
+              />
             </Route>
 
             {/* Solicitudes */}
@@ -309,6 +315,10 @@ const AppRoutes = () => {
               <Route
                 path={RoutesConfig.impresorasReportes}
                 element={<ReporteImpresionesPage />}
+              />
+              <Route
+                path={RoutesConfig.impresorasImpresionMasiva}
+                element={<ImpresionMasivaPage />}
               />
             </Route>
             {/* Puestos de Control */}

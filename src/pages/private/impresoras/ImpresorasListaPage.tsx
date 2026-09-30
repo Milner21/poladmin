@@ -1,29 +1,33 @@
-import { useState, type FC } from "react";
-import { useNavigate } from "react-router-dom";
-import { PageHeader, CTable } from "@components";
+// src/pages/private/impresoras/ImpresorasListaPage.tsx
+
+import { CTable, PageHeader } from "@components";
+import type { ColumnDef } from "@components/CTable";
+import type { Impresora } from "@dto/impresora.types";
 import { usePermisos } from "@hooks/usePermisos";
+import RoutesConfig from "@routes/RoutesConfig";
 import {
+  CheckCircle,
+  Edit,
   Plus,
   Printer,
   Trash2,
-  Edit,
-  CheckCircle,
   XCircle,
 } from "lucide-react";
-import type { Impresora } from "@dto/impresora.types";
-import RoutesConfig from "@routes/RoutesConfig";
-import { useImpresoras } from "./hooks/useImpresoras";
+import { useState, type FC } from "react";
+import { useNavigate } from "react-router-dom";
+import { ModalImpresionMasiva } from "./components/ModalImpresionMasiva";
 import { useEliminarImpresora } from "./hooks/useEliminarImpresora";
-import type { ColumnDef } from "@components/CTable";
+import { useImpresoras } from "./hooks/useImpresoras";
 
 const ImpresorasListaPage: FC = () => {
   const navigate = useNavigate();
-  const { data: impresoras, isLoading } = useImpresoras();
+  const { data: impresoras, isLoading, refetch } = useImpresoras();
   const { tienePermiso } = usePermisos();
   const eliminarMutation = useEliminarImpresora();
 
   const [impresoraAEliminar, setImpresoraAEliminar] =
     useState<Impresora | null>(null);
+  const [modalMasivaOpen, setModalMasivaOpen] = useState(false);
 
   const puedeCrear = tienePermiso("crear_impresora");
   const puedeEditar = tienePermiso("editar_impresora");
@@ -172,7 +176,7 @@ const ImpresorasListaPage: FC = () => {
         subtitle="Administrá las impresoras térmicas del sistema"
       />
 
-      <div className="mb-6 flex justify-between items-center">
+      <div className="mb-6 flex justify-between items-center flex-wrap gap-4">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 px-3 py-2 bg-success/10 border border-success/30 rounded-lg">
             <CheckCircle size={16} className="text-success" />
@@ -228,7 +232,7 @@ const ImpresorasListaPage: FC = () => {
           {puedeCrear && (
             <button
               onClick={() => navigate(RoutesConfig.impresorasCrear)}
-              className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-lg cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-lg cursor-pointer mx-auto"
             >
               <Plus size={18} />
               Registrar Impresora
@@ -280,6 +284,15 @@ const ImpresorasListaPage: FC = () => {
           </div>
         </>
       )}
+
+      {/* Modal de Impresión Masiva */}
+      <ModalImpresionMasiva
+        isOpen={modalMasivaOpen}
+        onClose={() => setModalMasivaOpen(false)}
+        onImpresionCompletada={() => {
+          refetch();
+        }}
+      />
     </div>
   );
 };

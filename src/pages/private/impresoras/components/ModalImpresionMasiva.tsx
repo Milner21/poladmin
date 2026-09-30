@@ -1,24 +1,27 @@
 // src/pages/private/impresoras/components/ModalImpresionMasiva.tsx
 
+import { useState, useEffect, useCallback, type FC } from "react";
+import {
+  Printer,
+  X,
+  Search,
+  Loader2,
+  Users,
+  Building2,
+  MapPin,
+  ChevronDown,
+  UserCheck,
+} from "lucide-react";
+import { useCampanaSeleccionada } from "@hooks/useCampanaSeleccionada";
+import { useMiImpresora } from "../hooks/useMiImpresora";
+import { useCandidatosSuperiores } from "@pages/private/usuarios/hooks/useCandidatosSuperiores";
+import { useUsuarios } from "@pages/private/usuarios/hooks/useUsuarios";
+import { impresorasService } from "@services/impresoras.service";
 import type {
   ImprimirLoteFiltros,
   LotePreviewResponse,
 } from "@dto/impresora.types";
-import { useCampanaSeleccionada } from "@hooks/useCampanaSeleccionada";
-import { useCandidatosSuperiores } from "@pages/private/usuarios/hooks/useCandidatosSuperiores";
-import { impresorasService } from "@services/impresoras.service";
-import {
-  Building2,
-  Loader2,
-  MapPin,
-  Printer,
-  Search,
-  Users,
-  X,
-} from "lucide-react";
-import { useEffect, useState, type FC } from "react";
 import toast from "react-hot-toast";
-import { useMiImpresora } from "../hooks/useMiImpresora";
 
 interface ModalImpresionMasivaProps {
   isOpen: boolean;
@@ -34,20 +37,28 @@ export const ModalImpresionMasiva: FC<ModalImpresionMasivaProps> = ({
   const { campanaSeleccionada, campanaActual } = useCampanaSeleccionada();
   const { data: miImpresora } = useMiImpresora();
   const { data: candidatos } = useCandidatosSuperiores(campanaSeleccionada, 99);
+  const { data: todosLosUsuarios } = useUsuarios(campanaSeleccionada);
 
   const [filtros, setFiltros] = useState<ImprimirLoteFiltros>({
     candidato_id: "",
+    registrado_por_id: "",
     barrio: "",
     local_votacion: "",
     solo_pendientes: true,
     modo_eleccion: undefined,
   });
 
-  const [previewData, setPreviewData] = useState<LotePreviewResponse | null>(
-    null,
-  );
+  const [previewData, setPreviewData] = useState<LotePreviewResponse | null>(null);
   const [cargandoPreview, setCargandoPreview] = useState(false);
   const [imprimiendo, setImprimiendo] = useState(false);
+
+  // Estados dropdown Registrador
+  const [searchRegistrador, setSearchRegistrador] = useState("");
+  const [dropdownRegistradorAbierto, setDropdownRegistradorAbierto] = useState(false);
+  const [registradorSeleccionado, setRegistradorSeleccionado] = useState<{
+    id: string;
+    nombre: string;
+  } | null>(null);
 
   const impresoraConectada = miImpresora && miImpresora.estado === "CONECTADA";
 
@@ -61,12 +72,25 @@ export const ModalImpresionMasiva: FC<ModalImpresionMasivaProps> = ({
     }
   }, [campanaActual]);
 
-  const cargarPreview = async (filtrosActuales: ImprimirLoteFiltros) => {
+  const registradoresFiltrados = (todosLosUsuarios || [])
+    .filter((u) => u.estado)
+    .filter((u) => {
+      if (!searchRegistrador.trim()) return true;
+      const busqueda = searchRegistrador.toLowerCase();
+      return (
+        u.nombre.toLowerCase().includes(busqueda) ||
+        u.apellido.toLowerCase().includes(busqueda) ||
+        u.documento.includes(busqueda)
+      );
+    });
+
+  const cargarPreview = useCallback(async (filtrosActuales: ImprimirLoteFiltros) => {
     setCargandoPreview(true);
     try {
       const payload: ImprimirLoteFiltros = {
         ...filtrosActuales,
         candidato_id: filtrosActuales.candidato_id || undefined,
+        registrado_por_id: filtrosActuales.registrado_por_id || undefined,
         barrio: filtrosActuales.barrio?.trim() || undefined,
         local_votacion: filtrosActuales.local_votacion?.trim() || undefined,
       };
@@ -77,22 +101,35 @@ export const ModalImpresionMasiva: FC<ModalImpresionMasivaProps> = ({
     } finally {
       setCargandoPreview(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
       cargarPreview(filtros);
     }
-  }, [isOpen, filtros]);
+  }, [
+    isOpen,
+    filtros,
+    cargarPreview,
+  ]);
 
   const handleFiltroChange = (
     campo: keyof ImprimirLoteFiltros,
-    valor: string | boolean,
+    valor: string | boolean | undefined,
   ) => {
-    setFiltros((prev) => {
-      const nuevos = { ...prev, [campo]: valor };
-      return nuevos;
-    });
+    setFiltros((prev) => ({ ...prev, [campo]: valor }));
+  };
+
+  const handleSeleccionarRegistrador = (u: { id: string; nombre: string; apellido: string } | null) => {
+    if (!u) {
+      setRegistradorSeleccionado(null);
+      handleFiltroChange("registrado_por_id", "");
+    } else {
+      setRegistradorSeleccionado({ id: u.id, nombre: `${u.nombre} ${u.apellido}` });
+      handleFiltroChange("registrado_por_id", u.id);
+    }
+    setDropdownRegistradorAbierto(false);
+    setSearchRegistrador("");
   };
 
   const handleBuscarManual = () => {
@@ -110,8 +147,9 @@ export const ModalImpresionMasiva: FC<ModalImpresionMasivaProps> = ({
       return;
     }
 
+    const nombreImpresora = miImpresora?.nombre || "asignada";
     const confirmar = window.confirm(
-      `¿Confirmás la impresión de ${previewData.total} tickets en la impresora ${miImpresora?.nombre || "asignada"}? Los tickets se imprimirán y cortarán uno por uno.`,
+      `¿Confirmás la impresión de ${previewData.total} tickets en la impresora "${nombreImpresora}"? Se enviarán uno a uno con corte automático.`,
     );
     if (!confirmar) return;
 
@@ -120,6 +158,7 @@ export const ModalImpresionMasiva: FC<ModalImpresionMasivaProps> = ({
       const payload: ImprimirLoteFiltros = {
         ...filtros,
         candidato_id: filtros.candidato_id || undefined,
+        registrado_por_id: filtros.registrado_por_id || undefined,
         barrio: filtros.barrio?.trim() || undefined,
         local_votacion: filtros.local_votacion?.trim() || undefined,
       };
@@ -151,11 +190,12 @@ export const ModalImpresionMasiva: FC<ModalImpresionMasivaProps> = ({
                 Impresión Masiva de Tickets
               </h3>
               <p className="text-xs text-text-tertiary mt-0.5 m-0">
-                Imprime y corta tickets secuencialmente por candidato o zona
+                Imprime y corta tickets secuencialmente por candidato o por registrador
               </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="text-text-tertiary hover:text-text-primary p-1 rounded-lg transition-colors"
           >
@@ -163,7 +203,7 @@ export const ModalImpresionMasiva: FC<ModalImpresionMasivaProps> = ({
           </button>
         </div>
 
-        {/* Contenido con scroll */}
+        {/* Contenido */}
         <div className="flex-1 overflow-y-auto p-6 space-y-5">
           {/* Estado de la impresora */}
           <div
@@ -194,20 +234,17 @@ export const ModalImpresionMasiva: FC<ModalImpresionMasivaProps> = ({
             </h4>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Selector Candidato Político */}
               <div>
-                <label className="text-xs font-semibold text-text-primary mb-1 flex items-center gap-1">
-                  <Users size={14} /> Candidato / Líder
+                <label className="flex items-center gap-1 text-xs font-semibold text-text-primary mb-1">
+                  <Users size={14} /> Candidato Político
                 </label>
                 <select
                   value={filtros.candidato_id || ""}
-                  onChange={(e) =>
-                    handleFiltroChange("candidato_id", e.target.value)
-                  }
+                  onChange={(e) => handleFiltroChange("candidato_id", e.target.value)}
                   className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-bg-content text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
                 >
-                  <option value="">
-                    Todos los simpatizantes de la campaña
-                  </option>
+                  <option value="">Todos los candidatos de la campaña</option>
                   {candidatos?.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.nombre} {c.apellido} ({c.nivel?.nombre || "Candidato"})
@@ -216,8 +253,68 @@ export const ModalImpresionMasiva: FC<ModalImpresionMasivaProps> = ({
                 </select>
               </div>
 
+              {/* Selector Registrado Por (Operativo / Administrador) */}
+              <div className="relative">
+                <label className="flex items-center gap-1 text-xs font-semibold text-text-primary mb-1">
+                  <UserCheck size={14} /> Registrado Por (Operador)
+                </label>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setDropdownRegistradorAbierto(!dropdownRegistradorAbierto)}
+                    className="w-full px-3 py-2 text-sm text-left border border-border rounded-lg bg-bg-content text-text-primary focus:outline-none focus:ring-2 focus:ring-primary flex items-center justify-between"
+                  >
+                    <span className="truncate">
+                      {registradorSeleccionado
+                        ? registradorSeleccionado.nombre
+                        : "Todos los registradores"}
+                    </span>
+                    <ChevronDown size={16} className="text-text-tertiary" />
+                  </button>
+
+                  {dropdownRegistradorAbierto && (
+                    <div className="absolute z-50 w-full mt-1 bg-bg-content border border-border rounded-lg shadow-lg max-h-56 overflow-hidden">
+                      <div className="p-2 border-b border-border">
+                        <input
+                          type="text"
+                          value={searchRegistrador}
+                          onChange={(e) => setSearchRegistrador(e.target.value)}
+                          placeholder="Buscar por nombre o CI..."
+                          className="w-full px-2.5 py-1.5 text-xs border border-border rounded bg-bg-base text-text-primary focus:outline-none"
+                        />
+                      </div>
+                      <div className="max-h-40 overflow-y-auto">
+                        <button
+                          type="button"
+                          onClick={() => handleSeleccionarRegistrador(null)}
+                          className={`w-full px-3 py-1.5 text-left text-xs hover:bg-bg-base transition-colors ${
+                            !registradorSeleccionado ? "bg-primary/10 text-primary font-bold" : ""
+                          }`}
+                        >
+                          Todos los registradores
+                        </button>
+                        {registradoresFiltrados.map((u) => (
+                          <button
+                            key={u.id}
+                            type="button"
+                            onClick={() => handleSeleccionarRegistrador(u)}
+                            className={`w-full px-3 py-1.5 text-left text-xs hover:bg-bg-base transition-colors ${
+                              registradorSeleccionado?.id === u.id
+                                ? "bg-primary/10 text-primary font-bold"
+                                : ""
+                            }`}
+                          >
+                            {u.nombre} {u.apellido} — CI: {u.documento}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <div>
-                <label className="text-xs font-semibold text-text-primary mb-1 flex items-center gap-1">
+                <label className="flex items-center gap-1 text-xs font-semibold text-text-primary mb-1">
                   <MapPin size={14} /> Barrio
                 </label>
                 <input
@@ -231,38 +328,17 @@ export const ModalImpresionMasiva: FC<ModalImpresionMasivaProps> = ({
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-text-primary mb-1 flex items-center gap-1">
+                <label className="flex items-center gap-1 text-xs font-semibold text-text-primary mb-1">
                   <Building2 size={14} /> Local de Votación
                 </label>
                 <input
                   type="text"
                   placeholder="Filtrar por escuela/local..."
                   value={filtros.local_votacion || ""}
-                  onChange={(e) =>
-                    handleFiltroChange("local_votacion", e.target.value)
-                  }
+                  onChange={(e) => handleFiltroChange("local_votacion", e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleBuscarManual()}
                   className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-bg-content text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
                 />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-text-primary mb-1">
-                  Etapa / Modo
-                </label>
-                <select
-                  value={filtros.modo_eleccion || "GENERALES"}
-                  onChange={(e) =>
-                    handleFiltroChange(
-                      "modo_eleccion",
-                      e.target.value as "INTERNAS" | "GENERALES",
-                    )
-                  }
-                  className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-bg-content text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="INTERNAS">Internas</option>
-                  <option value="GENERALES">Generales</option>
-                </select>
               </div>
             </div>
 

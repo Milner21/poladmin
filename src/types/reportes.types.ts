@@ -339,3 +339,46 @@ export interface FiltrosLocalesVotacion {
   campana_id: string;
   candidato_id?: string;
 }
+
+export interface VotanteOperativaLocal extends Record<string, unknown> {
+  id: string;
+  nombre: string;
+  apellido: string;
+  documento: string;
+  telefono: string | null;
+  barrio: string | null;
+  local_votacion: string;
+  mesa_votacion: string;
+  orden_votacion: string;
+  intencion_voto: string;
+  voto: boolean;
+  fecha_voto: string | null;
+}
+
+export interface MesaOperativaLocal {
+  mesa: string;
+  total: number;
+  votaron: number;
+  pendientes: number;
+}
+
+export interface LocalOperativaData {
+  local: string;
+  total: number;
+  votaron: number;
+  pendientes: number;
+  porcentaje_participacion: number;
+  total_mesas: number;
+  mesas: MesaOperativaLocal[];
+  simpatizantes: VotanteOperativaLocal[];
+}
+
+export interface OperativaLocalesResponse {
+  modo_eleccion: 'INTERNAS' | 'GENERALES';
+  total_simpatizantes: number;
+  total_votaron: number;
+  total_pendientes: number;
+  porcentaje_participacion_general: number;
+  total_locales: number;
+  locales: LocalOperativaData[];
+}

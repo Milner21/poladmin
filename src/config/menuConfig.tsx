@@ -201,7 +201,14 @@ export const menuConfig: MenuItemConfig[] = [
     modulo: "simpatizantes",
     permisoEspecifico: "marcar_voto",
   },
-
+  {
+    key: "simpatizantes-operativa-locales",
+    icon: <MapPin size={18} />,
+    label: "Operativa por Locales",
+    path: RoutesConfig.simpatizantesOperativaLocales,
+    modulo: "simpatizantes",
+    permisoEspecifico: "ver_reportes",
+  },
   // ==========================================
   // SOLICITUDES
   // ==========================================

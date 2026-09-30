@@ -55,6 +55,7 @@ const RoutesConfig = {
   simpatizantesLocales: `${basePaths.admin}/simpatizantes/locales`,
   simpatizantesConsultaVoto: `${basePaths.admin}/simpatizantes/consulta-voto`,
   simpatizantesDashboardVotacion: `${basePaths.admin}/simpatizantes/dashboard-votacion`,
+  simpatizantesOperativaLocales: `${basePaths.admin}/simpatizantes/operativa-locales`,
 
   // Campañas
   campanas: `${basePaths.admin}/campanas`,
@@ -96,6 +97,7 @@ const RoutesConfig = {
   impresorasDetalle: "/admin/impresoras/:id",
   impresorasCrear: "/admin/impresoras/crear",
   impresorasReportes: "/admin/impresoras/reportes",
+  impresorasImpresionMasiva: "/admin/impresoras/impresion-masiva",
 
   // PUESTOS DE CONTROL
   puestosLista: `${basePaths.admin}/puestos`,

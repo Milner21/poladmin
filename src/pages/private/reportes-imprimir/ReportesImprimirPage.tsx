@@ -1,19 +1,25 @@
-import { useState, type FC } from "react";
+// src/pages/private/reportes-imprimir/ReportesImprimirPage.tsx
+
 import { PageHeader } from "@components";
 import { useCampanaSeleccionada } from "@hooks/useCampanaSeleccionada";
-import { ReporteCard } from "./components/ReporteCard";
-import { ConfigurarReporteUsuariosModal } from "./components/ConfigurarReporteUsuariosModal";
+import { usePermisos } from "@hooks/usePermisos";
+import RoutesConfig from "@routes/RoutesConfig";
 import {
   BarChart3,
   FileDown,
   MapPin,
+  Printer,
   TrendingUp,
   Truck,
   Users,
   UsersRound,
 } from "lucide-react";
-import { ConfigurarReporteSimpatizantesModal } from "./components/ConfigurarReporteSimpatizantesModal";
+import { useState, type FC } from "react";
+import { useNavigate } from "react-router-dom";
 import { ConfigurarReporteRedJerarquicaModal } from "./components/ConfigurarReporteRedJerarquicaModal";
+import { ConfigurarReporteSimpatizantesModal } from "./components/ConfigurarReporteSimpatizantesModal";
+import { ConfigurarReporteUsuariosModal } from "./components/ConfigurarReporteUsuariosModal";
+import { ReporteCard } from "./components/ReporteCard";
 
 type TipoReporte =
   | "usuarios"
@@ -22,10 +28,15 @@ type TipoReporte =
   | "estadisticas";
 
 const ReportesImprimirPage: FC = () => {
+  const navigate = useNavigate();
   const { campanaActual } = useCampanaSeleccionada();
+  const { tienePermiso, esRoot } = usePermisos();
+
   const [tabActiva, setTabActiva] = useState<TipoReporte>("usuarios");
   const [modalVisible, setModalVisible] = useState(false);
   const [tipoReporteModal, setTipoReporteModal] = useState<string>("");
+
+  const puedeImprimirMasivo = esRoot || tienePermiso("imprimir_lote_tickets");
 
   const handleGenerarReporte = (tipo: string) => {
     setTipoReporteModal(tipo);
@@ -66,7 +77,7 @@ const ReportesImprimirPage: FC = () => {
             ? `Exportar Reportes — ${campanaActual.nombre}`
             : "Exportar Reportes"
         }
-        subtitle="Generá y exportá reportes del sistema en PDF y Excel"
+        subtitle="Generá y exportá reportes e impresiones masivas del sistema"
         showDivider
       />
 
@@ -163,6 +174,20 @@ const ReportesImprimirPage: FC = () => {
                 "Por necesidad de transporte",
               ]}
               onGenerar={() => handleGenerarReporte("simpatizantes-listado")}
+            />
+
+            <ReporteCard
+              icon={<Printer size={24} />}
+              titulo="Impresión Masiva de Tickets"
+              descripcion="Generá y cortá secuencialmente los tickets físicos de padrón para los simpatizantes de tu candidato u operador."
+              filtros={[
+                "Por candidato político",
+                "Por operador/registrador",
+                "Por barrio / local de votación",
+                "Solo tickets pendientes",
+              ]}
+              onGenerar={() => navigate(RoutesConfig.impresorasImpresionMasiva)}
+              proximamente={!puedeImprimirMasivo}
             />
 
             <ReporteCard

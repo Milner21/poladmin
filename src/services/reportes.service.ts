@@ -5,6 +5,7 @@ import type {
   FiltrosLocalesVotacion,
   FiltrosReporte,
   LocalesVotacionResponse,
+  OperativaLocalesResponse,
   ReporteCaptacion,
   ReporteMapaCalor,
   ReporteRedJerarquicaResponse,
@@ -149,6 +150,23 @@ export const reportesService = {
 
     const response = await axiosInstance.get(
       `/reportes/locales-votacion?${params.toString()}`,
+    );
+    return response.data;
+  },
+
+  getOperativaLocales: async (
+    filtros: FiltrosReporte,
+  ): Promise<OperativaLocalesResponse> => {
+    const params = new URLSearchParams();
+
+    if (filtros.campana_id) params.append("campana_id", filtros.campana_id);
+    if (filtros.candidato_id)
+      params.append("candidato_id", filtros.candidato_id);
+    if (filtros.registrado_por_id)
+      params.append("registrado_por_id", filtros.registrado_por_id);
+
+    const response = await axiosInstance.get(
+      `/reportes/operativa-locales?${params.toString()}`,
     );
     return response.data;
   },
